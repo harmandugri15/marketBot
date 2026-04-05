@@ -1,639 +1,227 @@
 {
   "start_date": "2026-01-01",
-  "end_date": "2026-04-05",
-  "starting_capital": 100000.0,
-  "strategy_run": "DEP",
+  "end_date": "2026-03-31",
+  "starting_capital": 3000.0,
+  "strategy_run": "AUTO",
   "metrics": {
-    "total_trades": 32,
-    "winning_trades": 5,
-    "losing_trades": 27,
-    "win_rate": 15.6,
-    "total_pnl": -59833.83,
-    "total_return_pct": -59.83,
-    "avg_win_pct": 5.22,
-    "avg_loss_pct": -3.47,
-    "profit_factor": 0.27,
-    "max_drawdown_pct": 59.83,
-    "best_trade_pct": 8.28,
-    "worst_trade_pct": -7.3,
-    "avg_holding_days": 6,
-    "final_equity": 40166.17
+    "final_equity": 3034.38,
+    "total_return_pct": 1.15,
+    "total_trades": 11,
+    "winning_trades": 4,
+    "losing_trades": 7,
+    "win_rate": 36.4,
+    "profit_factor": 1.1,
+    "avg_win_pct": 7.6,
+    "avg_loss_pct": -3.9,
+    "max_drawdown_pct": 7.94
   },
   "trades": [
     {
-      "symbol": "IRFC",
-      "strategy": "DEP",
+      "symbol": "SBIN",
+      "strategy": "HARMAN1",
+      "entry_date": "2026-01-01",
+      "entry_price": 984.75,
+      "sl": 984.75,
+      "shares": 1,
+      "one_r": 49.23750000000007,
+      "be_active": true,
+      "exit_date": "2026-02-01",
+      "exit_price": 1018.2,
+      "exit_reason": "Trend Trail Exit",
+      "pnl": 33.450000000000045,
+      "pnl_pct": 3.3968012185834016
+    },
+    {
+      "symbol": "HDFCBANK",
+      "strategy": "HARMAN1",
       "entry_date": "2026-01-02",
-      "entry_price": 125.12,
-      "stop_loss": 122.66,
-      "exit_date": "2026-01-08",
-      "exit_price": 122.66,
-      "shares": 799,
-      "pnl": -1966.51,
-      "pnl_pct": -1.97,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 2.46,
-      "is_win": "False"
+      "entry_price": 1001.6,
+      "sl": 951.52,
+      "shares": 1,
+      "one_r": 50.08000000000004,
+      "be_active": false,
+      "exit_date": "2026-01-07",
+      "exit_price": 951.52,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -50.08000000000004,
+      "pnl_pct": -5.0000000000000036
     },
     {
-      "symbol": "RVNL",
-      "strategy": "DEP",
-      "entry_date": "2026-01-02",
-      "entry_price": 364.31,
-      "stop_loss": 354.34,
-      "exit_date": "2026-01-06",
-      "exit_price": 354.34,
-      "shares": 274,
-      "pnl": -2731.78,
-      "pnl_pct": -2.74,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 9.97,
-      "is_win": "False"
+      "symbol": "ONGC",
+      "strategy": "HARMAN1",
+      "entry_date": "2026-01-07",
+      "entry_price": 239.06,
+      "sl": 239.06,
+      "shares": 5,
+      "one_r": 11.953000000000003,
+      "be_active": true,
+      "exit_date": "2026-01-29",
+      "exit_price": 274.919,
+      "exit_reason": "Target Hit (14%)",
+      "pnl": 179.2949999999999,
+      "pnl_pct": 14.999999999999991
     },
     {
-      "symbol": "RPOWER",
-      "strategy": "DEP",
-      "entry_date": "2026-01-02",
-      "entry_price": 35.57,
-      "stop_loss": 34.5,
-      "exit_date": "2026-01-08",
-      "exit_price": 34.5,
-      "shares": 2803,
-      "pnl": -2999.21,
-      "pnl_pct": -3.01,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.07,
-      "is_win": "False"
-    },
-    {
-      "symbol": "HFCL",
-      "strategy": "DEP",
-      "entry_date": "2026-01-05",
-      "entry_price": 69.33,
-      "stop_loss": 67.31,
-      "exit_date": "2026-01-06",
-      "exit_price": 67.31,
-      "shares": 1442,
-      "pnl": -2912.84,
-      "pnl_pct": -2.91,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 2.02,
-      "is_win": "False"
-    },
-    {
-      "symbol": "TITAGARH",
-      "strategy": "DEP",
-      "entry_date": "2026-01-05",
-      "entry_price": 892.0,
-      "stop_loss": 881.25,
-      "exit_date": "2026-01-06",
-      "exit_price": 881.25,
-      "shares": 112,
-      "pnl": -1204.0,
-      "pnl_pct": -1.21,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 10.75,
-      "is_win": "False"
-    },
-    {
-      "symbol": "NHPC",
-      "strategy": "DEP",
-      "entry_date": "2026-01-08",
-      "entry_price": 82.44,
-      "stop_loss": 81.21,
-      "exit_date": "2026-01-09",
-      "exit_price": 80.74,
-      "shares": 1213,
-      "pnl": -2060.35,
-      "pnl_pct": -2.06,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.23,
-      "is_win": "False"
-    },
-    {
-      "symbol": "SJVN",
-      "strategy": "DEP",
-      "entry_date": "2026-01-12",
-      "entry_price": 79.13,
-      "stop_loss": 76.56,
-      "exit_date": "2026-01-16",
-      "exit_price": 76.56,
-      "shares": 1167,
-      "pnl": -2999.19,
-      "pnl_pct": -3.25,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 2.57,
-      "is_win": "False"
-    },
-    {
-      "symbol": "NHPC",
-      "strategy": "DEP",
-      "entry_date": "2026-01-13",
-      "entry_price": 81.57,
-      "stop_loss": 78.79,
-      "exit_date": "2026-01-16",
-      "exit_price": 78.79,
-      "shares": 1079,
-      "pnl": -2999.62,
-      "pnl_pct": -3.41,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 2.78,
-      "is_win": "False"
-    },
-    {
-      "symbol": "NTPC",
-      "strategy": "DEP",
-      "entry_date": "2026-01-14",
-      "entry_price": 336.76,
-      "stop_loss": 336.76,
-      "exit_date": "2026-01-20",
-      "exit_price": 336.76,
-      "shares": 296,
-      "pnl": 1895.88,
-      "pnl_pct": 1.9,
-      "exit_reason": "Break Even",
-      "one_r": 4.27,
-      "is_win": "True"
-    },
-    {
-      "symbol": "SOUTHBANK",
-      "strategy": "DEP",
-      "entry_date": "2026-01-14",
-      "entry_price": 41.61,
-      "stop_loss": 41.61,
-      "exit_date": "2026-01-30",
-      "exit_price": 38.15,
-      "shares": 1807,
-      "pnl": 1369.1,
-      "pnl_pct": 1.82,
-      "exit_reason": "Break Even",
-      "one_r": 1.66,
-      "is_win": "True"
-    },
-    {
-      "symbol": "IEX",
-      "strategy": "DEP",
-      "entry_date": "2026-01-19",
-      "entry_price": 139.33,
-      "stop_loss": 136.55,
-      "exit_date": "2026-01-20",
-      "exit_price": 134.88,
-      "shares": 717,
-      "pnl": -3191.83,
-      "pnl_pct": -3.2,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 2.78,
-      "is_win": "False"
-    },
-    {
-      "symbol": "NTPC",
-      "strategy": "DEP",
-      "entry_date": "2026-01-22",
-      "entry_price": 339.09,
-      "stop_loss": 334.23,
-      "exit_date": "2026-01-23",
-      "exit_price": 334.23,
-      "shares": 294,
-      "pnl": -1428.84,
-      "pnl_pct": -1.43,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 4.86,
-      "is_win": "False"
-    },
-    {
-      "symbol": "NHPC",
-      "strategy": "DEP",
-      "entry_date": "2026-01-23",
-      "entry_price": 76.67,
-      "stop_loss": 75.15,
-      "exit_date": "2026-01-27",
-      "exit_price": 74.09,
-      "shares": 1304,
-      "pnl": -3355.86,
-      "pnl_pct": -3.36,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.52,
-      "is_win": "False"
-    },
-    {
-      "symbol": "UNIONBANK",
-      "strategy": "DEP",
-      "entry_date": "2026-01-23",
-      "entry_price": 177.71,
-      "stop_loss": 173.95,
-      "exit_date": "2026-01-27",
-      "exit_price": 173.95,
-      "shares": 562,
-      "pnl": -2113.12,
-      "pnl_pct": -2.12,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 3.76,
-      "is_win": "False"
-    },
-    {
-      "symbol": "NTPC",
-      "strategy": "DEP",
-      "entry_date": "2026-01-27",
-      "entry_price": 340.68,
-      "stop_loss": 340.68,
-      "exit_date": "2026-03-04",
-      "exit_price": 365.8,
-      "shares": 293,
-      "pnl": 6390.72,
-      "pnl_pct": 6.4,
-      "exit_reason": "20 EMA Trail",
-      "one_r": 6.16,
-      "is_win": "True"
-    },
-    {
-      "symbol": "BEML",
-      "strategy": "DEP",
-      "entry_date": "2026-01-30",
-      "entry_price": 1831.32,
-      "stop_loss": 1759.42,
-      "exit_date": "2026-02-02",
-      "exit_price": 1697.56,
-      "shares": 41,
-      "pnl": -5484.24,
-      "pnl_pct": -7.3,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 71.9,
-      "is_win": "False"
-    },
-    {
-      "symbol": "UNIONBANK",
-      "strategy": "DEP",
-      "entry_date": "2026-02-05",
-      "entry_price": 177.04,
-      "stop_loss": 177.04,
+      "symbol": "ICICIBANK",
+      "strategy": "MRB",
+      "entry_date": "2026-01-29",
+      "entry_price": 1383.6,
+      "sl": 1314.42,
+      "shares": 1,
+      "one_r": 69.18000000000006,
+      "be_active": false,
       "exit_date": "2026-03-06",
-      "exit_price": 188.65,
-      "shares": 564,
-      "pnl": 7664.76,
-      "pnl_pct": 7.68,
-      "exit_reason": "20 EMA Trail",
-      "one_r": 5.19,
-      "is_win": "True"
+      "exit_price": 1314.42,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -69.17999999999984,
+      "pnl_pct": -4.9999999999999885
     },
     {
-      "symbol": "IFCI",
-      "strategy": "DEP",
-      "entry_date": "2026-02-05",
-      "entry_price": 58.45,
-      "stop_loss": 58.45,
-      "exit_date": "2026-02-20",
-      "exit_price": 59.97,
-      "shares": 1102,
-      "pnl": 5333.68,
-      "pnl_pct": 8.28,
-      "exit_reason": "20 EMA Trail",
-      "one_r": 2.72,
-      "is_win": "True"
+      "symbol": "ONGC",
+      "strategy": "MRB",
+      "entry_date": "2026-02-01",
+      "entry_price": 254.3,
+      "sl": 241.59,
+      "shares": 5,
+      "one_r": 12.715000000000003,
+      "be_active": false,
+      "exit_date": "2026-02-04",
+      "exit_price": 269.55800000000005,
+      "exit_reason": "Target Hit (6%)",
+      "pnl": 76.29000000000019,
+      "pnl_pct": 6.000000000000015
     },
     {
-      "symbol": "BEML",
-      "strategy": "DEP",
-      "entry_date": "2026-02-06",
-      "entry_price": 1761.52,
-      "stop_loss": 1717.28,
-      "exit_date": "2026-02-09",
-      "exit_price": 1644.23,
-      "shares": 56,
-      "pnl": -6567.98,
-      "pnl_pct": -6.66,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 44.24,
-      "is_win": "False"
-    },
-    {
-      "symbol": "TRIDENT",
-      "strategy": "DEP",
-      "entry_date": "2026-02-09",
-      "entry_price": 28.2,
-      "stop_loss": 27.22,
-      "exit_date": "2026-02-10",
-      "exit_price": 27.22,
-      "shares": 3061,
-      "pnl": -2999.78,
-      "pnl_pct": -3.48,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 0.98,
-      "is_win": "False"
-    },
-    {
-      "symbol": "TRIDENT",
-      "strategy": "DEP",
-      "entry_date": "2026-02-13",
-      "entry_price": 27.45,
-      "stop_loss": 26.36,
-      "exit_date": "2026-02-16",
-      "exit_price": 26.36,
-      "shares": 2752,
-      "pnl": -2999.68,
-      "pnl_pct": -3.97,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.09,
-      "is_win": "False"
-    },
-    {
-      "symbol": "SJVN",
-      "strategy": "DEP",
-      "entry_date": "2026-02-16",
-      "entry_price": 76.94,
-      "stop_loss": 74.89,
-      "exit_date": "2026-02-19",
-      "exit_price": 74.89,
-      "shares": 1299,
-      "pnl": -2662.95,
-      "pnl_pct": -2.66,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 2.05,
-      "is_win": "False"
-    },
-    {
-      "symbol": "HUDCO",
-      "strategy": "DEP",
-      "entry_date": "2026-02-17",
-      "entry_price": 196.0,
-      "stop_loss": 191.64,
-      "exit_date": "2026-02-23",
-      "exit_price": 191.64,
-      "shares": 510,
-      "pnl": -2223.6,
-      "pnl_pct": -2.22,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 4.36,
-      "is_win": "False"
-    },
-    {
-      "symbol": "BEML",
-      "strategy": "DEP",
-      "entry_date": "2026-02-18",
-      "entry_price": 1745.0,
-      "stop_loss": 1712.75,
-      "exit_date": "2026-02-19",
-      "exit_price": 1712.75,
-      "shares": 57,
-      "pnl": -1838.25,
-      "pnl_pct": -1.85,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 32.25,
-      "is_win": "False"
-    },
-    {
-      "symbol": "SJVN",
-      "strategy": "DEP",
-      "entry_date": "2026-02-25",
-      "entry_price": 74.7,
-      "stop_loss": 72.86,
+      "symbol": "RELIANCE",
+      "strategy": "HARMAN1",
+      "entry_date": "2026-02-04",
+      "entry_price": 1456.8,
+      "sl": 1383.96,
+      "shares": 1,
+      "one_r": 72.84000000000015,
+      "be_active": false,
       "exit_date": "2026-03-02",
-      "exit_price": 69.5,
-      "shares": 1338,
-      "pnl": -6957.6,
-      "pnl_pct": -6.96,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.84,
-      "is_win": "False"
+      "exit_price": 1383.96,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -72.83999999999992,
+      "pnl_pct": -4.999999999999995
     },
     {
-      "symbol": "UNIONBANK",
-      "strategy": "DEP",
-      "entry_date": "2026-03-09",
-      "entry_price": 181.51,
-      "stop_loss": 175.46,
+      "symbol": "SBIN",
+      "strategy": "MRB",
+      "entry_date": "2026-03-02",
+      "entry_price": 1189.9,
+      "sl": 1130.4,
+      "shares": 1,
+      "one_r": 59.49500000000012,
+      "be_active": false,
+      "exit_date": "2026-03-09",
+      "exit_price": 1130.4,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -59.5,
+      "pnl_pct": -5.000420203378435
+    },
+    {
+      "symbol": "ONGC",
+      "strategy": "MRB",
+      "entry_date": "2026-03-06",
+      "entry_price": 278.95,
+      "sl": 265.0,
+      "shares": 4,
+      "one_r": 13.947499999999991,
+      "be_active": false,
       "exit_date": "2026-03-13",
-      "exit_price": 175.46,
-      "shares": 495,
-      "pnl": -2994.75,
-      "pnl_pct": -3.33,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 6.05,
-      "is_win": "False"
+      "exit_price": 265.0,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -55.799999999999955,
+      "pnl_pct": -5.000896217960204
     },
     {
-      "symbol": "IRCON",
-      "strategy": "DEP",
-      "entry_date": "2026-03-11",
-      "entry_price": 142.05,
-      "stop_loss": 136.85,
-      "exit_date": "2026-03-12",
-      "exit_price": 136.83,
-      "shares": 576,
-      "pnl": -3006.72,
-      "pnl_pct": -3.67,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 5.2,
-      "is_win": "False"
-    },
-    {
-      "symbol": "JPPOWER",
-      "strategy": "DEP",
-      "entry_date": "2026-03-12",
-      "entry_price": 14.05,
-      "stop_loss": 13.5,
-      "exit_date": "2026-03-16",
-      "exit_price": 13.5,
-      "shares": 5454,
-      "pnl": -2999.7,
-      "pnl_pct": -3.91,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 0.55,
-      "is_win": "False"
-    },
-    {
-      "symbol": "IFCI",
-      "strategy": "DEP",
-      "entry_date": "2026-03-18",
-      "entry_price": 56.24,
-      "stop_loss": 54.67,
-      "exit_date": "2026-03-19",
-      "exit_price": 54.67,
-      "shares": 1778,
-      "pnl": -2791.46,
-      "pnl_pct": -2.79,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.57,
-      "is_win": "False"
-    },
-    {
-      "symbol": "TRIDENT",
-      "strategy": "DEP",
-      "entry_date": "2026-03-20",
-      "entry_price": 24.05,
-      "stop_loss": 23.26,
-      "exit_date": "2026-03-23",
-      "exit_price": 23.26,
-      "shares": 3797,
-      "pnl": -2999.63,
-      "pnl_pct": -3.28,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 0.79,
-      "is_win": "False"
-    },
-    {
-      "symbol": "TRIDENT",
-      "strategy": "DEP",
-      "entry_date": "2026-03-24",
-      "entry_price": 25.2,
-      "stop_loss": 23.5,
+      "symbol": "NTPC",
+      "strategy": "MRB",
+      "entry_date": "2026-03-09",
+      "entry_price": 376.25,
+      "sl": 357.44,
+      "shares": 3,
+      "one_r": 18.8125,
+      "be_active": false,
       "exit_date": "2026-03-30",
-      "exit_price": 23.5,
-      "shares": 1764,
-      "pnl": -2998.8,
-      "pnl_pct": -6.75,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 1.7,
-      "is_win": "False"
+      "exit_price": 370.65,
+      "exit_reason": "End of Test",
+      "pnl": -16.800000000000068,
+      "pnl_pct": -1.4883720930232618
     },
     {
-      "symbol": "JPPOWER",
-      "strategy": "DEP",
-      "entry_date": "2026-03-25",
-      "entry_price": 15.23,
-      "stop_loss": 14.59,
-      "exit_date": "2026-03-27",
-      "exit_price": 14.59,
-      "shares": 4687,
-      "pnl": -2999.68,
-      "pnl_pct": -4.2,
-      "exit_reason": "Stop Loss Hit",
-      "one_r": 0.64,
-      "is_win": "False"
+      "symbol": "ADANIPOWER",
+      "strategy": "MRB",
+      "entry_date": "2026-03-13",
+      "entry_price": 146.57,
+      "sl": 139.24,
+      "shares": 9,
+      "one_r": 7.3285000000000196,
+      "be_active": false,
+      "exit_date": "2026-03-17",
+      "exit_price": 155.3642,
+      "exit_reason": "Target Hit (6%)",
+      "pnl": 79.14780000000016,
+      "pnl_pct": 6.000000000000013
+    },
+    {
+      "symbol": "POWERGRID",
+      "strategy": "MRB",
+      "entry_date": "2026-03-17",
+      "entry_price": 298.5,
+      "sl": 283.57,
+      "shares": 4,
+      "one_r": 14.925000000000011,
+      "be_active": false,
+      "exit_date": "2026-03-30",
+      "exit_price": 296.1,
+      "exit_reason": "End of Test",
+      "pnl": -9.599999999999909,
+      "pnl_pct": -0.804020100502505
     }
   ],
   "equity_curve": [
     {
       "date": "2026-01-01",
-      "equity": 100000.0
+      "equity": 3000.0
     },
     {
-      "date": "2026-01-08",
-      "equity": 98033.49
+      "date": "2026-01-07",
+      "equity": 2949.92
     },
     {
-      "date": "2026-01-06",
-      "equity": 95301.71
+      "date": "2026-01-29",
+      "equity": 3129.22
     },
     {
-      "date": "2026-01-08",
-      "equity": 92302.5
+      "date": "2026-02-01",
+      "equity": 3162.66
     },
     {
-      "date": "2026-01-06",
-      "equity": 89389.66
-    },
-    {
-      "date": "2026-01-06",
-      "equity": 88185.66
-    },
-    {
-      "date": "2026-01-09",
-      "equity": 86125.31
-    },
-    {
-      "date": "2026-01-16",
-      "equity": 83126.12
-    },
-    {
-      "date": "2026-01-16",
-      "equity": 80126.5
-    },
-    {
-      "date": "2026-01-20",
-      "equity": 82022.38
-    },
-    {
-      "date": "2026-01-30",
-      "equity": 83391.48
-    },
-    {
-      "date": "2026-01-20",
-      "equity": 80199.65
-    },
-    {
-      "date": "2026-01-23",
-      "equity": 78770.81
-    },
-    {
-      "date": "2026-01-27",
-      "equity": 75414.95
-    },
-    {
-      "date": "2026-01-27",
-      "equity": 73301.83
-    },
-    {
-      "date": "2026-03-04",
-      "equity": 79692.55
-    },
-    {
-      "date": "2026-02-02",
-      "equity": 74208.31
-    },
-    {
-      "date": "2026-03-06",
-      "equity": 81873.07
-    },
-    {
-      "date": "2026-02-20",
-      "equity": 87206.75
-    },
-    {
-      "date": "2026-02-09",
-      "equity": 80638.77
-    },
-    {
-      "date": "2026-02-10",
-      "equity": 77638.99
-    },
-    {
-      "date": "2026-02-16",
-      "equity": 74639.31
-    },
-    {
-      "date": "2026-02-19",
-      "equity": 71976.36
-    },
-    {
-      "date": "2026-02-23",
-      "equity": 69752.76
-    },
-    {
-      "date": "2026-02-19",
-      "equity": 67914.51
+      "date": "2026-02-04",
+      "equity": 3238.95
     },
     {
       "date": "2026-03-02",
-      "equity": 60956.91
+      "equity": 3166.11
+    },
+    {
+      "date": "2026-03-06",
+      "equity": 3096.93
+    },
+    {
+      "date": "2026-03-09",
+      "equity": 3037.43
     },
     {
       "date": "2026-03-13",
-      "equity": 57962.16
+      "equity": 2981.64
     },
     {
-      "date": "2026-03-12",
-      "equity": 54955.44
-    },
-    {
-      "date": "2026-03-16",
-      "equity": 51955.74
-    },
-    {
-      "date": "2026-03-19",
-      "equity": 49164.28
-    },
-    {
-      "date": "2026-03-23",
-      "equity": 46164.65
-    },
-    {
-      "date": "2026-03-30",
-      "equity": 43165.85
-    },
-    {
-      "date": "2026-03-27",
-      "equity": 40166.17
+      "date": "2026-03-17",
+      "equity": 3060.78
     }
-  ],
-  "run_timestamp": "2026-04-05 10:10:06"
+  ]
 }

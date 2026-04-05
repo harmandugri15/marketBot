@@ -1,0 +1,13 @@
+{
+  "capital": 2000,
+  "risk_pct": 10,
+  "max_sl_pct": 15,
+  "min_quality": 70,
+  "vol_mult": 1.5,
+  "expansion_pct": 3.5,
+  "rsi_oversold": 35,
+  "paper_trading": true,
+  "api_key": "",
+  "secret_key": "",
+  "client_id": ""
+}

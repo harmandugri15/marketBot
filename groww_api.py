@@ -1,234 +1,145 @@
-"""
-groww_api.py
-------------
-Data fetching: uses yfinance (free, no API key needed, works for NSE)
-Order placement: uses Groww API (only needed for live trading)
-
-This means you can run the scanner and backtester RIGHT NOW
-without configuring any API key. The Groww API is only needed
-when you want to place real buy/sell orders.
-"""
-
-import requests
 import logging
-from datetime import datetime, timedelta
-
-import pandas as pd
-import yfinance as yf
-
-from config import (
-    GROWW_API_KEY, GROWW_SECRET_KEY, GROWW_CLIENT_ID,
-    GROWW_BASE_URL
-)
+from datetime import datetime
+from growwapi import GrowwAPI as OfficialGroww
+from config import GROWW_API_KEY, GROWW_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 
-
 class GrowwAPI:
-    """
-    Handles market data (via yfinance) and order placement (via Groww API).
-    """
-
     def __init__(self):
-        self.api_key    = GROWW_API_KEY
+        self.api_key = GROWW_API_KEY
         self.secret_key = GROWW_SECRET_KEY
-        self.client_id  = GROWW_CLIENT_ID
-        self.session    = requests.Session()
-        self._set_headers()
+        self.client = None
+        self.connected = False
+        self.authenticate()
 
-    def _set_headers(self):
-        self.session.headers.update({
-            "Authorization": f"Bearer {self.api_key}",
-            "x-api-key":     self.api_key,
-            "Content-Type":  "application/json",
-            "Accept":        "application/json"
-        })
+    def authenticate(self):
+        """Authenticates using the official Groww API Key and Secret flow."""
+        if not self.api_key or not self.secret_key:
+            logger.warning("Groww API keys missing. Running in disconnected mode.")
+            return
 
-    def _groww_get(self, endpoint: str, params: dict = None) -> dict:
-        url = f"{GROWW_BASE_URL}{endpoint}"
-        resp = self.session.get(url, params=params, timeout=10)
-        resp.raise_for_status()
-        return resp.json()
-
-    def _groww_post(self, endpoint: str, payload: dict) -> dict:
-        url = f"{GROWW_BASE_URL}{endpoint}"
-        resp = self.session.post(url, json=payload, timeout=10)
-        resp.raise_for_status()
-        return resp.json()
-
-    # ── Market Data via yfinance (free, no API key needed) ───────────────────
-
-    def get_historical_data(self, symbol: str, from_date: str, to_date: str,
-                             interval: str = "1d", exchange: str = "NSE") -> list:
-        """
-        Fetch historical OHLCV data using yfinance.
-        NSE symbols on Yahoo Finance use the .NS suffix (e.g. KAYNES.NS).
-
-        Returns list of dicts: [{date, open, high, low, close, volume}, ...]
-        """
-        yf_symbol = f"{symbol}.NS"
         try:
-            ticker = yf.Ticker(yf_symbol)
-            df = ticker.history(
-                start       = from_date,
-                end         = to_date,
-                interval    = interval,
-                auto_adjust = True
-            )
-
-            if df.empty:
-                logger.warning(f"yfinance: no data for {yf_symbol}")
-                return []
-
-            df.reset_index(inplace=True)
-
-            # Flatten MultiIndex columns if present
-            if hasattr(df.columns, "levels"):
-                df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
-
-            df.columns = [c.lower().strip() for c in df.columns]
-
-            # Rename datetime -> date
-            if "datetime" in df.columns:
-                df.rename(columns={"datetime": "date"}, inplace=True)
-
-            # Strip timezone from date column
-            if "date" in df.columns:
-                df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
-
-            # Keep only required columns
-            required = ["date", "open", "high", "low", "close", "volume"]
-            available = [c for c in required if c in df.columns]
-            if "close" not in available:
-                logger.warning(f"yfinance: missing 'close' column for {symbol}. Got: {list(df.columns)}")
-                return []
-
-            df = df[available].dropna(subset=["close"])
-            return df.to_dict(orient="records")
-
+            # Generate the fresh daily access token
+            access_token = OfficialGroww.get_access_token(api_key=self.api_key, secret=self.secret_key)
+            self.client = OfficialGroww(access_token)
+            
+            # Verify the connection actually works using the correct SDK method
+            profile = self.client.get_user_profile()
+            if profile:
+                self.connected = True
+                logger.info("✅ Successfully connected to the official Groww API!")
+            else:
+                raise Exception("Profile returned empty.")
+                
         except Exception as e:
-            logger.error(f"yfinance error for {symbol}: {e}")
-            return []
+            logger.error(f"❌ Failed to authenticate with Groww API: {e}")
+            self.connected = False
 
-    def get_quote(self, symbol: str, exchange: str = "NSE") -> dict:
-        """Get the latest quote for a symbol using yfinance."""
-        try:
-            ticker = yf.Ticker(f"{symbol}.NS")
-            info   = ticker.fast_info
-            ltp    = float(getattr(info, "last_price", 0) or 0)
-            return {
-                "symbol":     symbol,
-                "ltp":        round(ltp, 2),
-                "open":       round(float(getattr(info, "open", 0) or 0), 2),
-                "high":       round(float(getattr(info, "day_high", 0) or 0), 2),
-                "low":        round(float(getattr(info, "day_low", 0) or 0), 2),
-                "prev_close": round(float(getattr(info, "previous_close", 0) or 0), 2),
-            }
-        except Exception as e:
-            logger.error(f"get_quote error for {symbol}: {e}")
-            return {"symbol": symbol, "ltp": 0, "error": str(e)}
+    def test_connection(self):
+        return self.connected
 
-    def get_index_data(self, days: int = 30) -> pd.DataFrame:
-        """
-        Fetch BSE Smallcap index for the market filter check.
-        Yahoo symbol: ^BSESMCAP
-        """
-        try:
-            end   = datetime.today().strftime("%Y-%m-%d")
-            start = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
-            df = yf.download("^BSESMCAP", start=start, end=end,
-                             interval="1d", progress=False, auto_adjust=True)
-            if df.empty:
-                logger.warning("Could not fetch BSE Smallcap index data")
-                return pd.DataFrame()
-
-            df.reset_index(inplace=True)
-            if hasattr(df.columns, "levels"):
-                df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
-            df.columns = [c.lower().strip() for c in df.columns]
-            if "adj close" in df.columns:
-                df.rename(columns={"adj close": "close"}, inplace=True)
-            if "date" in df.columns:
-                df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
-                df.set_index("date", inplace=True)
-            return df
-        except Exception as e:
-            logger.warning(f"Index data error: {e}")
-            return pd.DataFrame()
-
-    # ── Portfolio & Orders via Groww API (needs key, only for live trading) ──
-
-    def get_funds(self) -> dict:
-        """
-        Get available funds from Groww.
-        IMPORTANT: If you see a 404 error here, your Groww API endpoint path
-        may be different. Check https://groww.in/trade-api for the correct URL.
-        This error is harmless in paper trading mode.
-        """
-        return self._groww_get("/user/trading-balance")
-
-    def get_portfolio(self) -> list:
-        """Get holdings from Groww."""
-        try:
-            data = self._groww_get("/portfolio/holdings")
-            if isinstance(data, list):
-                return data
-            return data.get("data", data.get("holdings", []))
-        except Exception:
-            return []
-
-    def place_order(self, symbol: str, exchange: str, transaction_type: str,
-                    quantity: int, order_type: str, price: float = 0.0,
-                    trigger_price: float = 0.0, product: str = "CNC") -> dict:
-        """
-        Place a real order via Groww API.
-        Only called when PAPER_TRADING = FALSE in your .env file.
-        """
-        payload = {
-            "symbol":           symbol,
-            "exchange":         exchange,
-            "transaction_type": transaction_type,
-            "quantity":         quantity,
-            "order_type":       order_type,
-            "price":            price,
-            "trigger_price":    trigger_price,
-            "product":          product
-        }
-        logger.info(f"Placing order: {transaction_type} {quantity} {symbol} @ {price}")
-        return self._groww_post("/orders", payload)
-
-    def get_orders(self) -> list:
-        """Get today's orders from Groww."""
-        try:
-            data = self._groww_get("/orders")
-            if isinstance(data, list):
-                return data
-            return data.get("data", data.get("orders", []))
-        except Exception:
-            return []
-
-    # ── Utility ───────────────────────────────────────────────────────────────
-
-    def is_market_open(self) -> bool:
-        """Check if NSE is open (9:15 AM to 3:30 PM IST, Mon-Fri)."""
+    def is_market_open(self):
         now = datetime.now()
-        if now.weekday() >= 5:
-            return False
-        open_time  = now.replace(hour=9,  minute=15, second=0, microsecond=0)
-        close_time = now.replace(hour=15, minute=30, second=0, microsecond=0)
-        return open_time <= now <= close_time
+        if now.weekday() >= 5: return False
+        return (9, 15) <= (now.hour, now.minute) and (now.hour, now.minute) <= (15, 30)
 
-    def test_connection(self) -> bool:
-        """
-        Test connectivity.
-        Data (yfinance) always works without an API key.
-        Returns True if yfinance is reachable.
-        """
+    def get_funds(self):
+        if not self.connected: return 0.0
         try:
-            hist = yf.Ticker("RELIANCE.NS").history(period="2d", auto_adjust=True)
-            if not hist.empty:
-                logger.info("Data connection OK (yfinance)")
-                return True
+            # Use the correct method for fetching cash balance
+            res = self.client.get_available_margin_details() 
+            # Note: The exact dict key might be different (e.g., 'available_cash', 'margin'). 
+            # If this returns 0 on the dashboard, we will just print the 'res' to find the right key.
+            return res.get('available_cash', 0.0) 
         except Exception as e:
-            logger.warning(f"yfinance connection test failed: {e}")
-        return False
+            logger.error(f"Failed to fetch funds: {e}")
+            return 0.0
+
+    def get_historical_data(self, symbol, from_date, to_date):
+        """
+        Fetches historical OHLCV data using the unlocked legacy Groww endpoint.
+        Includes a dictionary to translate standard symbols to Groww's official NSE names.
+        """
+        if not self.connected:
+            return []
+            
+        # 🎓 THE TRANSLATION DICTIONARY
+        # Maps common/yfinance names to Groww's official NSE Cash market names
+        symbol_map = {
+            "^NSEI": "NIFTYBEES",      
+            "MAPMYIND": "MAPMYINDIA",  # Fixed: Exact NSE ticker
+            "DATAPATT": "DATAPATTNS",
+            "M&M": "M&M",              # Fixed: Pass special characters raw
+            "BAJAJ-AUTO": "BAJAJ-AUTO",# Fixed: Pass dash raw
+            "L&TFH": "LTF"
+        }
+
+        # Translate the symbol if it is in our map. Otherwise, use the original.
+        groww_ticker = symbol_map.get(symbol, symbol)
+            
+        try:
+            # The legacy endpoint requires the exact hours, minutes, and seconds
+            start = f"{from_date} 00:00:00"
+            end = f"{to_date} 23:59:59"
+
+            # THE BACKDOOR ENDPOINT: get_historical_candle_data (NOT get_historical_candles)
+            response = self.client.get_historical_candle_data(
+                trading_symbol=groww_ticker,  
+                exchange="NSE",
+                segment="CASH",
+                start_time=start,
+                end_time=end,
+                interval_in_minutes=1440  # 1440 minutes = 1 Day
+            )
+            
+            formatted_data = []
+            
+            # The legacy endpoint returns a dictionary with a 'candles' array
+            # Format: [timestamp_epoch, open, high, low, close, volume]
+            candle_list = response.get("candles", []) if isinstance(response, dict) else []
+            
+            if not candle_list:
+                return []
+                
+            for candle in candle_list:
+                if len(candle) >= 6: # Ensure it has all OHLCV data points
+                    # The timestamp is in epoch seconds, we convert it to YYYY-MM-DD
+                    date_val = datetime.fromtimestamp(candle[0]).strftime('%Y-%m-%d')
+                    
+                    formatted_data.append({
+                        "date": date_val,
+                        "open": float(candle[1]),
+                        "high": float(candle[2]),
+                        "low": float(candle[3]),
+                        "close": float(candle[4]),
+                        "volume": int(candle[5])
+                    })
+                    
+            return formatted_data
+            
+        except Exception as e:
+            logger.error(f"Error fetching historical data for {symbol} ({groww_ticker}) from Groww: {e}")
+            return []
+
+    def place_order(self, symbol, quantity, price, transaction_type="BUY"):
+        """Places live limit orders. Disabled when paper_mode is True."""
+        if not self.connected:
+            raise Exception("Not connected to Groww API. Check credentials.")
+            
+        try:
+            response = self.client.place_order(
+                validity="DAY",
+                exchange="NSE",
+                transaction_type=transaction_type,
+                order_type="LIMIT",
+                price=price,
+                product="CNC", # CNC for Delivery
+                trading_symbol=symbol,
+                quantity=quantity
+            )
+            logger.info(f"Order placed successfully: {response}")
+            return response
+        except Exception as e:
+            logger.error(f"Order placement failed: {e}")
+            raise Exception(f"Order failed: {e}")
