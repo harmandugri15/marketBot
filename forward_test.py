@@ -18,7 +18,7 @@ def add_trade(signal):
     trade = {
         "id": trade_id, "symbol": signal["symbol"], "strategy": signal["strategy"],
         "entry_price": signal["entry_price"], "stop_loss": signal["stop_loss"],
-        "sl_pct": signal["sl_pct"], "shares": signal["shares"], "status": "WATCHING",
+        "sl_pct": signal["sl_pct"], "shares": signal["quantity"], "status": "WATCHING",
         "entry_date": None, "exit_date": None, "realized_pnl": 0, "pnl_pct": 0, "notes": signal.get("notes", "")
     }
     if not db["started"]: db["started"] = datetime.now().strftime("%Y-%m-%d")
