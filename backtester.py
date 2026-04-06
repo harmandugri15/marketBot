@@ -168,7 +168,7 @@ def run_backtest(api, start_date, end_date, capital, symbols=None, progress_call
                     one_r = entry - sl
                     
                     if one_r > 0 and (one_r/entry*100) <= 8.0:
-                        shares = int((running_equity * 0.45) / entry) # 45% position size per trade
+                        shares = int((running_equity * (settings.get('risk_pct', 2.0)/100)) / one_r) # Risk-based sizing
                         if shares > 0:
                             active_trades.append({
                                 "symbol": symbol, "strategy": active_strat, "entry_date": str(current_date), 

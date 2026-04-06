@@ -2,9 +2,12 @@ import os
 import json
 import logging
 import time
+import random  # <-- Added for request jitter
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
+import concurrent.futures
+
 from config import STOCK_UNIVERSE, SIGNALS_DB, get_settings
 
 logger = logging.getLogger(__name__)
@@ -47,43 +50,101 @@ def run_scan(api, progress_callback=None, strategy="AUTO"):
     settings = get_settings()
     regime = get_market_regime(api)
 
+    # Global Circuit Breaker (Safety Mode)
     if regime == "PANIC" and strategy == "AUTO":
         logger.warning("DEEP BEAR DETECTED: 100% Cash Mode.")
         with open(SIGNALS_DB, "w") as f: json.dump([{"market_bearish": True}], f)
-        #return []
+        # return []  <-- Remove the '#' to activate the Emergency Stop for live trading
 
     signals = []
     total = len(STOCK_UNIVERSE)
     start_date = (datetime.now() - timedelta(days=250)).strftime("%Y-%m-%d")
 
-    for i, symbol in enumerate(STOCK_UNIVERSE, 1):
-        if progress_callback: progress_callback(i, total, symbol)
+    # --- THE WORKER FUNCTION ---
+    def process_symbol(symbol):
+        # 🎓 STAGGERED JITTER: Random sleep between 0.5s and 1.2s
+        # This prevents the threads from hitting the API in simultaneous bursts!
+        time.sleep(random.uniform(0.5, 1.2)) 
+        
         try:
             raw = api.get_historical_data(symbol, from_date=start_date, to_date=datetime.now().strftime("%Y-%m-%d"))
-            if not raw or len(raw) < 100: continue
+            if not raw or len(raw) < 100: return None
+            
             df = _build_indicators(pd.DataFrame(raw).rename(columns={"c":"close","v":"volume","h":"high","l":"low","o":"open"}))
             today, yest = df.iloc[-1], df.iloc[-2]
+            
+            # Determine active strategy
             active_strat = strategy if strategy != "AUTO" else ("HARMAN1" if regime == "BULL" else "MRB")
             
             setup = None
-            if active_strat == "HARMAN1":
-                exp = any(df['daily_ret'].iloc[j] >= settings['expansion_pct'] and df['volume'].iloc[j] >= df['vol_sma50'].iloc[j]*settings['vol_mult'] for j in range(len(df)-16, len(df)-1))
-                if exp and today["volume"] <= today["vol_sma50"] * 1.5 and today["close"] > today["ema20"] and today["macd_hist"] > yest["macd_hist"]:
-                    setup = {"notes": "Harman1: Expansion + Momentum", "score": 95}
-            elif active_strat == "MRB":
-                if (yest["rsi"] < settings['rsi_oversold'] or today["rsi"] < settings['rsi_oversold']) and today["close"] > yest["high"]:
-                    if today["volume"] > today["vol_sma50"] * 1.2: # Volume confirmation
-                        setup = {"notes": "MRB: Volume Confirmed Bounce", "score": 90}
+            
+            # Condition 1: EMA Pullback
+            dist_to_ema = (today["close"] - today["ema20"]) / today["ema20"]
+            is_pullback = 0 < dist_to_ema < 0.04 and 40 < today["rsi"] < 65
+            
+            # Condition 2: Breakout Surge (Looking at previous 5 days)
+            five_day_high = df.iloc[-6:-1]["high"].max()
+            is_breakout = today["close"] > five_day_high and today["volume"] > today["vol_sma50"] * 1.5
+            
+            # Condition 3: Deep Bear Bounce
+            is_bear_bounce = today["rsi"] < 35 and today["close"] > yest["high"] and today["volume"] > today["vol_sma50"]
 
-            if setup and setup["score"] >= settings['min_quality']:
-                entry, sl = round(today["high"] + 0.05, 2), round(min(today["low"], yest["low"]) - 0.05, 2)
+            # Strategy Routing
+            if active_strat in ["HARMAN1", "VT"] and regime == "BULL":
+                if is_pullback: setup = {"notes": "EMA 20 Pullback", "score": 90}
+                elif is_breakout: setup = {"notes": "Volume Breakout Surge", "score": 95}
+            elif active_strat in ["MRB", "DEP"]:
+                if is_pullback: setup = {"notes": "EMA 20 Pullback", "score": 90}
+                elif is_bear_bounce: setup = {"notes": "Deep Bear Bounce", "score": 85}
+
+            if setup and setup["score"] >= settings.get('min_quality', 80):
+                # Calculate precise Entry and Stop Loss
+                entry = float(today["close"])
+                sl = float(max(min(today["low"] * 0.99, entry * 0.95), entry * 0.92))
                 one_r = entry - sl
-                if (one_r / entry * 100) <= settings['max_sl_pct']:
-                    shares = int((settings['capital'] * (settings['risk_pct']/100)) / one_r) if one_r > 0 else 0
+                
+                # Risk Management filters
+                if one_r > 0 and (one_r / entry * 100) <= settings.get('max_sl_pct', 8.0):
+                    shares = int((settings['capital'] * (settings['risk_pct']/100)) / one_r)
+                    
                     if shares == 0 and entry <= settings['capital']: shares = 1
+                    
                     if shares > 0:
-                        signals.append({"strategy": active_strat, "symbol": symbol, "entry_price": entry, "stop_loss": sl, "sl_pct": round(one_r/entry*100,2), "shares": shares, "quality_score": setup["score"], "notes": setup["notes"], "scan_date": datetime.now().strftime("%Y-%m-%d")})
-        except: continue
+                        return {
+                            "strategy": active_strat, 
+                            "symbol": symbol, 
+                            "entry_price": round(entry, 2), 
+                            "stop_loss": round(sl, 2), 
+                            "sl_pct": round(one_r/entry*100, 2), 
+                            "shares": shares, 
+                            "quality_score": setup["score"], 
+                            "notes": setup["notes"], 
+                            "scan_date": datetime.now().strftime("%Y-%m-%d"),
+                            "pullback_pct": round(dist_to_ema * 100, 2),
+                            "vol_ratio": round(today["volume"] / today["vol_sma50"], 2),
+                            "invested": round(entry * shares, 2)
+                        }
+        except Exception as e: 
+            logger.error(f"Scanner failed to process {symbol}: {e}")
+        
+        return None
+
+    # --- MULTITHREADING ORCHESTRATOR ---
+    processed_count = 0
+    # Reduced to 3 workers for maximum API safety
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        future_to_symbol = {executor.submit(process_symbol, sym): sym for sym in STOCK_UNIVERSE}
+        
+        for future in concurrent.futures.as_completed(future_to_symbol):
+            sym = future_to_symbol[future]
+            processed_count += 1
+            
+            if progress_callback: 
+                progress_callback(processed_count, total, sym)
+                
+            result = future.result()
+            if result:
+                signals.append(result)
     
     signals.sort(key=lambda x: x["quality_score"], reverse=True)
     with open(SIGNALS_DB, "w") as f: json.dump(signals, f, indent=2)

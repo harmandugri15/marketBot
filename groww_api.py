@@ -72,7 +72,8 @@ class GrowwAPI:
             "DATAPATT": "DATAPATTNS",
             "M&M": "M&M",              # Fixed: Pass special characters raw
             "BAJAJ-AUTO": "BAJAJ-AUTO",# Fixed: Pass dash raw
-            "L&TFH": "LTF"
+            "L&TFH": "LTF",
+            "ADANITRANS": "ADANIENSOL"
         }
 
         # Translate the symbol if it is in our map. Otherwise, use the original.

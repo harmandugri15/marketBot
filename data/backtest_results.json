@@ -1,227 +1,41 @@
 {
-  "start_date": "2026-01-01",
-  "end_date": "2026-03-31",
-  "starting_capital": 3000.0,
+  "start_date": "2026-04-06",
+  "end_date": "2026-08-06",
+  "starting_capital": 2000.0,
   "strategy_run": "AUTO",
   "metrics": {
-    "final_equity": 3034.38,
-    "total_return_pct": 1.15,
-    "total_trades": 11,
-    "winning_trades": 4,
-    "losing_trades": 7,
-    "win_rate": 36.4,
-    "profit_factor": 1.1,
-    "avg_win_pct": 7.6,
-    "avg_loss_pct": -3.9,
-    "max_drawdown_pct": 7.94
+    "final_equity": 2000.0,
+    "total_return_pct": 0.0,
+    "total_trades": 1,
+    "winning_trades": 0,
+    "losing_trades": 1,
+    "win_rate": 0.0,
+    "profit_factor": NaN,
+    "avg_win_pct": 0,
+    "avg_loss_pct": 0.0,
+    "max_drawdown_pct": 0
   },
   "trades": [
     {
-      "symbol": "SBIN",
+      "symbol": "TCS",
       "strategy": "HARMAN1",
-      "entry_date": "2026-01-01",
-      "entry_price": 984.75,
-      "sl": 984.75,
+      "entry_date": "2026-04-06",
+      "entry_price": 2474.0,
+      "sl": 2350.3,
       "shares": 1,
-      "one_r": 49.23750000000007,
-      "be_active": true,
-      "exit_date": "2026-02-01",
-      "exit_price": 1018.2,
-      "exit_reason": "Trend Trail Exit",
-      "pnl": 33.450000000000045,
-      "pnl_pct": 3.3968012185834016
-    },
-    {
-      "symbol": "HDFCBANK",
-      "strategy": "HARMAN1",
-      "entry_date": "2026-01-02",
-      "entry_price": 1001.6,
-      "sl": 951.52,
-      "shares": 1,
-      "one_r": 50.08000000000004,
+      "one_r": 123.70000000000027,
       "be_active": false,
-      "exit_date": "2026-01-07",
-      "exit_price": 951.52,
-      "exit_reason": "Stop Loss/BE",
-      "pnl": -50.08000000000004,
-      "pnl_pct": -5.0000000000000036
-    },
-    {
-      "symbol": "ONGC",
-      "strategy": "HARMAN1",
-      "entry_date": "2026-01-07",
-      "entry_price": 239.06,
-      "sl": 239.06,
-      "shares": 5,
-      "one_r": 11.953000000000003,
-      "be_active": true,
-      "exit_date": "2026-01-29",
-      "exit_price": 274.919,
-      "exit_reason": "Target Hit (14%)",
-      "pnl": 179.2949999999999,
-      "pnl_pct": 14.999999999999991
-    },
-    {
-      "symbol": "ICICIBANK",
-      "strategy": "MRB",
-      "entry_date": "2026-01-29",
-      "entry_price": 1383.6,
-      "sl": 1314.42,
-      "shares": 1,
-      "one_r": 69.18000000000006,
-      "be_active": false,
-      "exit_date": "2026-03-06",
-      "exit_price": 1314.42,
-      "exit_reason": "Stop Loss/BE",
-      "pnl": -69.17999999999984,
-      "pnl_pct": -4.9999999999999885
-    },
-    {
-      "symbol": "ONGC",
-      "strategy": "MRB",
-      "entry_date": "2026-02-01",
-      "entry_price": 254.3,
-      "sl": 241.59,
-      "shares": 5,
-      "one_r": 12.715000000000003,
-      "be_active": false,
-      "exit_date": "2026-02-04",
-      "exit_price": 269.55800000000005,
-      "exit_reason": "Target Hit (6%)",
-      "pnl": 76.29000000000019,
-      "pnl_pct": 6.000000000000015
-    },
-    {
-      "symbol": "RELIANCE",
-      "strategy": "HARMAN1",
-      "entry_date": "2026-02-04",
-      "entry_price": 1456.8,
-      "sl": 1383.96,
-      "shares": 1,
-      "one_r": 72.84000000000015,
-      "be_active": false,
-      "exit_date": "2026-03-02",
-      "exit_price": 1383.96,
-      "exit_reason": "Stop Loss/BE",
-      "pnl": -72.83999999999992,
-      "pnl_pct": -4.999999999999995
-    },
-    {
-      "symbol": "SBIN",
-      "strategy": "MRB",
-      "entry_date": "2026-03-02",
-      "entry_price": 1189.9,
-      "sl": 1130.4,
-      "shares": 1,
-      "one_r": 59.49500000000012,
-      "be_active": false,
-      "exit_date": "2026-03-09",
-      "exit_price": 1130.4,
-      "exit_reason": "Stop Loss/BE",
-      "pnl": -59.5,
-      "pnl_pct": -5.000420203378435
-    },
-    {
-      "symbol": "ONGC",
-      "strategy": "MRB",
-      "entry_date": "2026-03-06",
-      "entry_price": 278.95,
-      "sl": 265.0,
-      "shares": 4,
-      "one_r": 13.947499999999991,
-      "be_active": false,
-      "exit_date": "2026-03-13",
-      "exit_price": 265.0,
-      "exit_reason": "Stop Loss/BE",
-      "pnl": -55.799999999999955,
-      "pnl_pct": -5.000896217960204
-    },
-    {
-      "symbol": "NTPC",
-      "strategy": "MRB",
-      "entry_date": "2026-03-09",
-      "entry_price": 376.25,
-      "sl": 357.44,
-      "shares": 3,
-      "one_r": 18.8125,
-      "be_active": false,
-      "exit_date": "2026-03-30",
-      "exit_price": 370.65,
+      "exit_date": "2026-04-06",
+      "exit_price": 2474.0,
       "exit_reason": "End of Test",
-      "pnl": -16.800000000000068,
-      "pnl_pct": -1.4883720930232618
-    },
-    {
-      "symbol": "ADANIPOWER",
-      "strategy": "MRB",
-      "entry_date": "2026-03-13",
-      "entry_price": 146.57,
-      "sl": 139.24,
-      "shares": 9,
-      "one_r": 7.3285000000000196,
-      "be_active": false,
-      "exit_date": "2026-03-17",
-      "exit_price": 155.3642,
-      "exit_reason": "Target Hit (6%)",
-      "pnl": 79.14780000000016,
-      "pnl_pct": 6.000000000000013
-    },
-    {
-      "symbol": "POWERGRID",
-      "strategy": "MRB",
-      "entry_date": "2026-03-17",
-      "entry_price": 298.5,
-      "sl": 283.57,
-      "shares": 4,
-      "one_r": 14.925000000000011,
-      "be_active": false,
-      "exit_date": "2026-03-30",
-      "exit_price": 296.1,
-      "exit_reason": "End of Test",
-      "pnl": -9.599999999999909,
-      "pnl_pct": -0.804020100502505
+      "pnl": 0.0,
+      "pnl_pct": 0.0
     }
   ],
   "equity_curve": [
     {
-      "date": "2026-01-01",
-      "equity": 3000.0
-    },
-    {
-      "date": "2026-01-07",
-      "equity": 2949.92
-    },
-    {
-      "date": "2026-01-29",
-      "equity": 3129.22
-    },
-    {
-      "date": "2026-02-01",
-      "equity": 3162.66
-    },
-    {
-      "date": "2026-02-04",
-      "equity": 3238.95
-    },
-    {
-      "date": "2026-03-02",
-      "equity": 3166.11
-    },
-    {
-      "date": "2026-03-06",
-      "equity": 3096.93
-    },
-    {
-      "date": "2026-03-09",
-      "equity": 3037.43
-    },
-    {
-      "date": "2026-03-13",
-      "equity": 2981.64
-    },
-    {
-      "date": "2026-03-17",
-      "equity": 3060.78
+      "date": "2026-04-06",
+      "equity": 2000.0
     }
   ]
 }
