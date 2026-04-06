@@ -1,41 +1,360 @@
 {
-  "start_date": "2026-04-06",
-  "end_date": "2026-08-06",
-  "starting_capital": 2000.0,
+  "start_date": "2023-01-01",
+  "end_date": "2023-12-31",
+  "starting_capital": 100000.0,
   "strategy_run": "AUTO",
   "metrics": {
-    "final_equity": 2000.0,
-    "total_return_pct": 0.0,
-    "total_trades": 1,
-    "winning_trades": 0,
-    "losing_trades": 1,
-    "win_rate": 0.0,
-    "profit_factor": NaN,
-    "avg_win_pct": 0,
-    "avg_loss_pct": 0.0,
-    "max_drawdown_pct": 0
+    "final_equity": 136047.1,
+    "total_return_pct": 36.05,
+    "total_trades": 18,
+    "winning_trades": 9,
+    "losing_trades": 9,
+    "win_rate": 50.0,
+    "profit_factor": 1.4,
+    "avg_win_pct": 7.11,
+    "avg_loss_pct": -4.56,
+    "max_drawdown_pct": 27.9
   },
   "trades": [
     {
+      "symbol": "HDFCBANK",
+      "strategy": "MRB",
+      "entry_date": "2023-01-02",
+      "entry_price": 814.35,
+      "sl": 773.63,
+      "shares": 245,
+      "one_r": 40.717500000000086,
+      "be_active": false,
+      "exit_date": "2023-03-15",
+      "exit_price": 773.63,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -9976.400000000007,
+      "pnl_pct": -5.000306993307549
+    },
+    {
       "symbol": "TCS",
       "strategy": "HARMAN1",
-      "entry_date": "2026-04-06",
-      "entry_price": 2474.0,
-      "sl": 2350.3,
-      "shares": 1,
-      "one_r": 123.70000000000027,
+      "entry_date": "2023-01-03",
+      "entry_price": 3311.35,
+      "sl": 3311.35,
+      "shares": 60,
+      "one_r": 165.5675000000001,
+      "be_active": true,
+      "exit_date": "2023-02-17",
+      "exit_price": 3501.15,
+      "exit_reason": "Trend Trail Exit",
+      "pnl": 11388.000000000011,
+      "pnl_pct": 5.73180122910596
+    },
+    {
+      "symbol": "RELIANCE",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-02-17",
+      "entry_price": 1220.1,
+      "sl": 1159.09,
+      "shares": 182,
+      "one_r": 61.00500000000011,
       "be_active": false,
-      "exit_date": "2026-04-06",
-      "exit_price": 2474.0,
+      "exit_date": "2023-02-28",
+      "exit_price": 1159.09,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -11103.819999999998,
+      "pnl_pct": -5.000409802475207
+    },
+    {
+      "symbol": "ICICIBANK",
+      "strategy": "MRB",
+      "entry_date": "2023-02-28",
+      "entry_price": 854.85,
+      "sl": 812.11,
+      "shares": 234,
+      "one_r": 42.742500000000064,
+      "be_active": false,
+      "exit_date": "2023-03-16",
+      "exit_price": 812.11,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -10001.160000000002,
+      "pnl_pct": -4.999707551032346
+    },
+    {
+      "symbol": "LT",
+      "strategy": "MRB",
+      "entry_date": "2023-03-15",
+      "entry_price": 2176.65,
+      "sl": 2067.82,
+      "shares": 82,
+      "one_r": 108.83249999999998,
+      "be_active": false,
+      "exit_date": "2023-04-10",
+      "exit_price": 2307.2490000000003,
+      "exit_reason": "Target Hit (6%)",
+      "pnl": 10709.118000000013,
+      "pnl_pct": 6.000000000000007
+    },
+    {
+      "symbol": "ITC",
+      "strategy": "MRB",
+      "entry_date": "2023-03-16",
+      "entry_price": 381.45,
+      "sl": 362.38,
+      "shares": 421,
+      "one_r": 19.07249999999999,
+      "be_active": false,
+      "exit_date": "2023-04-21",
+      "exit_price": 404.337,
+      "exit_reason": "Target Hit (6%)",
+      "pnl": 9635.427,
+      "pnl_pct": 6.000000000000001
+    },
+    {
+      "symbol": "RELIANCE",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-04-10",
+      "entry_price": 1162.42,
+      "sl": 1162.42,
+      "shares": 156,
+      "one_r": 58.121250000000146,
+      "be_active": true,
+      "exit_date": "2023-05-16",
+      "exit_price": 1226.9,
+      "exit_reason": "Trend Trail Exit",
+      "pnl": 10058.880000000003,
+      "pnl_pct": 5.547048399029611
+    },
+    {
+      "symbol": "HDFCBANK",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-04-21",
+      "entry_price": 837.3,
+      "sl": 795.43,
+      "shares": 240,
+      "one_r": 41.86500000000001,
+      "be_active": false,
+      "exit_date": "2023-06-13",
+      "exit_price": 795.43,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -10048.800000000001,
+      "pnl_pct": -5.000597157530157
+    },
+    {
+      "symbol": "RELIANCE",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-05-16",
+      "entry_price": 1226.9,
+      "sl": 1226.9,
+      "shares": 180,
+      "one_r": 61.34500000000003,
+      "be_active": true,
+      "exit_date": "2023-07-18",
+      "exit_price": 1410.935,
+      "exit_reason": "Target Hit (14%)",
+      "pnl": 33126.299999999974,
+      "pnl_pct": 14.999999999999986
+    },
+    {
+      "symbol": "ICICIBANK",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-06-13",
+      "entry_price": 943.55,
+      "sl": 943.55,
+      "shares": 213,
+      "one_r": 47.17750000000001,
+      "be_active": true,
+      "exit_date": "2023-12-20",
+      "exit_price": 1006.65,
+      "exit_reason": "Trend Trail Exit",
+      "pnl": 13440.300000000005,
+      "pnl_pct": 6.6875099358804535
+    },
+    {
+      "symbol": "RELIANCE",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-07-18",
+      "entry_price": 1410.22,
+      "sl": 1339.71,
+      "shares": 189,
+      "one_r": 70.51125000000002,
+      "be_active": false,
+      "exit_date": "2023-07-20",
+      "exit_price": 1339.71,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -13326.389999999998,
+      "pnl_pct": -4.999929089078298
+    },
+    {
+      "symbol": "HDFCBANK",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-07-20",
+      "entry_price": 844.38,
+      "sl": 802.16,
+      "shares": 285,
+      "one_r": 42.21875,
+      "be_active": false,
+      "exit_date": "2023-08-14",
+      "exit_price": 802.16,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -12032.700000000008,
+      "pnl_pct": -5.000118430090721
+    },
+    {
+      "symbol": "RELIANCE",
+      "strategy": "MRB",
+      "entry_date": "2023-08-14",
+      "entry_price": 1288.62,
+      "sl": 1224.19,
+      "shares": 168,
+      "one_r": 64.43125000000009,
+      "be_active": false,
+      "exit_date": "2023-08-25",
+      "exit_price": 1224.19,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -10824.239999999972,
+      "pnl_pct": -4.999922397603626
+    },
+    {
+      "symbol": "BHARTIARTL",
+      "strategy": "MRB",
+      "entry_date": "2023-08-25",
+      "entry_price": 873.5,
+      "sl": 873.5,
+      "shares": 223,
+      "one_r": 43.67500000000007,
+      "be_active": true,
+      "exit_date": "2023-09-15",
+      "exit_price": 925.9100000000001,
+      "exit_reason": "Target Hit (6%)",
+      "pnl": 11687.430000000018,
+      "pnl_pct": 6.00000000000001
+    },
+    {
+      "symbol": "HDFCBANK",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-09-15",
+      "entry_price": 830.88,
+      "sl": 789.33,
+      "shares": 263,
+      "one_r": 41.543750000000045,
+      "be_active": false,
+      "exit_date": "2023-09-20",
+      "exit_price": 789.33,
+      "exit_reason": "Stop Loss/BE",
+      "pnl": -10927.649999999989,
+      "pnl_pct": -5.000722125938759
+    },
+    {
+      "symbol": "BHARTIARTL",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-09-20",
+      "entry_price": 910.7,
+      "sl": 910.7,
+      "shares": 216,
+      "one_r": 45.53500000000008,
+      "be_active": true,
+      "exit_date": "2023-12-07",
+      "exit_price": 1000.0,
+      "exit_reason": "Trend Trail Exit",
+      "pnl": 19288.79999999999,
+      "pnl_pct": 9.805644010102114
+    },
+    {
+      "symbol": "BHARTIARTL",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-12-07",
+      "entry_price": 1000.0,
+      "sl": 950.0,
+      "shares": 235,
+      "one_r": 50.0,
+      "be_active": false,
+      "exit_date": "2023-12-29",
+      "exit_price": 1032.2,
       "exit_reason": "End of Test",
-      "pnl": 0.0,
-      "pnl_pct": 0.0
+      "pnl": 7567.000000000011,
+      "pnl_pct": 3.2200000000000046
+    },
+    {
+      "symbol": "ICICIBANK",
+      "strategy": "HARMAN1",
+      "entry_date": "2023-12-20",
+      "entry_price": 1006.65,
+      "sl": 956.32,
+      "shares": 260,
+      "one_r": 50.332500000000095,
+      "be_active": false,
+      "exit_date": "2023-12-29",
+      "exit_price": 996.6,
+      "exit_reason": "End of Test",
+      "pnl": -2612.999999999988,
+      "pnl_pct": -0.9983609000148963
     }
   ],
   "equity_curve": [
     {
-      "date": "2026-04-06",
-      "equity": 2000.0
+      "date": "2023-01-01",
+      "equity": 100000.0
+    },
+    {
+      "date": "2023-02-17",
+      "equity": 111388.0
+    },
+    {
+      "date": "2023-02-28",
+      "equity": 100284.18
+    },
+    {
+      "date": "2023-03-15",
+      "equity": 90307.78
+    },
+    {
+      "date": "2023-03-16",
+      "equity": 80306.62
+    },
+    {
+      "date": "2023-04-10",
+      "equity": 91015.74
+    },
+    {
+      "date": "2023-04-21",
+      "equity": 100651.17
+    },
+    {
+      "date": "2023-05-16",
+      "equity": 110710.05
+    },
+    {
+      "date": "2023-06-13",
+      "equity": 100661.25
+    },
+    {
+      "date": "2023-07-18",
+      "equity": 133787.54
+    },
+    {
+      "date": "2023-07-20",
+      "equity": 120461.15
+    },
+    {
+      "date": "2023-08-14",
+      "equity": 108428.45
+    },
+    {
+      "date": "2023-08-25",
+      "equity": 97604.21
+    },
+    {
+      "date": "2023-09-15",
+      "equity": 109291.65
+    },
+    {
+      "date": "2023-09-20",
+      "equity": 98364.0
+    },
+    {
+      "date": "2023-12-07",
+      "equity": 117652.8
+    },
+    {
+      "date": "2023-12-20",
+      "equity": 131093.1
     }
   ]
 }
