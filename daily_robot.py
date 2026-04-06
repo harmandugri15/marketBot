@@ -29,6 +29,7 @@ def send_telegram_alert(message):
 
 def run_daily_automation():
     logger.info("🤖 Waking up Daily Robot...")
+    send_telegram_alert("☀️ *MarketBot waking up for daily scan...*")
     
     api = GrowwAPI()
     if not api.connected:
