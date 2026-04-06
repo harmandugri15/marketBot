@@ -1,0 +1,37 @@
+name: MarketBot Daily Run
+
+on:
+  schedule:
+    # Runs at 10:30 AM UTC, which is exactly 4:00 PM IST (After Indian Market Close)
+    # Runs Monday through Friday
+    - cron: '30 10 * * 1-5'
+  workflow_dispatch: # Allows you to trigger it manually via a button for testing
+
+jobs:
+  run-robot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Daily Robot
+        env:
+          GROWW_API_KEY: ${{ secrets.GROWW_API_KEY }}
+          GROWW_SECRET_KEY: ${{ secrets.GROWW_SECRET_KEY }}
+        run: python daily_robot.py
+
+      - name: Save Trade Data back to GitHub
+        run: |
+          git config --global user.name 'MarketBot'
+          git config --global user.email 'bot@marketbot.local'
+          git add data/*.json
+          git commit -m "🤖 Auto-updated portfolio data [skip ci]" || echo "No changes to commit"
+          git push
