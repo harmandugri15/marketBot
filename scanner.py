@@ -116,10 +116,10 @@ def run_scan(api, progress_callback=None, strategy="AUTO"):
                             "entry_price": round(entry, 2), 
                             "stop_loss": round(sl, 2), 
                             "sl_pct": round(one_r/entry*100, 2), 
-                            "shares": shares, 
+                            "quantity": shares,
                             "quality_score": setup["score"], 
                             "notes": setup["notes"], 
-                            "scan_date": datetime.now().strftime("%Y-%m-%d"),
+                            "date": datetime.now().strftime("%Y-%m-%d"),
                             "pullback_pct": round(dist_to_ema * 100, 2),
                             "vol_ratio": round(today["volume"] / today["vol_sma50"], 2),
                             "invested": round(entry * shares, 2)
