@@ -1716,6 +1716,8 @@
     </div>
 
     <script>
+      const isGH = window.location.hostname.includes("github.io");
+
       // ════════════════════════════════════════════════════════════════
       //  GLOBALS
       // ════════════════════════════════════════════════════════════════
@@ -1791,7 +1793,7 @@
       // ════════════════════════════════════════════════════════════════
       async function refreshHome() {
         try {
-          const s = await (await fetch('/api/forward/summary')).json();
+          const s = await (await fetch(isGH ? 'data/summary.json' : '/api/forward/summary')).json();
           const pnl = s.total_pnl || 0;
           $('hs-act').textContent = (s.active || 0) + (s.watching || 0);
           $('hs-pnl').textContent = (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0);
@@ -1817,7 +1819,7 @@
           drawHomeEq(s.equity_curve || [], s.capital || 2000);
 
           try {
-            const sigs = await (await fetch('/api/scan/signals')).json();
+            fetch(isGH ? 'data/signals.json' : '/api/scan/signals')
             $('hs-sigs').textContent = sigs.length;
           } catch (e) { }
         } catch (e) { }
@@ -1836,7 +1838,7 @@
       // ════════════════════════════════════════════════════════════════
       async function refreshFwd() {
         try {
-          const s = await (await fetch('/api/forward/summary')).json();
+          const s = await (await fetch(isGH ? 'data/summary.json' : '/api/forward/summary')).json();
           $('ft-total').textContent = s.total_trades;
           $('ft-watching').textContent = s.watching;
           $('ft-active2').textContent = s.active;
@@ -2033,7 +2035,7 @@
 
       async function loadAndShowSignals(total, secs) {
         try {
-          const sigs = await (await fetch('/api/scan/signals')).json();
+          const sigs = await (await fetch(isGH ? 'data/signals.json' : '/api/scan/signals')).json();
 
           if (sigs.length > 0 && sigs[0].market_bearish) {
             $('market-safety-alert').style.display = 'flex';
@@ -2137,7 +2139,7 @@
 
       async function loadBtResults() {
         try {
-          const r = await (await fetch('/api/backtest/results')).json();
+          const r = await (await fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results')).json();
           if (r.error) return;
           const m = r.metrics;
           $('bt-results').style.display = 'block';
@@ -2269,6 +2271,9 @@
         { t: 'Circuit Breaker', d: 'A safety rule: if the account loses 50% of capital, the bot stops all trading. This prevents catastrophic loss due to a broken strategy or extreme market condition.' },
       ];
 
+      
+
+
       function renderGloss() {
         $('gloss-list').innerHTML = GLOSSARY.map(g => `
     <div class="step">
@@ -2301,7 +2306,7 @@
           checkStatus();
         } catch (e) { $('cfg-msg').textContent = 'Error saving'; $('cfg-msg').style.color = 'var(--r)'; }
       }
-
+      
       // ════════════════════════════════════════════════════════════════
       //  LOGS
       // ════════════════════════════════════════════════════════════════
@@ -2322,7 +2327,7 @@
       refreshHome();
       renderGloss();
       loadAndShowSignals(0, 0).catch(() => { });
-      fetch('/api/backtest/results').then(r => r.json()).then(d => { if (!d.error) { $('bt-results').style.display = 'block'; loadBtResults(); } }).catch(() => { });
+      fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results').then(r => r.json()).then(d => { if (!d.error) { $('bt-results').style.display = 'block'; loadBtResults(); } }).catch(() => { });
     </script>
 </body>
 

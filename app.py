@@ -38,7 +38,7 @@ from backtester    import run_backtest, load_backtest_results
 from trade_manager import open_trade, get_portfolio_summary
 import forward_test as ft
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.', static_folder='data')
 CORS(app)
 api = GrowwAPI()
 

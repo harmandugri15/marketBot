@@ -5,6 +5,7 @@ import requests
 from datetime import datetime, timedelta
 from groww_api import GrowwAPI
 from scanner import run_scan
+import json
 import forward_test as ft
 
 # Configure logging for the Cloud Terminal
@@ -109,6 +110,9 @@ def run_daily_automation():
         send_telegram_alert(alert_msg)
     else:
         logger.info("📉 No perfect setups found today. Staying safe in cash.")
+        
+    with open("data/summary.json", "w") as f:
+        json.dump(ft.get_summary(), f)    
 
     logger.info("🤖 Daily routine complete. See you tomorrow.")
 
