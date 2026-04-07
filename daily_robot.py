@@ -110,9 +110,11 @@ def run_daily_automation():
         send_telegram_alert(alert_msg)
     else:
         logger.info("📉 No perfect setups found today. Staying safe in cash.")
-        
+
+    # 👇 YOU ARE MISSING THESE 3 LINES 👇
+    import json
     with open("data/summary.json", "w") as f:
-        json.dump(ft.get_summary(), f)    
+        json.dump(ft.get_summary(), f)
 
     logger.info("🤖 Daily routine complete. See you tomorrow.")
 
