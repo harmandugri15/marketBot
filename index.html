@@ -1010,6 +1010,7 @@
 
     .mcalc {
       background: var(--surf);
+      border: 1px solid var(--border);
       border-radius: 7px;
       padding: 11px 13px;
       font-size: 12px;
@@ -1792,12 +1793,6 @@
       // ════════════════════════════════════════════════════════════════
       //  HOME
       // ════════════════════════════════════════════════════════════════
-      // ════════════════════════════════════════════════════════════════
-      //  HOME
-      // ════════════════════════════════════════════════════════════════
-      // ════════════════════════════════════════════════════════════════
-      //  HOME
-      // ════════════════════════════════════════════════════════════════
       async function refreshHome() {
         try {
           // 👇 BUG 1 FIXED: Pointing directly to the live forward_test.json database
@@ -1886,55 +1881,74 @@
       }
 
       // ════════════════════════════════════════════════════════════════
-      //  LIST RENDERER (BUG 2 FIXED)
+      //  LIST RENDERER (ULTRA-SAFE VERSION)
       // ════════════════════════════════════════════════════════════════
       function renderFtList(trades) {
         const el = $('ft-list');
-        if (!trades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No trades yet. Add from the Scanner page.</div>'; return; }
+        if (!trades.length) { 
+          el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No trades yet. Add from the Scanner page.</div>'; 
+          return; 
+        }
         
-        el.innerHTML = trades.slice().reverse().map(t => {
-          const one_r = t.one_r || (t.entry_price - t.stop_loss) || 1;
-          const be = t.entry_price + 2 * one_r;
-          const t3r = t.entry_price + 3 * one_r;
-          const pnl = t.realized_pnl || 0;
-          
-          // 👇 BUG 2 FIXED: If pnl_pct is missing from old files, default to 0 to prevent crash
-          const pnl_pct = t.pnl_pct || 0; 
-          
-          const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
-          const stages = [
-            { label: 'Scan', done: true },
-            { label: 'Enter @ Rs' + t.entry_price, done: t.status !== 'WATCHING' },
-            { label: 'BE @ Rs' + be.toFixed(0), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
-            { label: '3R @ Rs' + t3r.toFixed(0), done: false },
-            { label: 'Trail EMA', done: false },
-          ];
-          
-          return `<div class="ft-trade">
-      <div class="ft-head">
-        <div>
-          <div class="ft-sym">${t.symbol} <span style="font-size:11px;color:var(--muted);font-weight:500">${t.strategy}</span></div>
-          <div class="ft-meta">Entry Rs${t.entry_price} · SL Rs${t.stop_loss} (${t.sl_pct || 0}%) · 1R=Rs${one_r.toFixed(1)}</div>
-          <div class="ft-meta">${t.notes || ''}</div>
-        </div>
-        <div class="ft-right">
-          ${t.status === 'CLOSED'
-              ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
-               <div style="font-size:11px;color:var(--muted);margin-top:3px">${t.exit_reason || 'Manual'}</div>`
-              : `<span class="badge ${statusBadge}">${t.status}</span><br>
-               ${t.status === 'WATCHING'
-                ? `<button class="btn btn-b" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="markEntered('${t.id}',${t.entry_price})">Mark Entered</button>`
-                : ''}
-               <button class="btn btn-r" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="openModal('${t.id}',${t.entry_price},${t.shares})">Close Trade</button>`
-            }
-        </div>
-      </div>
-      <div class="ft-stages">
-        ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
-      </div>
-    </div>`;
-        }).join('');
+        let html = '';
+        
+        // Loop through each trade individually
+        trades.slice().reverse().forEach(t => {
+          try {
+            // 👇 THE FIX: Force everything to be a real Number to prevent .toFixed() crashes
+            const ep = parseFloat(t.entry_price) || 0;
+            const sl = parseFloat(t.stop_loss) || 0;
+            const one_r = parseFloat(t.one_r) || (ep - sl) || 1;
+            const be = ep + (2 * one_r);
+            const t3r = ep + (3 * one_r);
+            const pnl = parseFloat(t.realized_pnl) || 0;
+            const pnl_pct = parseFloat(t.pnl_pct) || 0;
+            const sl_pct = parseFloat(t.sl_pct) || 0;
+            
+            const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
+            const stages = [
+              { label: 'Scan', done: true },
+              { label: 'Enter @ Rs' + ep.toFixed(1), done: t.status !== 'WATCHING' },
+              { label: 'BE @ Rs' + be.toFixed(1), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
+              { label: '3R @ Rs' + t3r.toFixed(1), done: false },
+              { label: 'Trail EMA', done: false },
+            ];
+            
+            html += `<div class="ft-trade">
+              <div class="ft-head">
+                <div>
+                  <div class="ft-sym">${t.symbol} <span style="font-size:11px;color:var(--muted);font-weight:500">${t.strategy || 'SYS'}</span></div>
+                  <div class="ft-meta">Entry Rs${ep} · SL Rs${sl} (${sl_pct}%) · 1R=Rs${one_r.toFixed(1)}</div>
+                  <div class="ft-meta">${t.notes || ''}</div>
+                </div>
+                <div class="ft-right">
+                  ${t.status === 'CLOSED'
+                      ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
+                       <div style="font-size:11px;color:var(--muted);margin-top:3px">${t.exit_reason || 'Manual'}</div>`
+                      : `<span class="badge ${statusBadge}">${t.status}</span><br>
+                       ${t.status === 'WATCHING'
+                        ? `<button class="btn btn-b" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="markEntered('${t.id}',${ep})">Mark Entered</button>`
+                        : ''}
+                       <button class="btn btn-r" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="openModal('${t.id}',${ep},${t.shares || 1})">Close Trade</button>`
+                    }
+                </div>
+              </div>
+              <div class="ft-stages">
+                ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
+              </div>
+            </div>`;
+          } catch (err) {
+            console.error("Skipping corrupted trade:", t.symbol, err);
+          }
+        });
+        
+        if (html === '') {
+          html = '<div style="color:var(--r);font-size:13px;padding:8px 0">Error rendering trades. Data might be corrupted.</div>';
+        }
+        
+        el.innerHTML = html;
       }
+
       async function addToFt(signal) {
         try {
           const r = await (await fetch('/api/forward/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(signal) })).json();
@@ -2289,7 +2303,6 @@
       ];
 
       
-
 
       function renderGloss() {
         $('gloss-list').innerHTML = GLOSSARY.map(g => `
