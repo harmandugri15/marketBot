@@ -499,7 +499,7 @@
       "id": "TATACONSUM_20260408",
       "symbol": "TATACONSUM",
       "strategy": "HARMAN1",
-      "entry_price": 1069.5,
+      "entry_price": 1070.0,
       "stop_loss": 1015.55,
       "sl_pct": 5.0,
       "shares": 3,
