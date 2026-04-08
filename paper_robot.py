@@ -6,6 +6,20 @@ import pytz
 from groww_api import GrowwAPI
 import forward_test as ft
 
+
+import requests # Ensure this is at the very top with other imports
+
+def send_telegram_alert(message):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if token and chat_id:
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
+            requests.post(url, json=payload)
+        except Exception as e:
+            print(f"Telegram alert failed: {e}")
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] PAPER: %(message)s")
 logger = logging.getLogger(__name__)
 IST = pytz.timezone('Asia/Kolkata')
