@@ -197,12 +197,8 @@ if __name__ == "__main__":
         if found_signals:
             print(f"🎯 Found {len(found_signals)} trading setups! Adding to Paper Trading database...")
             
-            # 👇 Alert when setups are found
-            send_telegram_alert(f"🎯 *Scan Complete!* Found {len(found_signals)} new high-probability setups. Added to WATCHING list.")
-            
             # --- BRIDGE: Move signals directly into forward_test.json ---
             db = ft._load()
-            
             active_symbols = [t["symbol"] for t in db.get("trades", []) if t["status"] in ["ACTIVE", "WATCHING"]]
             
             added_count = 0
@@ -229,10 +225,9 @@ if __name__ == "__main__":
             ft._save(db)
             print(f"📥 Successfully loaded {added_count} new WATCHING trades into the live dashboard!")
             
+            # 👇 MOVED THE TELEGRAM ALERT HERE! Now it tells you the exact breakdown.
+            send_telegram_alert(f"🎯 *Scan Complete!*\nFound {len(found_signals)} total setups.\nAdded {added_count} *NEW* trades to your live dashboard (skipped the rest to prevent duplicates).")
+            
         else:
             print("⚠️ No setups found matching our strict criteria today. Cash is King!")
-            # 👇 Alert when NO setups are found
             send_telegram_alert("⚠️ *Scan Complete!* No setups found matching strict criteria today. Cash is King.")
-    else:
-        print("❌ Could not connect to Groww API. Check your .env credentials.")
-        send_telegram_alert("❌ *Error:* Scanner could not connect to Groww API.")
