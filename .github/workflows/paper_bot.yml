@@ -22,9 +22,13 @@ jobs:
         with:
           python-version: '3.12'
           
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+      - name: Run Paper Trading Engine
+        env:
+          GROWW_API_KEY: ${{ secrets.GROWW_API_KEY }}
+          GROWW_SECRET_KEY: ${{ secrets.GROWW_SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python paper_robot.py
           
       - name: Run Paper Trading Engine
         env:
