@@ -59,56 +59,60 @@
 
 <script>
     // Automatically fetch the JSON file hosted alongside this HTML file on GitHub Pages
-    fetch('data/forward_test.json')
-        .then(response => response.json())
-        .then(data => {
-            const trades = data.trades || [];
-            const closed = trades.filter(t => t.status === "CLOSED");
-            const active = trades.filter(t => t.status === "ACTIVE");
-            
-            let totalPnl = 0;
-            let wins = 0;
-            closed.forEach(t => { 
-                totalPnl += t.realized_pnl; 
-                if(t.realized_pnl > 0) wins++; 
-            });
+    fetch('data/forward_test.json?v=' + new Date().getTime())
+    .then(response => response.json())
+    .then(data => {
+        let allTrades = data.trades || [];
+        
+        // 👇 THE FILTER: Keep ONLY Intraday trades
+        let trades = allTrades.filter(t => t.strategy.includes("INTRADAY"));
 
-            // Update Stats
-            document.getElementById('val-cap').innerText = "Rs 3000"; // Assuming 3000 base
-            
-            const pnlEl = document.getElementById('val-pnl');
-            pnlEl.innerText = `Rs ${totalPnl.toFixed(2)}`;
-            pnlEl.className = `stat-value ${totalPnl >= 0 ? 'profit' : 'loss'}`;
-            
-            document.getElementById('val-wr').innerText = closed.length > 0 ? `${((wins/closed.length)*100).toFixed(1)}%` : "0%";
-            document.getElementById('val-active').innerText = active.length;
-
-            // Render Table
-            const tbody = document.getElementById('trade-table');
-            tbody.innerHTML = '';
-            
-            // Sort to show Active first, then newest closed
-            trades.reverse().forEach(t => {
-                let pnlStr = t.realized_pnl ? `Rs ${t.realized_pnl}` : '-';
-                let pnlClass = t.realized_pnl > 0 ? 'profit' : (t.realized_pnl < 0 ? 'loss' : '');
-                let statusClass = t.status === 'WATCHING' ? 'b-watching' : (t.status === 'ACTIVE' ? 'b-active' : 'b-closed');
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight: bold;">${t.symbol}</td>
-                        <td style="color: #94a3b8;">${t.strategy}</td>
-                        <td><span class="badge ${statusClass}">${t.status}</span></td>
-                        <td>${t.entry_price ? 'Rs ' + t.entry_price : '-'}</td>
-                        <td>${t.exit_price ? 'Rs ' + t.exit_price : '-'}</td>
-                        <td class="${pnlClass}">${pnlStr}</td>
-                        <td style="color: #94a3b8;">${t.exit_reason || '-'}</td>
-                    </tr>
-                `;
-            });
-        })
-        .catch(err => {
-            document.getElementById('trade-table').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center;">Error loading trade data. Make sure GitHub Pages is updated.</td></tr>`;
+        const closed = trades.filter(t => t.status === "CLOSED");
+        const active = trades.filter(t => t.status === "ACTIVE");
+        
+        let totalPnl = 0;
+        let wins = 0;
+        closed.forEach(t => { 
+            totalPnl += t.realized_pnl; 
+            if(t.realized_pnl > 0) wins++; 
         });
+
+        // Update Stats (Calculated only for Intraday)
+        document.getElementById('val-cap').innerText = "Rs 3000"; 
+        
+        const pnlEl = document.getElementById('val-pnl');
+        pnlEl.innerText = `Rs ${totalPnl.toFixed(2)}`;
+        pnlEl.className = `stat-value ${totalPnl >= 0 ? 'profit' : 'loss'}`;
+        
+        document.getElementById('val-wr').innerText = closed.length > 0 ? `${((wins/closed.length)*100).toFixed(1)}%` : "0%";
+        document.getElementById('val-active').innerText = active.length;
+
+        // Render Table
+        const tbody = document.getElementById('trade-table');
+        tbody.innerHTML = '';
+        
+        // Sort to show Active first, then newest closed
+        trades.reverse().forEach(t => {
+            let pnlStr = t.realized_pnl ? `Rs ${t.realized_pnl}` : '-';
+            let pnlClass = t.realized_pnl > 0 ? 'profit' : (t.realized_pnl < 0 ? 'loss' : '');
+            let statusClass = t.status === 'WATCHING' ? 'b-watching' : (t.status === 'ACTIVE' ? 'b-active' : 'b-closed');
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="font-weight: bold;">${t.symbol}</td>
+                    <td style="color: #94a3b8;">${t.strategy}</td>
+                    <td><span class="badge ${statusClass}">${t.status}</span></td>
+                    <td>${t.entry_price ? 'Rs ' + t.entry_price : '-'}</td>
+                    <td>${t.exit_price ? 'Rs ' + t.exit_price : '-'}</td>
+                    <td class="${pnlClass}">${pnlStr}</td>
+                    <td style="color: #94a3b8;">${t.exit_reason || '-'}</td>
+                </tr>
+            `;
+        });
+    })
+    .catch(err => {
+        document.getElementById('trade-table').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center;">Error loading trade data. Make sure GitHub Pages is updated.</td></tr>`;
+    });
 </script>
 
 </body>

@@ -1792,20 +1792,39 @@
       // ════════════════════════════════════════════════════════════════
       //  HOME
       // ════════════════════════════════════════════════════════════════
+      // ════════════════════════════════════════════════════════════════
+      //  HOME
+      // ════════════════════════════════════════════════════════════════
       async function refreshHome() {
         try {
-          const s = await (await fetch(isGH ? 'data/summary.json' : '/api/forward/summary')).json();
-          const pnl = s.total_pnl || 0;
-          $('hs-act').textContent = (s.active || 0) + (s.watching || 0);
-          $('hs-pnl').textContent = (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0);
-          $('hs-pnl').className = 'sv ' + (pnl >= 0 ? 'g' : 'r');
-          $('hs-wr').textContent = s.closed > 0 ? s.win_rate + '%' : '—';
+          // Added Cache Buster ?v=...
+          const s = await (await fetch(isGH ? 'data/summary.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
+          
+          // 👇 THE FILTER: Keep everything EXCEPT Intraday
+          const allTrades = s.trades || [];
+          const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
 
-          const trades = (s.trades || []).slice().reverse().slice(0, 5);
+          const closed = trades.filter(t => t.status === "CLOSED");
+          const active = trades.filter(t => t.status === "ACTIVE");
+          const watching = trades.filter(t => t.status === "WATCHING");
+
+          // Recalculate stats for Swing ONLY
+          let totalPnl = 0, wins = 0;
+          closed.forEach(t => {
+            totalPnl += (t.realized_pnl || 0);
+            if (t.realized_pnl > 0) wins++;
+          });
+
+          $('hs-act').textContent = active.length + watching.length;
+          $('hs-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
+          $('hs-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
+          $('hs-wr').textContent = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(1) + '%' : '—';
+
+          const recentTrades = trades.slice().reverse().slice(0, 5);
           const el = $('home-ft-list');
-          if (!trades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No trades yet.</div>'; }
+          if (!recentTrades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No trades yet.</div>'; }
           else {
-            el.innerHTML = trades.map(t => {
+            el.innerHTML = recentTrades.map(t => {
               const pnl = t.realized_pnl || 0;
               const cls = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
               const val = t.status === 'CLOSED' ? (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0) : t.status;
@@ -1820,18 +1839,10 @@
           drawHomeEq(s.equity_curve || [], s.capital || 2000);
 
           try {
-            fetch(isGH ? 'data/signals.json' : '/api/scan/signals')
+            const sigs = await (await fetch(isGH ? 'data/signals.json?v=' + new Date().getTime() : '/api/scan/signals')).json();
             $('hs-sigs').textContent = sigs.length;
           } catch (e) { }
-        } catch (e) { }
-      }
-
-      function drawHomeEq(curve, cap) {
-        if (homeEqChart) { homeEqChart.destroy(); homeEqChart = null; }
-        const note = $('home-eq-note');
-        if (curve.length < 2) { note.textContent = 'No closed trades yet'; return; }
-        note.textContent = (curve.length - 1) + ' data points';
-        homeEqChart = mkLineChart('home-eq-chart', curve.map(p => p.date), curve.map(p => p.equity), 'Rs');
+        } catch (e) { console.error(e); }
       }
 
       // ════════════════════════════════════════════════════════════════
@@ -1839,84 +1850,46 @@
       // ════════════════════════════════════════════════════════════════
       async function refreshFwd() {
         try {
-          const s = await (await fetch(isGH ? 'data/summary.json' : '/api/forward/summary')).json();
-          $('ft-total').textContent = s.total_trades;
-          $('ft-watching').textContent = s.watching;
-          $('ft-active2').textContent = s.active;
-          $('ft-wins').textContent = s.wins;
-          $('ft-losses').textContent = s.losses;
-          $('ft-wr').textContent = s.closed > 0 ? s.win_rate + '%' : '—';
-          const pnl = s.total_pnl || 0;
-          $('ft-pnl').textContent = (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0);
-          $('ft-pnl').className = 'sv ' + (pnl >= 0 ? 'g' : 'r');
-          $('ft-pf').textContent = s.closed > 0 && s.losses > 0 ? s.profit_factor : '—';
+          const s = await (await fetch(isGH ? 'data/summary.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
+
+          // 👇 THE FILTER: Keep everything EXCEPT Intraday
+          const allTrades = s.trades || [];
+          const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
+
+          const closed = trades.filter(t => t.status === "CLOSED");
+          const active = trades.filter(t => t.status === "ACTIVE");
+          const watching = trades.filter(t => t.status === "WATCHING");
+
+          // Recalculate all stats manually to exclude Intraday noise
+          let totalPnl = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0;
+          closed.forEach(t => {
+            const pnl = t.realized_pnl || 0;
+            totalPnl += pnl;
+            if (pnl > 0) { wins++; grossWin += pnl; }
+            else if (pnl < 0) { losses++; grossLoss += Math.abs(pnl); }
+          });
+
+          const pf = grossLoss > 0 ? (grossWin / grossLoss).toFixed(2) : (grossWin > 0 ? '∞' : '—');
+
+          $('ft-total').textContent = trades.length;
+          $('ft-watching').textContent = watching.length;
+          $('ft-active2').textContent = active.length;
+          $('ft-wins').textContent = wins;
+          $('ft-losses').textContent = losses;
+          $('ft-wr').textContent = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(1) + '%' : '—';
+
+          $('ft-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
+          $('ft-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
+          $('ft-pf').textContent = pf;
           if (s.started) $('ft-started-label').textContent = 'Started ' + s.started;
 
-          const active = (s.active || 0) + (s.watching || 0);
-          const b = $('ft-badge'); b.textContent = active; b.style.display = active > 0 ? '' : 'none';
+          const activeCount = active.length + watching.length;
+          const b = $('ft-badge'); b.textContent = activeCount; b.style.display = activeCount > 0 ? '' : 'none';
 
-          drawFtCharts(s.equity_curve || [], s.trades || [], s.capital || 2000);
-          renderFtList(s.trades || []);
+          // Pass ONLY the filtered trades to the charts and the list
+          drawFtCharts(s.equity_curve || [], trades, s.capital || 2000);
+          renderFtList(trades);
         } catch (e) { console.error(e); }
-      }
-
-      function drawFtCharts(curve, trades, cap) {
-        Object.values(ftCharts).forEach(c => c.destroy()); ftCharts = {};
-        if (curve.length > 1) {
-          ftCharts.eq = mkLineChart('ft-eq-chart', curve.map(p => p.date), curve.map(p => p.equity), 'Rs');
-        }
-        const closed = trades.filter(t => t.status === 'CLOSED');
-        if (closed.length) {
-          ftCharts.bar = new Chart($('ft-bar-chart'), {
-            type: 'bar',
-            data: { labels: closed.map(t => t.symbol), datasets: [{ data: closed.map(t => t.pnl_pct), backgroundColor: closed.map(t => t.pnl_pct >= 0 ? 'rgba(0,217,126,.7)' : 'rgba(255,79,106,.7)'), borderRadius: 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#576080', font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#576080', callback: v => v + '%', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } } } }
-          });
-        }
-      }
-
-      function renderFtList(trades) {
-        const el = $('ft-list');
-        if (!trades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No trades yet.</div>'; return; }
-        el.innerHTML = trades.slice().reverse().map(t => {
-          const one_r = t.one_r || (t.entry_price - t.stop_loss);
-          const be = t.entry_price + 2 * one_r;
-          const t3r = t.entry_price + 3 * one_r;
-          const t4r = t.entry_price + 4 * one_r;
-          const pnl = t.realized_pnl || 0;
-          const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
-          const stages = [
-            { label: 'Scan ' + t.scan_date, done: true },
-            { label: 'Enter @ Rs' + t.entry_price, done: t.status !== 'WATCHING' },
-            { label: 'BE @ Rs' + be.toFixed(0), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
-            { label: '3R @ Rs' + t3r.toFixed(0), done: false },
-            { label: 'Trail EMA', done: false },
-          ];
-          return `<div class="ft-trade">
-      <div class="ft-head">
-        <div>
-          <div class="ft-sym">${t.symbol} <span style="font-size:11px;color:var(--muted);font-weight:500">${t.strategy}</span></div>
-          <div class="ft-meta">Entry Rs${t.entry_price} · SL Rs${t.stop_loss} (${t.sl_pct}%) · Q${t.quality_score} · 1R=Rs${one_r.toFixed(1)}</div>
-          <div class="ft-meta">${t.notes || ''}</div>
-        </div>
-        <div class="ft-right">
-          ${t.status === 'CLOSED'
-              ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${t.pnl_pct >= 0 ? '+' : ''}${t.pnl_pct.toFixed(1)}%)</span>
-               <div style="font-size:11px;color:var(--muted);margin-top:3px">${t.exit_reason}</div>`
-              : `<span class="badge ${statusBadge}">${t.status}</span><br>
-               ${t.status === 'WATCHING'
-                ? `<button class="btn btn-b" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="markEntered('${t.id}',${t.entry_price})">Mark Entered</button>`
-                : ''}
-               <button class="btn btn-r" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="openModal('${t.id}',${t.entry_price},${t.shares})">Close Trade</button>`
-            }
-          <div style="margin-top:5px"><button class="btn btn-s" style="font-size:10px;padding:3px 8px;opacity:.6" onclick="deleteFt('${t.id}')">× Remove</button></div>
-        </div>
-      </div>
-      <div class="ft-stages">
-        ${stages.map((s, i) => `<span class="fts ${s.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${s.label}</span>`).join('')}
-      </div>
-    </div>`;
-        }).join('');
       }
 
       async function addToFt(signal) {
