@@ -155,3 +155,64 @@ def load_signals():
     try:
         with open(SIGNALS_DB, "r") as f: return json.load(f)
     except: return []
+    
+    
+    
+# ==========================================
+# EXECUTION BLOCK (The "Start Button")
+# ==========================================
+if __name__ == "__main__":
+    from groww_api import GrowwAPI
+    import forward_test as ft
+    
+    print("🤖 Booting up Market Scanner...")
+    api = GrowwAPI()
+    
+    if api.connected:
+        print("📊 Scanning the Nifty 500 universe... (this takes a couple of minutes)")
+        
+        # A small visual progress bar for your terminal
+        def print_progress(current, total, sym):
+            print(f"Scanning: {current}/{total} | Checking {sym}...     ", end="\r")
+            
+        found_signals = run_scan(api, progress_callback=print_progress)
+        
+        print("\n\n✅ Scan Complete!")
+        
+        if found_signals:
+            print(f"🎯 Found {len(found_signals)} trading setups! Adding to Paper Trading database...")
+            
+            # --- BRIDGE: Move signals directly into forward_test.json ---
+            db = ft._load()
+            
+            # Get a list of stocks we are already trading so we don't buy duplicates
+            active_symbols = [t["symbol"] for t in db.get("trades", []) if t["status"] in ["ACTIVE", "WATCHING"]]
+            
+            added_count = 0
+            for s in found_signals:
+                if s["symbol"] not in active_symbols:
+                    new_trade = {
+                        "id": f"{s['symbol']}_{datetime.now().strftime('%Y%m%d')}",
+                        "symbol": s["symbol"],
+                        "strategy": s["strategy"],
+                        "entry_price": s["entry_price"],
+                        "stop_loss": s["stop_loss"],
+                        "sl_pct": s["sl_pct"],
+                        "shares": s["quantity"],
+                        "status": "WATCHING", # Tell the bot to watch this!
+                        "entry_date": None,
+                        "exit_date": None,
+                        "realized_pnl": 0,
+                        "pnl_pct": 0,
+                        "notes": s["notes"]
+                    }
+                    db["trades"].append(new_trade)
+                    added_count += 1
+            
+            ft._save(db)
+            print(f"📥 Successfully loaded {added_count} new WATCHING trades into the live dashboard!")
+            
+        else:
+            print("⚠️ No setups found matching our strict criteria today. Cash is King!")
+    else:
+        print("❌ Could not connect to Groww API. Check your .env credentials.")
