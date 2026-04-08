@@ -1795,12 +1795,14 @@
       // ════════════════════════════════════════════════════════════════
       //  HOME
       // ════════════════════════════════════════════════════════════════
+      // ════════════════════════════════════════════════════════════════
+      //  HOME
+      // ════════════════════════════════════════════════════════════════
       async function refreshHome() {
         try {
-          // Added Cache Buster ?v=...
-          const s = await (await fetch(isGH ? 'data/summary.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
+          // 👇 BUG 1 FIXED: Pointing directly to the live forward_test.json database
+          const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
           
-          // 👇 THE FILTER: Keep everything EXCEPT Intraday
           const allTrades = s.trades || [];
           const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
 
@@ -1808,11 +1810,10 @@
           const active = trades.filter(t => t.status === "ACTIVE");
           const watching = trades.filter(t => t.status === "WATCHING");
 
-          // Recalculate stats for Swing ONLY
           let totalPnl = 0, wins = 0;
           closed.forEach(t => {
             totalPnl += (t.realized_pnl || 0);
-            if (t.realized_pnl > 0) wins++;
+            if ((t.realized_pnl || 0) > 0) wins++;
           });
 
           $('hs-act').textContent = active.length + watching.length;
@@ -1830,19 +1831,14 @@
               const val = t.status === 'CLOSED' ? (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0) : t.status;
               return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
           <div><div style="font-weight:700;font-size:13px">${t.symbol} <span style="font-size:11px;color:var(--muted)">${t.strategy}</span></div>
-          <div style="font-size:11px;color:var(--muted)">Entry Rs${t.entry_price} · SL ${t.sl_pct}%</div></div>
+          <div style="font-size:11px;color:var(--muted)">Entry Rs${t.entry_price} · SL ${t.sl_pct || 0}%</div></div>
           <span class="badge ${cls}">${val}</span>
         </div>`;
             }).join('');
           }
 
-          drawHomeEq(s.equity_curve || [], s.capital || 2000);
-
-          try {
-            const sigs = await (await fetch(isGH ? 'data/signals.json?v=' + new Date().getTime() : '/api/scan/signals')).json();
-            $('hs-sigs').textContent = sigs.length;
-          } catch (e) { }
-        } catch (e) { console.error(e); }
+          drawHomeEq(s.equity_curve || [], s.capital || 3000);
+        } catch (e) { console.error("Home error:", e); }
       }
 
       // ════════════════════════════════════════════════════════════════
@@ -1850,9 +1846,9 @@
       // ════════════════════════════════════════════════════════════════
       async function refreshFwd() {
         try {
-          const s = await (await fetch(isGH ? 'data/summary.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
+          // 👇 BUG 1 FIXED: Pointing directly to the live forward_test.json database
+          const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
 
-          // 👇 THE FILTER: Keep everything EXCEPT Intraday
           const allTrades = s.trades || [];
           const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
 
@@ -1860,7 +1856,6 @@
           const active = trades.filter(t => t.status === "ACTIVE");
           const watching = trades.filter(t => t.status === "WATCHING");
 
-          // Recalculate all stats manually to exclude Intraday noise
           let totalPnl = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0;
           closed.forEach(t => {
             const pnl = t.realized_pnl || 0;
@@ -1881,17 +1876,65 @@
           $('ft-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
           $('ft-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
           $('ft-pf').textContent = pf;
-          if (s.started) $('ft-started-label').textContent = 'Started ' + s.started;
 
           const activeCount = active.length + watching.length;
           const b = $('ft-badge'); b.textContent = activeCount; b.style.display = activeCount > 0 ? '' : 'none';
 
-          // Pass ONLY the filtered trades to the charts and the list
-          drawFtCharts(s.equity_curve || [], trades, s.capital || 2000);
+          drawFtCharts(s.equity_curve || [], trades, s.capital || 3000);
           renderFtList(trades);
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Fwd error:", e); }
       }
 
+      // ════════════════════════════════════════════════════════════════
+      //  LIST RENDERER (BUG 2 FIXED)
+      // ════════════════════════════════════════════════════════════════
+      function renderFtList(trades) {
+        const el = $('ft-list');
+        if (!trades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No trades yet. Add from the Scanner page.</div>'; return; }
+        
+        el.innerHTML = trades.slice().reverse().map(t => {
+          const one_r = t.one_r || (t.entry_price - t.stop_loss) || 1;
+          const be = t.entry_price + 2 * one_r;
+          const t3r = t.entry_price + 3 * one_r;
+          const pnl = t.realized_pnl || 0;
+          
+          // 👇 BUG 2 FIXED: If pnl_pct is missing from old files, default to 0 to prevent crash
+          const pnl_pct = t.pnl_pct || 0; 
+          
+          const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
+          const stages = [
+            { label: 'Scan', done: true },
+            { label: 'Enter @ Rs' + t.entry_price, done: t.status !== 'WATCHING' },
+            { label: 'BE @ Rs' + be.toFixed(0), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
+            { label: '3R @ Rs' + t3r.toFixed(0), done: false },
+            { label: 'Trail EMA', done: false },
+          ];
+          
+          return `<div class="ft-trade">
+      <div class="ft-head">
+        <div>
+          <div class="ft-sym">${t.symbol} <span style="font-size:11px;color:var(--muted);font-weight:500">${t.strategy}</span></div>
+          <div class="ft-meta">Entry Rs${t.entry_price} · SL Rs${t.stop_loss} (${t.sl_pct || 0}%) · 1R=Rs${one_r.toFixed(1)}</div>
+          <div class="ft-meta">${t.notes || ''}</div>
+        </div>
+        <div class="ft-right">
+          ${t.status === 'CLOSED'
+              ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
+               <div style="font-size:11px;color:var(--muted);margin-top:3px">${t.exit_reason || 'Manual'}</div>`
+              : `<span class="badge ${statusBadge}">${t.status}</span><br>
+               ${t.status === 'WATCHING'
+                ? `<button class="btn btn-b" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="markEntered('${t.id}',${t.entry_price})">Mark Entered</button>`
+                : ''}
+               <button class="btn btn-r" style="margin-top:7px;font-size:11px;padding:5px 10px" onclick="openModal('${t.id}',${t.entry_price},${t.shares})">Close Trade</button>`
+            }
+        </div>
+      </div>
+      <div class="ft-stages">
+        ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
+      </div>
+    </div>`;
+        }).join('');
+      }
       async function addToFt(signal) {
         try {
           const r = await (await fetch('/api/forward/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(signal) })).json();
