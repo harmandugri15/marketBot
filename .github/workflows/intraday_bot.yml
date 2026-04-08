@@ -1,0 +1,32 @@
+name: 9:20 AM Intraday Bot
+
+on:
+  schedule:
+    # 3:40 AM UTC is exactly 9:10 AM IST. 
+    # We boot it 10 minutes early so the server is fully awake and waiting.
+    - cron: '40 3 * * 1-5'
+  workflow_dispatch: # Allows you to run it manually to test
+
+jobs:
+  run-intraday:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          
+      - name: Run Intraday Engine
+        env:
+          GROWW_API_KEY: ${{ secrets.GROWW_API_KEY }}
+          GROWW_SECRET_KEY: ${{ secrets.GROWW_SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python intraday_robot.py
