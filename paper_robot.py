@@ -17,6 +17,10 @@ def push_to_github():
         os.system('git config --global user.name "MarketBot Engine"')
         os.system('git add data/forward_test.json')
         os.system('git commit -m "🤖 Auto-update paper trades"')
+        
+        # 👇 THIS IS THE MAGIC LINE: Download any laptop changes before pushing!
+        os.system('git pull origin main --rebase')
+        
         os.system('git push')
         logger.info("☁️ Pushed live trade updates to GitHub Pages!")
     except Exception as e:
