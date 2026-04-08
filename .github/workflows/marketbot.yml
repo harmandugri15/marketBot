@@ -33,7 +33,7 @@ jobs:
           # Your Telegram Keys
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: run: python scanner.py
+        run: python scanner.py
 
       - name: Save Trade Data back to GitHub
         run: |
