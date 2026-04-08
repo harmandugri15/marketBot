@@ -71,20 +71,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "ADANIGREEN",
-    "entry_price": 1035.0,
-    "stop_loss": 959.31,
-    "sl_pct": 7.31,
-    "quantity": 2,
-    "quality_score": 95,
-    "notes": "Volume Breakout Surge",
-    "date": "2026-04-08",
-    "pullback_pct": 16.3,
-    "vol_ratio": 3.7,
-    "invested": 2070.0
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "ADANITRANS",
     "entry_price": 1076.0,
     "stop_loss": 1006.04,
@@ -96,6 +82,20 @@
     "pullback_pct": 8.81,
     "vol_ratio": 2.37,
     "invested": 2152.0
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "ADANIGREEN",
+    "entry_price": 1035.0,
+    "stop_loss": 959.31,
+    "sl_pct": 7.31,
+    "quantity": 2,
+    "quality_score": 95,
+    "notes": "Volume Breakout Surge",
+    "date": "2026-04-08",
+    "pullback_pct": 16.3,
+    "vol_ratio": 3.7,
+    "invested": 2070.0
   },
   {
     "strategy": "HARMAN1",
@@ -253,20 +253,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "PRESTIGE",
-    "entry_price": 1324.9,
-    "stop_loss": 1258.65,
-    "sl_pct": 5.0,
-    "quantity": 3,
-    "quality_score": 95,
-    "notes": "Volume Breakout Surge",
-    "date": "2026-04-08",
-    "pullback_pct": 5.97,
-    "vol_ratio": 2.66,
-    "invested": 3974.7
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "PHOENIXLTD",
     "entry_price": 1710.0,
     "stop_loss": 1624.5,
@@ -281,17 +267,17 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "GTLINFRA",
-    "entry_price": 1.26,
-    "stop_loss": 1.16,
-    "sl_pct": 8.0,
-    "quantity": 1984,
+    "symbol": "PRESTIGE",
+    "entry_price": 1324.9,
+    "stop_loss": 1258.65,
+    "sl_pct": 5.0,
+    "quantity": 3,
     "quality_score": 95,
     "notes": "Volume Breakout Surge",
     "date": "2026-04-08",
-    "pullback_pct": 17.8,
-    "vol_ratio": 3.36,
-    "invested": 2499.84
+    "pullback_pct": 5.97,
+    "vol_ratio": 2.66,
+    "invested": 3974.7
   },
   {
     "strategy": "HARMAN1",
@@ -306,6 +292,20 @@
     "pullback_pct": 10.23,
     "vol_ratio": 1.63,
     "invested": 2907.52
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "GTLINFRA",
+    "entry_price": 1.26,
+    "stop_loss": 1.16,
+    "sl_pct": 8.0,
+    "quantity": 1984,
+    "quality_score": 95,
+    "notes": "Volume Breakout Surge",
+    "date": "2026-04-08",
+    "pullback_pct": 17.8,
+    "vol_ratio": 3.36,
+    "invested": 2499.84
   },
   {
     "strategy": "HARMAN1",
@@ -407,6 +407,20 @@
   },
   {
     "strategy": "HARMAN1",
+    "symbol": "BHARTIARTL",
+    "entry_price": 1861.0,
+    "stop_loss": 1767.95,
+    "sl_pct": 5.0,
+    "quantity": 2,
+    "quality_score": 90,
+    "notes": "EMA 20 Pullback",
+    "date": "2026-04-08",
+    "pullback_pct": 1.4,
+    "vol_ratio": 1.29,
+    "invested": 3722.0
+  },
+  {
+    "strategy": "HARMAN1",
     "symbol": "ICICIBANK",
     "entry_price": 1309.0,
     "stop_loss": 1243.55,
@@ -432,20 +446,6 @@
     "pullback_pct": 0.69,
     "vol_ratio": 1.7,
     "invested": 3196.05
-  },
-  {
-    "strategy": "HARMAN1",
-    "symbol": "BHARTIARTL",
-    "entry_price": 1861.0,
-    "stop_loss": 1767.95,
-    "sl_pct": 5.0,
-    "quantity": 2,
-    "quality_score": 90,
-    "notes": "EMA 20 Pullback",
-    "date": "2026-04-08",
-    "pullback_pct": 1.4,
-    "vol_ratio": 1.29,
-    "invested": 3722.0
   },
   {
     "strategy": "HARMAN1",
@@ -701,20 +701,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "TATACONSUM",
-    "entry_price": 1069.0,
-    "stop_loss": 1015.55,
-    "sl_pct": 5.0,
-    "quantity": 3,
-    "quality_score": 90,
-    "notes": "EMA 20 Pullback",
-    "date": "2026-04-08",
-    "pullback_pct": 0.27,
-    "vol_ratio": 1.36,
-    "invested": 3207.0
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "VBL",
     "entry_price": 424.0,
     "stop_loss": 402.8,
@@ -726,6 +712,20 @@
     "pullback_pct": 3.34,
     "vol_ratio": 1.14,
     "invested": 3816.0
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "TATACONSUM",
+    "entry_price": 1069.0,
+    "stop_loss": 1015.55,
+    "sl_pct": 5.0,
+    "quantity": 3,
+    "quality_score": 90,
+    "notes": "EMA 20 Pullback",
+    "date": "2026-04-08",
+    "pullback_pct": 0.27,
+    "vol_ratio": 1.36,
+    "invested": 3207.0
   },
   {
     "strategy": "HARMAN1",
@@ -827,20 +827,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "UCOBANK",
-    "entry_price": 25.93,
-    "stop_loss": 24.63,
-    "sl_pct": 5.0,
-    "quantity": 154,
-    "quality_score": 90,
-    "notes": "EMA 20 Pullback",
-    "date": "2026-04-08",
-    "pullback_pct": 3.38,
-    "vol_ratio": 1.69,
-    "invested": 3993.22
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "SOUTHBANK",
     "entry_price": 38.44,
     "stop_loss": 36.52,
@@ -852,6 +838,20 @@
     "pullback_pct": 3.22,
     "vol_ratio": 0.85,
     "invested": 3997.76
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "UCOBANK",
+    "entry_price": 25.93,
+    "stop_loss": 24.63,
+    "sl_pct": 5.0,
+    "quantity": 154,
+    "quality_score": 90,
+    "notes": "EMA 20 Pullback",
+    "date": "2026-04-08",
+    "pullback_pct": 3.38,
+    "vol_ratio": 1.69,
+    "invested": 3993.22
   },
   {
     "strategy": "HARMAN1",
@@ -911,17 +911,17 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "COCHINSHIP",
-    "entry_price": 1384.8,
-    "stop_loss": 1315.56,
+    "symbol": "IFCI",
+    "entry_price": 55.5,
+    "stop_loss": 52.72,
     "sl_pct": 5.0,
-    "quantity": 2,
+    "quantity": 72,
     "quality_score": 90,
     "notes": "EMA 20 Pullback",
     "date": "2026-04-08",
-    "pullback_pct": 2.07,
-    "vol_ratio": 1.27,
-    "invested": 2769.6
+    "pullback_pct": 3.41,
+    "vol_ratio": 0.47,
+    "invested": 3996.0
   },
   {
     "strategy": "HARMAN1",
@@ -939,17 +939,17 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "IFCI",
-    "entry_price": 55.5,
-    "stop_loss": 52.72,
+    "symbol": "COCHINSHIP",
+    "entry_price": 1384.8,
+    "stop_loss": 1315.56,
     "sl_pct": 5.0,
-    "quantity": 72,
+    "quantity": 2,
     "quality_score": 90,
     "notes": "EMA 20 Pullback",
     "date": "2026-04-08",
-    "pullback_pct": 3.41,
-    "vol_ratio": 0.47,
-    "invested": 3996.0
+    "pullback_pct": 2.07,
+    "vol_ratio": 1.27,
+    "invested": 2769.6
   },
   {
     "strategy": "HARMAN1",
@@ -995,20 +995,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "RECLTD",
-    "entry_price": 343.1,
-    "stop_loss": 325.94,
-    "sl_pct": 5.0,
-    "quantity": 11,
-    "quality_score": 90,
-    "notes": "EMA 20 Pullback",
-    "date": "2026-04-08",
-    "pullback_pct": 3.62,
-    "vol_ratio": 0.74,
-    "invested": 3774.1
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "PFC",
     "entry_price": 418.4,
     "stop_loss": 397.48,
@@ -1020,6 +1006,20 @@
     "pullback_pct": 3.17,
     "vol_ratio": 1.48,
     "invested": 3765.6
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "RECLTD",
+    "entry_price": 343.1,
+    "stop_loss": 325.94,
+    "sl_pct": 5.0,
+    "quantity": 11,
+    "quality_score": 90,
+    "notes": "EMA 20 Pullback",
+    "date": "2026-04-08",
+    "pullback_pct": 3.62,
+    "vol_ratio": 0.74,
+    "invested": 3774.1
   },
   {
     "strategy": "HARMAN1",
@@ -1121,20 +1121,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "AUROPHARMA",
-    "entry_price": 1335.4,
-    "stop_loss": 1268.63,
-    "sl_pct": 5.0,
-    "quantity": 2,
-    "quality_score": 90,
-    "notes": "EMA 20 Pullback",
-    "date": "2026-04-08",
-    "pullback_pct": 3.12,
-    "vol_ratio": 1.68,
-    "invested": 2670.8
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "NAUKRI",
     "entry_price": 1033.0,
     "stop_loss": 981.35,
@@ -1146,6 +1132,20 @@
     "pullback_pct": 3.13,
     "vol_ratio": 0.84,
     "invested": 3099.0
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "AUROPHARMA",
+    "entry_price": 1335.4,
+    "stop_loss": 1268.63,
+    "sl_pct": 5.0,
+    "quantity": 2,
+    "quality_score": 90,
+    "notes": "EMA 20 Pullback",
+    "date": "2026-04-08",
+    "pullback_pct": 3.12,
+    "vol_ratio": 1.68,
+    "invested": 2670.8
   },
   {
     "strategy": "HARMAN1",
@@ -1219,20 +1219,6 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "VBL",
-    "entry_price": 424.0,
-    "stop_loss": 402.8,
-    "sl_pct": 5.0,
-    "quantity": 9,
-    "quality_score": 90,
-    "notes": "EMA 20 Pullback",
-    "date": "2026-04-08",
-    "pullback_pct": 3.34,
-    "vol_ratio": 1.14,
-    "invested": 3816.0
-  },
-  {
-    "strategy": "HARMAN1",
     "symbol": "SOBHA",
     "entry_price": 1296.0,
     "stop_loss": 1231.2,
@@ -1261,17 +1247,17 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "WESTLIFE",
-    "entry_price": 458.2,
-    "stop_loss": 435.29,
+    "symbol": "VBL",
+    "entry_price": 424.0,
+    "stop_loss": 402.8,
     "sl_pct": 5.0,
-    "quantity": 8,
+    "quantity": 9,
     "quality_score": 90,
     "notes": "EMA 20 Pullback",
     "date": "2026-04-08",
-    "pullback_pct": 0.22,
-    "vol_ratio": 0.13,
-    "invested": 3665.6
+    "pullback_pct": 3.34,
+    "vol_ratio": 1.14,
+    "invested": 3816.0
   },
   {
     "strategy": "HARMAN1",
@@ -1289,17 +1275,17 @@
   },
   {
     "strategy": "HARMAN1",
-    "symbol": "METROBRAND",
-    "entry_price": 981.5,
-    "stop_loss": 932.42,
+    "symbol": "WESTLIFE",
+    "entry_price": 458.2,
+    "stop_loss": 435.29,
     "sl_pct": 5.0,
-    "quantity": 4,
+    "quantity": 8,
     "quality_score": 90,
     "notes": "EMA 20 Pullback",
     "date": "2026-04-08",
-    "pullback_pct": 3.0,
-    "vol_ratio": 0.15,
-    "invested": 3926.0
+    "pullback_pct": 0.22,
+    "vol_ratio": 0.13,
+    "invested": 3665.6
   },
   {
     "strategy": "HARMAN1",
@@ -1314,6 +1300,20 @@
     "pullback_pct": 3.64,
     "vol_ratio": 1.0,
     "invested": 3534.25
+  },
+  {
+    "strategy": "HARMAN1",
+    "symbol": "METROBRAND",
+    "entry_price": 981.5,
+    "stop_loss": 932.42,
+    "sl_pct": 5.0,
+    "quantity": 4,
+    "quality_score": 90,
+    "notes": "EMA 20 Pullback",
+    "date": "2026-04-08",
+    "pullback_pct": 3.0,
+    "vol_ratio": 0.15,
+    "invested": 3926.0
   },
   {
     "strategy": "HARMAN1",
