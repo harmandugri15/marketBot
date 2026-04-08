@@ -40,5 +40,5 @@ jobs:
           git config --global user.name 'MarketBot'
           git config --global user.email 'bot@marketbot.local'
           git add data/*.json
-          git commit -m "🤖 Auto-updated portfolio data [skip ci]" || echo "No changes to commit"
+          git commit -m "🤖 Auto-updated portfolio data" || echo "No changes to commit"
           git push
