@@ -41,6 +41,9 @@ def push_to_github():
         logger.error(f"Failed to push to GitHub: {e}")
 
 def run_paper_trading():
+    # --- ADD THIS LINE HERE ---
+    send_telegram_alert("🚀 *MarketBot Engine Online* - Monitoring active positions.")
+    
     logger.info("🌅 Paper Trading Engine Booting Up...")
     api = GrowwAPI()
     
