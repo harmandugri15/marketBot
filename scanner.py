@@ -7,10 +7,23 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import concurrent.futures
+import requests # <-- ADD THIS LINE
+
 
 from config import STOCK_UNIVERSE, SIGNALS_DB, get_settings
 
 logger = logging.getLogger(__name__)
+
+def send_telegram_alert(message):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if token and chat_id:
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
+            requests.post(url, json=payload)
+        except Exception as e:
+            logger.error(f"Telegram failed: {e}")
 
 def get_market_regime(api):
     """
@@ -166,12 +179,14 @@ if __name__ == "__main__":
     import forward_test as ft
     
     print("🤖 Booting up Market Scanner...")
+    # 👇 Alert when scan starts
+    send_telegram_alert("🔍 *MarketBot Scanner* booting up... Analyzing the market for new setups.")
+    
     api = GrowwAPI()
     
     if api.connected:
         print("📊 Scanning the Nifty 500 universe... (this takes a couple of minutes)")
         
-        # A small visual progress bar for your terminal
         def print_progress(current, total, sym):
             print(f"Scanning: {current}/{total} | Checking {sym}...     ", end="\r")
             
@@ -182,10 +197,12 @@ if __name__ == "__main__":
         if found_signals:
             print(f"🎯 Found {len(found_signals)} trading setups! Adding to Paper Trading database...")
             
+            # 👇 Alert when setups are found
+            send_telegram_alert(f"🎯 *Scan Complete!* Found {len(found_signals)} new high-probability setups. Added to WATCHING list.")
+            
             # --- BRIDGE: Move signals directly into forward_test.json ---
             db = ft._load()
             
-            # Get a list of stocks we are already trading so we don't buy duplicates
             active_symbols = [t["symbol"] for t in db.get("trades", []) if t["status"] in ["ACTIVE", "WATCHING"]]
             
             added_count = 0
@@ -199,7 +216,7 @@ if __name__ == "__main__":
                         "stop_loss": s["stop_loss"],
                         "sl_pct": s["sl_pct"],
                         "shares": s["quantity"],
-                        "status": "WATCHING", # Tell the bot to watch this!
+                        "status": "WATCHING",
                         "entry_date": None,
                         "exit_date": None,
                         "realized_pnl": 0,
@@ -214,5 +231,8 @@ if __name__ == "__main__":
             
         else:
             print("⚠️ No setups found matching our strict criteria today. Cash is King!")
+            # 👇 Alert when NO setups are found
+            send_telegram_alert("⚠️ *Scan Complete!* No setups found matching strict criteria today. Cash is King.")
     else:
         print("❌ Could not connect to Groww API. Check your .env credentials.")
+        send_telegram_alert("❌ *Error:* Scanner could not connect to Groww API.")
