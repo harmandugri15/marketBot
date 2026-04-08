@@ -1,29 +1,38 @@
 import time
 import logging
 import os
+import requests  # <-- CRITICAL for Telegram
 from datetime import datetime
 import pytz
 from groww_api import GrowwAPI
 import forward_test as ft
 
-
-import requests # Ensure this is at the very top with other imports
-
-def send_telegram_alert(message):
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    if token and chat_id:
-        try:
-            url = f"https://api.telegram.org/bot{token}/sendMessage"
-            payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
-            requests.post(url, json=payload)
-        except Exception as e:
-            print(f"Telegram alert failed: {e}")
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] PAPER: %(message)s")
 logger = logging.getLogger(__name__)
 IST = pytz.timezone('Asia/Kolkata')
 
+# ==========================================
+# TELEGRAM NOTIFICATION FUNCTION
+# ==========================================
+def send_telegram_alert(message):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    
+    if token and chat_id:
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
+            response = requests.post(url, json=payload)
+            if response.status_code != 200:
+                logger.error(f"Telegram API Error: {response.text}")
+        except Exception as e:
+            logger.error(f"Telegram failed: {e}")
+    else:
+        logger.warning("⚠️ Telegram keys not found! Could not send message.")
+
+# ==========================================
+# GITHUB SYNC FUNCTION
+# ==========================================
 def push_to_github():
     """Commits the updated JSON file to GitHub so the public website updates."""
     try:
@@ -31,24 +40,25 @@ def push_to_github():
         os.system('git config --global user.name "MarketBot Engine"')
         os.system('git add data/forward_test.json')
         os.system('git commit -m "🤖 Auto-update paper trades"')
-        
-        # 👇 THIS IS THE MAGIC LINE: Download any laptop changes before pushing!
         os.system('git pull origin main --rebase')
-        
         os.system('git push')
         logger.info("☁️ Pushed live trade updates to GitHub Pages!")
     except Exception as e:
         logger.error(f"Failed to push to GitHub: {e}")
 
+# ==========================================
+# MAIN TRADING ENGINE
+# ==========================================
 def run_paper_trading():
-    # --- ADD THIS LINE HERE ---
-    send_telegram_alert("🚀 *MarketBot Engine Online* - Monitoring active positions.")
-    
     logger.info("🌅 Paper Trading Engine Booting Up...")
-    api = GrowwAPI()
     
+    # 👇 THE WAKE UP MESSAGE
+    send_telegram_alert("🚀 *MarketBot Engine Online*\nBooting up and scanning active positions...")
+    
+    api = GrowwAPI()
     if not api.connected:
         logger.error("❌ Groww API not connected. Exiting.")
+        send_telegram_alert("❌ *Error:* Groww API failed to connect. Check credentials.")
         return
 
     while True:
@@ -57,7 +67,8 @@ def run_paper_trading():
         
         if current_time > "15:30:00":
             logger.info("🕒 Market Closed. Shutting down paper engine.")
-            push_to_github() # Final sync for the day
+            send_telegram_alert("🕒 *Market Closed.*\nShutting down engine for the day. See you tomorrow!")
+            push_to_github()
             break
 
         db = ft._load()
@@ -74,16 +85,15 @@ def run_paper_trading():
 
             # 1. WATCHING -> ACTIVE (Entry Logic)
             if t["status"] == "WATCHING":
-                # Assuming standard LONG breakout logic for paper trades
                 if live_price >= t["entry_price"]:
                     logger.info(f"🚀 {t['symbol']} crossed entry! Moving to ACTIVE.")
+                    send_telegram_alert(f"🟢 *TRADE ENTERED: {t['symbol']}*\nPrice crossed entry at Rs {t['entry_price']}!")
                     ft.mark_entered(t["id"], live_price)
                     data_changed = True
 
             # 2. ACTIVE -> CLOSED (Exit Logic)
             elif t["status"] == "ACTIVE":
                 sl = t["stop_loss"]
-                # Rough 1.5R Target calculation based on SL
                 risk = t["entry_price"] - sl
                 target = t["entry_price"] + (1.5 * risk) if risk > 0 else 0
                 
@@ -99,6 +109,7 @@ def run_paper_trading():
 
                 if exit_px:
                     logger.info(f"💸 Closing {t['symbol']} at {exit_px} ({reason})")
+                    send_telegram_alert(f"🔴 *TRADE CLOSED: {t['symbol']}*\nExit Price: Rs {exit_px}\nReason: {reason}")
                     ft.close_trade(t["id"], exit_px, reason)
                     data_changed = True
 
