@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketBot | Live Forward Test</title>
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: -apple-system, sans-serif; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #38bdf8; text-align: center; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #e2e8f0; margin-top: 10px; }
+        .profit { color: #22c55e; }
+        .loss { color: #ef4444; }
+
+        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+        th { background: #0f172a; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
+        tr:hover { background: #283548; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .b-watching { background: #ca8a0420; color: #facc15; }
+        .b-active { background: #3b82f620; color: #60a5fa; }
+        .b-closed { background: #64748b20; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🤖 MarketBot Live Ledger</h1>
+    <p class="subtitle">Live Forward Testing & Paper Trading Results</p>
+
+    <div class="stats-grid">
+        <div class="stat-card">Starting Capital<div class="stat-value" id="val-cap">Loading...</div></div>
+        <div class="stat-card">Live P&L<div class="stat-value" id="val-pnl">Loading...</div></div>
+        <div class="stat-card">Win Rate<div class="stat-value" id="val-wr">Loading...</div></div>
+        <div class="stat-card">Active Trades<div class="stat-value" id="val-active">Loading...</div></div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Strategy</th>
+                <th>Status</th>
+                <th>Entry Price</th>
+                <th>Exit Price</th>
+                <th>P&L</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody id="trade-table">
+            <tr><td colspan="7" style="text-align: center;">Fetching live data from GitHub...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Automatically fetch the JSON file hosted alongside this HTML file on GitHub Pages
+    fetch('data/forward_test.json')
+        .then(response => response.json())
+        .then(data => {
+            const trades = data.trades || [];
+            const closed = trades.filter(t => t.status === "CLOSED");
+            const active = trades.filter(t => t.status === "ACTIVE");
+            
+            let totalPnl = 0;
+            let wins = 0;
+            closed.forEach(t => { 
+                totalPnl += t.realized_pnl; 
+                if(t.realized_pnl > 0) wins++; 
+            });
+
+            // Update Stats
+            document.getElementById('val-cap').innerText = "Rs 3000"; // Assuming 3000 base
+            
+            const pnlEl = document.getElementById('val-pnl');
+            pnlEl.innerText = `Rs ${totalPnl.toFixed(2)}`;
+            pnlEl.className = `stat-value ${totalPnl >= 0 ? 'profit' : 'loss'}`;
+            
+            document.getElementById('val-wr').innerText = closed.length > 0 ? `${((wins/closed.length)*100).toFixed(1)}%` : "0%";
+            document.getElementById('val-active').innerText = active.length;
+
+            // Render Table
+            const tbody = document.getElementById('trade-table');
+            tbody.innerHTML = '';
+            
+            // Sort to show Active first, then newest closed
+            trades.reverse().forEach(t => {
+                let pnlStr = t.realized_pnl ? `Rs ${t.realized_pnl}` : '-';
+                let pnlClass = t.realized_pnl > 0 ? 'profit' : (t.realized_pnl < 0 ? 'loss' : '');
+                let statusClass = t.status === 'WATCHING' ? 'b-watching' : (t.status === 'ACTIVE' ? 'b-active' : 'b-closed');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: bold;">${t.symbol}</td>
+                        <td style="color: #94a3b8;">${t.strategy}</td>
+                        <td><span class="badge ${statusClass}">${t.status}</span></td>
+                        <td>${t.entry_price ? 'Rs ' + t.entry_price : '-'}</td>
+                        <td>${t.exit_price ? 'Rs ' + t.exit_price : '-'}</td>
+                        <td class="${pnlClass}">${pnlStr}</td>
+                        <td style="color: #94a3b8;">${t.exit_reason || '-'}</td>
+                    </tr>
+                `;
+            });
+        })
+        .catch(err => {
+            document.getElementById('trade-table').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center;">Error loading trade data. Make sure GitHub Pages is updated.</td></tr>`;
+        });
+</script>
+
+</body>
+</html>
