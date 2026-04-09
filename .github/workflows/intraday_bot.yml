@@ -2,17 +2,21 @@ name: 9:20 AM Intraday Bot
 
 on:
   schedule:
-    # 3:40 AM UTC is exactly 9:10 AM IST. 
-    # We boot it 10 minutes early so the server is fully awake and waiting.
-    - cron: '40 3 * * 1-5'
-  workflow_dispatch: # Allows you to run it manually to test
+    # 3:38 AM UTC is 9:08 AM IST (Beats the GitHub traffic jam!)
+    - cron: '38 3 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   run-intraday:
     runs-on: ubuntu-latest
+    # 👇 CRITICAL FIX: Allows the bot to push updates to the dashboard
+    permissions:
+      contents: write  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # 👇 CRITICAL FIX: Identifies the bot to GitHub
         
       - name: Set up Python
         uses: actions/setup-python@v5
