@@ -91,21 +91,6 @@
       "notes": "Volume Breakout Surge"
     },
     {
-      "id": "DLF_20260408",
-      "symbol": "DLF",
-      "strategy": "HARMAN1",
-      "entry_price": 568.0,
-      "stop_loss": 539.6,
-      "sl_pct": 5.0,
-      "shares": 7,
-      "status": "WATCHING",
-      "entry_date": null,
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "Volume Breakout Surge"
-    },
-    {
       "id": "PRESTIGE_20260408",
       "symbol": "PRESTIGE",
       "strategy": "HARMAN1",
@@ -766,21 +751,6 @@
       "notes": "EMA 20 Pullback"
     },
     {
-      "id": "HAL_20260408",
-      "symbol": "HAL",
-      "strategy": "HARMAN1",
-      "entry_price": 3887.0,
-      "stop_loss": 3692.65,
-      "sl_pct": 5.0,
-      "shares": 1,
-      "status": "WATCHING",
-      "entry_date": null,
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "EMA 20 Pullback"
-    },
-    {
       "id": "BEML_20260408",
       "symbol": "BEML",
       "strategy": "HARMAN1",
@@ -1126,21 +1096,6 @@
       "notes": "EMA 20 Pullback"
     },
     {
-      "id": "VBL_20260408",
-      "symbol": "VBL",
-      "strategy": "HARMAN1",
-      "entry_price": 419.25,
-      "stop_loss": 398.29,
-      "sl_pct": 5.0,
-      "shares": 9,
-      "status": "WATCHING",
-      "entry_date": null,
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "EMA 20 Pullback"
-    },
-    {
       "id": "DEVYANI_20260408",
       "symbol": "DEVYANI",
       "strategy": "HARMAN1",
@@ -1231,21 +1186,6 @@
       "notes": "EMA 20 Pullback"
     },
     {
-      "id": "TATACONSUM_20260408",
-      "symbol": "TATACONSUM",
-      "strategy": "HARMAN1",
-      "entry_price": 1068.9,
-      "stop_loss": 1015.46,
-      "sl_pct": 5.0,
-      "shares": 3,
-      "status": "WATCHING",
-      "entry_date": null,
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "EMA 20 Pullback"
-    },
-    {
       "id": "GODREJCP_20260408",
       "symbol": "GODREJCP",
       "strategy": "HARMAN1",
@@ -1306,21 +1246,6 @@
       "notes": "EMA 20 Pullback"
     },
     {
-      "id": "IFCI_20260408",
-      "symbol": "IFCI",
-      "strategy": "HARMAN1",
-      "entry_price": 55.25,
-      "stop_loss": 52.49,
-      "sl_pct": 5.0,
-      "shares": 72,
-      "status": "WATCHING",
-      "entry_date": null,
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "EMA 20 Pullback"
-    },
-    {
       "id": "SREEL_20260408",
       "symbol": "SREEL",
       "strategy": "HARMAN1",
@@ -1375,21 +1300,6 @@
       "shares": 2,
       "status": "ACTIVE",
       "entry_date": "2026-04-08",
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "EMA 20 Pullback"
-    },
-    {
-      "id": "METROBRAND_20260408",
-      "symbol": "METROBRAND",
-      "strategy": "HARMAN1",
-      "entry_price": 990.9,
-      "stop_loss": 941.35,
-      "sl_pct": 5.0,
-      "shares": 4,
-      "status": "WATCHING",
-      "entry_date": null,
       "exit_date": null,
       "realized_pnl": 0,
       "pnl_pct": 0,
