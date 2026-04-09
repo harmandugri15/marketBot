@@ -61,8 +61,8 @@ def hunt_vwap_breakouts(api):
         last_candle = df.iloc[-1]
         prev_candle = df.iloc[-2]
 
-        # THE STRATEGY: Previous candle was below VWAP, Current candle broke above it!
-        if prev_candle['c'] < prev_candle['vwap'] and last_candle['c'] > last_candle['vwap']:
+        # AGGRESSIVE STRATEGY: Stock is above VWAP and the current candle is green (going up)
+        if last_candle['c'] > last_candle['vwap'] and last_candle['c'] > prev_candle['c']:
             entry = round(last_candle['c'], 2)
             sl = round(last_candle['l'] * 0.995, 2) # SL just below the breakout candle
             one_r = entry - sl
