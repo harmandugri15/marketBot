@@ -9,14 +9,13 @@ on:
 jobs:
   run-intraday:
     runs-on: ubuntu-latest
-    # 👇 CRITICAL FIX: Allows the bot to push updates to the dashboard
     permissions:
-      contents: write  
+      contents: write  # Allows the bot to push updates to the dashboard
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # 👇 CRITICAL FIX: Identifies the bot to GitHub
+          token: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Set up Python
         uses: actions/setup-python@v5

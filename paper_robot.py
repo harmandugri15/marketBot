@@ -39,8 +39,11 @@ def push_to_github():
         os.system('git config --global user.email "bot@marketbot.com"')
         os.system('git config --global user.name "MarketBot Engine"')
         os.system('git add data/forward_test.json')
-        os.system('git commit -m "🤖 Auto-update paper trades"')
+        os.system('git commit -m "🤖 Auto-update trades" || echo "No changes to commit"')
+        
+        # 👇 THIS LINE MUST BE IN BOTH PYTHON FILES TO PREVENT CRASHES
         os.system('git pull origin main --rebase')
+        
         os.system('git push')
         logger.info("☁️ Pushed live trade updates to GitHub Pages!")
     except Exception as e:

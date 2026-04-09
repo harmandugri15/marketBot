@@ -2,10 +2,9 @@ name: MarketBot Daily Run
 
 on:
   schedule:
-    # Runs at 10:30 AM UTC, which is exactly 4:00 PM IST (After Indian Market Close)
-    # Runs Monday through Friday
+    # Runs at 10:30 AM UTC, exactly 4:00 PM IST (After Indian Market Close)
     - cron: '30 10 * * 1-5'
-  workflow_dispatch: # Allows you to trigger it manually via a button for testing
+  workflow_dispatch:
 
 permissions:
   contents: write # Crucial: Allows the bot to save its trades back to your repo
@@ -16,6 +15,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # Added this here for consistency!
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,10 +28,8 @@ jobs:
 
       - name: Run Daily Robot
         env:
-          # Your Groww Keys
           GROWW_API_KEY: ${{ secrets.GROWW_API_KEY }}
           GROWW_SECRET_KEY: ${{ secrets.GROWW_SECRET_KEY }}
-          # Your Telegram Keys
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scanner.py
@@ -41,5 +40,5 @@ jobs:
           git config --global user.email 'bot@marketbot.local'
           git add data/*.json
           git commit -m "🤖 Auto-updated portfolio data" || echo "No changes to commit"
-          git pull origin main --rebase   # 👇 ADD THIS LINE to prevent crashes
+          git pull origin main --rebase   # Prevents GitHub upload crashes
           git push
