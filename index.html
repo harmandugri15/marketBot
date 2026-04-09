@@ -8,28 +8,28 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      /* Claude-inspired Warm Dark Theme */
-      --bg: #21201d; 
-      --surf: #292825; 
-      --card: #2f2d2a; 
-      --border: #44423e; 
-      --txt: #e8e6e3; 
-      --muted: #a8a5a0; 
-      --dim: #3a3834; 
+      /* Modern Professional Finance Dark Theme */
+      --bg: #0a0e17; 
+      --surf: #121620; 
+      --card: #191e2b; 
+      --border: #2a3143; 
+      --txt: #f1f4f9; 
+      --muted: #94a3b8; 
+      --dim: #21283b; 
       
       /* Refined Semantic Colors */
-      --g: #6db387; /* Muted elegant green */
-      --r: #df7b6f; /* Muted elegant red */
-      --a: #d97757; /* Claude signature amber/peach */
-      --b: #6d93b3; /* Soft steel blue */
-      --p: #ab87c2; /* Soft lavender */
+      --g: #10b981; /* Crisp emerald green */
+      --r: #ef4444; /* Clean ruby red */
+      --a: #f59e0b; /* Amber */
+      --b: #3b82f6; /* Blue */
+      --p: #8b5cf6; /* Purple */
       
       /* Soft Transparent Backgrounds */
-      --gd: rgba(109, 179, 135, 0.15);
-      --rd: rgba(223, 123, 111, 0.15);
-      --ad: rgba(217, 119, 87, 0.15);
-      --bd: rgba(109, 147, 179, 0.15);
-      --pd: rgba(171, 135, 194, 0.15);
+      --gd: rgba(16, 185, 129, 0.12);
+      --rd: rgba(239, 68, 68, 0.12);
+      --ad: rgba(245, 158, 11, 0.12);
+      --bd: rgba(59, 130, 246, 0.12);
+      --pd: rgba(139, 92, 246, 0.12);
     }
 
     * {
@@ -41,9 +41,9 @@
     body {
       background: var(--bg);
       color: var(--txt);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.5;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -53,10 +53,11 @@
     .shell {
       display: flex;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .side {
-      width: 240px;
+      width: 250px;
       background: var(--surf);
       border-right: 1px solid var(--border);
       display: flex;
@@ -67,18 +68,22 @@
       height: 100vh;
       overflow-y: auto;
       z-index: 100;
+      transition: transform 0.3s ease;
     }
 
     .body {
-      margin-left: 240px;
+      margin-left: 250px;
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-width: 0;
+      transition: margin-left 0.3s ease;
     }
 
     .topbar {
-      background: rgba(33, 32, 29, 0.85);
+      background: rgba(18, 22, 32, 0.85);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 14px 28px;
       display: flex;
@@ -89,11 +94,23 @@
       top: 0;
       z-index: 50;
     }
+    
+    .menu-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--txt);
+      cursor: pointer;
+      padding: 4px;
+    }
 
     .tb-left {
       font-size: 16px;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .tb-right {
@@ -107,22 +124,24 @@
     .main {
       padding: 32px 40px;
       flex: 1;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       width: 100%;
     }
 
     /* SIDEBAR */
     .logo {
-      padding: 24px 20px 20px;
+      padding: 24px 24px 20px;
     }
 
     .logo-n {
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-      font-size: 20px;
-      font-weight: 500;
+      font-size: 18px;
+      font-weight: 700;
       letter-spacing: -0.02em;
-      color: #f5f4f1;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .logo-s {
@@ -133,9 +152,9 @@
 
     .logo-b {
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 12px;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 4px 10px;
       border-radius: 6px;
       background: var(--dim);
@@ -145,23 +164,24 @@
     }
 
     .ng {
-      padding: 16px 20px 6px;
+      padding: 16px 24px 8px;
       font-size: 11px;
       color: var(--muted);
-      font-weight: 500;
-      letter-spacing: 0.04em;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
     .nl {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
+      gap: 12px;
+      padding: 10px 16px;
       margin: 2px 12px;
       cursor: pointer;
       color: var(--muted);
       font-size: 13.5px;
-      font-weight: 400;
+      font-weight: 500;
       border-radius: 8px;
       transition: all 0.2s ease;
       user-select: none;
@@ -175,35 +195,34 @@
     .nl.on {
       color: var(--txt);
       background: var(--dim);
-      font-weight: 500;
     }
 
     .nl.on .ni {
-      color: var(--a);
+      color: var(--b);
     }
 
     .ni {
-      font-size: 16px;
-      width: 20px;
-      text-align: center;
-      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: currentColor;
     }
 
     .nb {
       margin-left: auto;
-      background: var(--a);
+      background: var(--b);
       color: #fff;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 2px 8px;
       border-radius: 12px;
     }
 
     .sbar {
       margin-top: auto;
-      padding: 16px 20px;
+      padding: 16px 24px;
       border-top: 1px solid var(--border);
-      background: var(--bg);
+      background: var(--surf);
     }
 
     .sr {
@@ -230,27 +249,22 @@
     .mpill {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       padding: 6px 12px;
       border-radius: 99px;
       background: var(--dim);
       border: 1px solid var(--border);
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.02em;
     }
 
-    .mpill.open {
-      color: var(--txt);
-    }
-
-    .mpill.closed {
-      color: var(--muted);
-    }
+    .mpill.open { color: var(--txt); }
+    .mpill.closed { color: var(--muted); }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.9); }
+      50% { opacity: 0.5; transform: scale(0.8); }
     }
 
     .pulse {
@@ -269,7 +283,7 @@
       width: 16px;
       height: 16px;
       border: 2px solid var(--dim);
-      border-top-color: var(--a);
+      border-top-color: var(--b);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       flex-shrink: 0;
@@ -284,16 +298,16 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .ph {
-      margin-bottom: 32px;
-    }
+    .ph { margin-bottom: 32px; }
 
     .pt {
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-      font-size: 28px;
-      font-weight: 400;
+      font-size: 24px;
+      font-weight: 700;
       letter-spacing: -0.02em;
-      color: #f5f4f1;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .ps {
@@ -315,14 +329,30 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
     
     .stat:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-color: var(--dim);
     }
+
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .stat.g::before { background: var(--g); }
+    .stat.r::before { background: var(--r); }
+    .stat.b::before { background: var(--b); }
+    .stat.a::before { background: var(--a); }
+    .stat.p::before { background: var(--p); }
 
     .sl {
       font-size: 11px;
@@ -330,15 +360,14 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .sv {
-      font-size: 28px;
-      font-weight: 400;
+      font-size: 26px;
+      font-weight: 700;
       letter-spacing: -0.02em;
       line-height: 1;
-      font-family: ui-serif, Georgia, Cambria, serif;
     }
 
     .sv.g { color: var(--g); }
@@ -357,10 +386,9 @@
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 24px;
       margin-bottom: 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
 
     .ch {
@@ -374,7 +402,7 @@
 
     .ct {
       font-size: 16px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--txt);
       letter-spacing: -0.01em;
     }
@@ -393,10 +421,6 @@
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 
-    @media(max-width:860px) {
-      .g2, .g3 { grid-template-columns: 1fr; }
-    }
-
     /* CHART */
     .cb {
       position: relative;
@@ -412,56 +436,21 @@
       border-radius: 8px;
       border: 1px solid transparent;
       font-size: 13.5px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
       font-family: inherit;
     }
 
-    .btn-g {
-      background: var(--txt);
-      color: var(--bg);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .btn-g:hover {
-      background: #ffffff;
-      transform: translateY(-1px);
-    }
-
-    .btn-s {
-      background: var(--dim);
-      color: var(--txt);
-      border: 1px solid var(--border);
-    }
-
-    .btn-s:hover {
-      background: var(--border);
-    }
-
-    .btn-r {
-      background: var(--r);
-      color: #fff;
-    }
-
-    .btn-r:hover {
-      opacity: 0.9;
-    }
-
-    .btn-b {
-      background: var(--b);
-      color: #fff;
-    }
-
-    .btn-b:hover {
-      opacity: 0.9;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none !important;
-    }
+    .btn-g { background: var(--txt); color: var(--bg); }
+    .btn-g:hover { background: #ffffff; transform: translateY(-1px); }
+    .btn-s { background: var(--dim); color: var(--txt); border: 1px solid var(--border); }
+    .btn-s:hover { background: var(--border); }
+    .btn-r { background: var(--r); color: #fff; }
+    .btn-r:hover { opacity: 0.9; }
+    .btn-b { background: var(--b); color: #fff; }
+    .btn-b:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
     .br {
       display: flex;
@@ -488,7 +477,7 @@
     .fi label {
       font-size: 12px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .fi input,
@@ -506,8 +495,8 @@
 
     .fi input:focus,
     .fi select:focus {
-      border-color: var(--a);
-      box-shadow: 0 0 0 2px var(--ad);
+      border-color: var(--b);
+      box-shadow: 0 0 0 2px var(--bd);
     }
 
     /* PROGRESS */
@@ -521,7 +510,7 @@
 
     .pf {
       height: 100%;
-      background: var(--a);
+      background: var(--b);
       border-radius: 6px;
       transition: width 0.4s ease;
     }
@@ -536,7 +525,7 @@
 
     /* ALERTS */
     .alert {
-      padding: 14px 18px;
+      padding: 16px 20px;
       border-radius: 10px;
       font-size: 14px;
       margin-bottom: 20px;
@@ -547,6 +536,11 @@
       gap: 12px;
       align-items: flex-start;
       line-height: 1.6;
+    }
+    
+    .alert-icon {
+      flex-shrink: 0;
+      margin-top: 2px;
     }
 
     .ai { border-left-color: var(--b); }
@@ -571,7 +565,7 @@
       text-align: left;
       font-size: 11px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.02em;
       padding: 12px 16px;
       border-bottom: 1px solid var(--border);
@@ -586,23 +580,19 @@
       vertical-align: middle;
     }
 
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background: var(--surf);
-    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surf); }
 
     /* BADGES */
     .badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 4px 10px;
-      border-radius: 99px;
+      border-radius: 6px;
       font-size: 11.5px;
-      font-weight: 500;
+      font-weight: 600;
       white-space: nowrap;
-      letter-spacing: 0.01em;
     }
 
     .bg2 { background: var(--gd); color: var(--g); }
@@ -620,30 +610,26 @@
       margin-bottom: 16px;
       display: flex;
       gap: 16px;
-      transition: border-color 0.2s ease, transform 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transition: border-color 0.2s ease;
     }
 
     .sc:hover, .ft-trade:hover {
       border-color: var(--dim);
-      transform: translateY(-1px);
     }
 
     .sc.strong {
       border-left: 3px solid var(--g);
     }
 
-    .sl2 {
-      flex: 1;
-      min-width: 0;
-    }
+    .sl2 { flex: 1; min-width: 0; }
 
     .sn, .ft-sym {
-      font-family: ui-serif, Georgia, serif;
-      font-size: 18px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       color: var(--txt);
-      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .stags {
@@ -655,9 +641,11 @@
 
     .stag {
       font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 99px;
-      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
     }
 
     .stag.g { background: var(--gd); color: var(--g); }
@@ -684,15 +672,14 @@
 
     .se {
       font-size: 20px;
-      font-weight: 400;
-      font-family: ui-serif, Georgia, serif;
+      font-weight: 700;
       color: var(--txt);
     }
 
     .ssl {
       font-size: 14px;
       color: var(--r);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .star {
@@ -727,9 +714,7 @@
       line-height: 1.6;
     }
 
-    .ft-right {
-      text-align: right;
-    }
+    .ft-right { text-align: right; }
 
     .ft-stages {
       display: flex;
@@ -742,10 +727,10 @@
     }
 
     .fts {
-      font-size: 11.5px;
-      padding: 4px 12px;
-      border-radius: 99px;
-      font-weight: 500;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
     }
 
     .fts.done { background: var(--gd); color: var(--g); }
@@ -763,9 +748,9 @@
 
     .ext {
       font-size: 15px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--txt);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -777,10 +762,7 @@
       line-height: 1.7;
     }
 
-    .exb strong {
-      color: var(--txt);
-      font-weight: 500;
-    }
+    .exb strong { color: var(--txt); font-weight: 600; }
 
     /* STEP */
     .step {
@@ -800,18 +782,19 @@
       height: 28px;
       border-radius: 8px;
       background: var(--dim);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--txt);
       flex-shrink: 0;
     }
 
     .stept {
-      font-size: 14.5px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
       color: var(--txt);
       margin-bottom: 4px;
     }
@@ -824,7 +807,7 @@
 
     .stepb strong {
       color: var(--txt);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     /* SCAN LOG */
@@ -835,8 +818,8 @@
       padding: 16px;
       max-height: 300px;
       overflow-y: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12.5px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 12px;
       line-height: 1.7;
     }
 
@@ -850,14 +833,14 @@
     }
 
     .ll:last-child { border-bottom: none; }
-    .lsym { font-weight: 500; width: 110px; flex-shrink: 0; color: var(--txt); }
+    .lsym { font-weight: 600; width: 110px; flex-shrink: 0; color: var(--txt); }
 
     /* MODAL */
     .overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(15, 15, 14, 0.85);
+      background: rgba(10, 14, 23, 0.85);
       backdrop-filter: blur(4px);
       z-index: 200;
       align-items: center;
@@ -873,13 +856,12 @@
       padding: 32px;
       width: 460px;
       max-width: 90vw;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
     .modal-t {
-      font-family: ui-serif, Georgia, serif;
-      font-size: 20px;
-      font-weight: 400;
+      font-size: 18px;
+      font-weight: 700;
       margin-bottom: 24px;
       color: var(--txt);
     }
@@ -899,37 +881,105 @@
     /* SCROLLBAR */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* MOBILE RESPONSIVENESS */
+    @media (max-width: 900px) {
+      .g2, .g3 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .side {
+        transform: translateX(-100%);
+      }
+      .side.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+      }
+      .body {
+        margin-left: 0;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      .main {
+        padding: 24px 20px;
+      }
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+      .fg {
+        grid-template-columns: 1fr;
+      }
+      .sc, .ft-trade {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .sr2 {
+        text-align: left;
+        align-items: flex-start;
+      }
+      .star {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="shell">
 
-    <aside class="side">
+    <aside class="side" id="sidebar">
       <div class="logo">
-        <div class="logo-n">VCP Bot</div>
+        <div class="logo-n">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          VCP Bot
+        </div>
         <div class="logo-s">Vijay Thakkar Strategy</div>
         <div class="logo-b" id="mode-badge">PAPER TRADING</div>
       </div>
 
       <div class="ng">Monitor</div>
-      <div class="nl on" onclick="go('home')"><span class="ni">⊡</span> Dashboard</div>
-      <div class="nl" onclick="go('fwd')"><span class="ni">📅</span> Forward Test <span class="nb" id="ft-badge"
-          style="display:none">0</span></div>
+      <div class="nl on" onclick="go('home')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> 
+        Dashboard
+      </div>
+      <div class="nl" onclick="go('fwd')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"></path><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="15 19 18 22 22 17"></polyline></svg></span> 
+        Forward Test 
+        <span class="nb" id="ft-badge" style="display:none">0</span>
+      </div>
 
       <div class="ng">Strategies</div>
-      <div class="nl" onclick="go('scanner')"><span class="ni">🔍</span> Scanner</div>
-      <div class="nl" onclick="go('backtest')"><span class="ni">⏪</span> Backtest</div>
+      <div class="nl" onclick="go('scanner')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span> 
+        Scanner
+      </div>
+      <div class="nl" onclick="go('backtest')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></span> 
+        Backtest
+      </div>
 
       <div class="ng">Learn</div>
-      <div class="nl" onclick="go('learn')"><span class="ni">📖</span> How It Works</div>
-      <div class="nl" onclick="go('glossary')"><span class="ni">📚</span> Glossary</div>
+      <div class="nl" onclick="go('learn')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></span> 
+        How It Works
+      </div>
+      <div class="nl" onclick="go('glossary')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span> 
+        Glossary
+      </div>
 
       <div class="ng">Setup</div>
-      <div class="nl" onclick="go('config')"><span class="ni">⚙</span> Settings</div>
-      <div class="nl" onclick="go('logs')"><span class="ni">📋</span> Logs</div>
+      <div class="nl" onclick="go('config')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> 
+        Settings
+      </div>
+      <div class="nl" onclick="go('logs')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg></span> 
+        Logs
+      </div>
 
       <div class="sbar">
         <div class="sr">
@@ -938,15 +988,20 @@
         <div class="sr">
           <div class="dot r" id="d-api"></div><span id="t-api">Groww API not set</span>
         </div>
-        <div class="sr" style="font-size:11px;color:var(--muted);margin-top:6px" id="t-mode">Paper Mode</div>
+        <div class="sr" style="font-size:11px;color:var(--muted);margin-top:8px" id="t-mode">Paper Mode</div>
       </div>
     </aside>
 
     <div class="body">
       <div class="topbar">
-        <div class="tb-left" id="tb-title">Dashboard</div>
+        <div class="tb-left">
+          <button class="menu-toggle" onclick="toggleSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <span id="tb-title">Dashboard</span>
+        </div>
         <div class="tb-right">
-          <div id="mkt-pill" class="mpill closed">⏸ NSE Closed</div>
+          <div id="mkt-pill" class="mpill closed">NSE Closed</div>
           <div id="tb-clock" style="min-width:70px;text-align:right"></div>
         </div>
       </div>
@@ -955,7 +1010,7 @@
 
         <div class="page on" id="page-home">
           <div class="ph">
-            <div class="pt" id="home-greeting">Good morning 👋</div>
+            <div class="pt" id="home-greeting">Good morning</div>
             <div class="ps">Your VCP bot overview</div>
           </div>
 
@@ -987,8 +1042,9 @@
             </div>
           </div>
 
-          <div class="alert ai">💡 <div><strong>Paper trading is ON.</strong> Everything is tracked as if real but no
-              money moves. Run the forward test for 30 days, then decide if you want to go live.</div>
+          <div class="alert ai">
+            <div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+            <div><strong>Paper trading is ON.</strong> Everything is tracked as if real but no money moves. Run the forward test for 30 days, then decide if you want to go live.</div>
           </div>
 
           <div class="g2">
@@ -997,8 +1053,8 @@
                 <div>
                   <div class="ct">Forward Test — This Month</div>
                   <div class="cs">Trades tracked since you started</div>
-                </div><button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="go('fwd')">View all
-                  →</button>
+                </div>
+                <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="go('fwd')">View all</button>
               </div>
               <div id="home-ft-list">
                 <div style="color:var(--muted);font-size:13px">No trades tracked yet.</div>
@@ -1019,8 +1075,7 @@
                 <div class="stepn">2</div>
                 <div>
                   <div class="stept">Review Signals</div>
-                  <div class="stepb">Each signal shows entry price, stop loss, and exit targets. Read the "why"
-                    explanation.</div>
+                  <div class="stepb">Each signal shows entry price, stop loss, and exit targets. Read the "why" explanation.</div>
                 </div>
               </div>
               <div class="step">
@@ -1044,14 +1099,13 @@
 
         <div class="page" id="page-fwd">
           <div class="ph">
-            <div class="pt">📅 Forward Test</div>
-            <div class="ps">Real signals tracked from today. No real money. After 30 days you'll have real evidence.
-            </div>
+            <div class="pt">Forward Test</div>
+            <div class="ps">Real signals tracked from today. No real money. After 30 days you'll have real evidence.</div>
           </div>
 
-          <div class="alert ag">✅ <div><strong>How this works:</strong> Every time the scanner finds a signal, click
-              "Track This Trade". The bot saves it here on the server — it survives browser refresh, closing the app,
-              even restarting the bot. When a trade exits, you close it manually with the actual exit price.</div>
+          <div class="alert ag">
+            <div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+            <div><strong>How this works:</strong> Every time the scanner finds a signal, click "Track This Trade". The bot saves it here on the server — it survives browser refresh, closing the app, even restarting the bot. When a trade exits, you close it manually with the actual exit price.</div>
           </div>
 
           <div class="stats" id="ft-stats">
@@ -1114,1163 +1168,1152 @@
               </div>
             </div>
             <div id="ft-list">
-              <div style="color:var(--muted);font-size:14px;padding:12px 0">No trades yet. Add from the Scanner page.
-              </div>
+              <div style="color:var(--muted);font-size:14px;padding:12px 0">No trades yet. Add from the Scanner page.</div>
             </div>
           </div>
 
           <div class="ex">
-            <div class="ext">💡 Instructions</div>
+            <div class="ext">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              Instructions
+            </div>
             <div class="exb">
               <strong>WATCHING</strong> → Signal found. Entry price not yet hit. Check next morning.<br>
               <strong>ACTIVE</strong> → Price crossed above entry. Click "Mark Entered" to confirm.<br>
-              <strong>Closing a trade:</strong> When SL is hit, or 4R is reached, or EMA trail fires — click "Close
-              Trade", enter the actual exit price, pick the reason.<br>
-              <strong>After 30 days:</strong> If Win Rate > 50% and Profit Factor > 1.5, the strategy is working.
-              Consider going live with small capital.
+              <strong>Closing a trade:</strong> When SL is hit, or 4R is reached, or EMA trail fires — click "Close Trade", enter the actual exit price, pick the reason.<br>
+              <strong>After 30 days:</strong> If Win Rate > 50% and Profit Factor > 1.5, the strategy is working. Consider going live with small capital.
             </div>
           </div>
         </div>
 
         <div class="page" id="page-scanner">
           <div class="ph">
-            <div class="pt">🔍 Stock Scanner</div>
+            <div class="pt">Stock Scanner</div>
             <div class="ps">Run after 3:30 PM every weekday. Scans all stocks for today's setups.</div>
           </div>
 
           <div id="market-safety-alert" class="alert ar" style="display:none">
-            ⚠️ <strong>Safety Mode Active:</strong> Broad market trend is currently Bearish. The scanner is restricting
-            new trades to protect your capital.
+            <div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+            <div><strong>Safety Mode Active:</strong> Broad market trend is currently Bearish. The scanner is restricting new trades to protect your capital.</div>
           </div>
 
           <div class="ex">
-            <div class="ext">📖 Which strategy to use?</div>
+            <div class="ext">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              Which strategy to use?
+            </div>
             <div class="exb">
-              <strong>🤖 AUTO:</strong> Smartly switches between Harman1 (Bull Market) and MRB (Bear Market) to protect
-              your capital.<br><br>
-              <strong>⚡ HARMAN1:</strong> Hybrid strategy combining DEP's explosive volume with VT's 20 EMA momentum
-              confirmation.<br><br>
-              <strong>🐻 MRB:</strong> Mean Reversion Bounce. Buys high-quality stocks that are oversold (RSI < 30)
-                during market crashes. </div>
-            </div>
-
-            <div class="br">
-              <select id="scan-strat" style="min-width:240px;">
-                <option value="AUTO">🤖 AUTO (AI Market Switch)</option>
-                <option value="HARMAN1">⚡ HARMAN1 (Hybrid Merge)</option>
-                <option value="MRB">🐻 MRB (Bear Market Bounce)</option>
-                <option value="DEP">🎯 DEP (Sniper Only)</option>
-                <option value="VT">🌊 VT (Momentum Only)</option>
-              </select>
-              <button class="btn btn-g" id="scan-btn" onclick="startScan()">▶ Run Scanner Now</button>
-              <button class="btn btn-s" onclick="reloadSignals()">↺ Last Results</button>
-              <span id="scan-status-txt" style="font-size:13px;color:var(--muted)"></span>
-            </div>
-
-            <div id="scan-prog" style="display:none" class="card">
-              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                <div class="spin"></div><span style="font-size:14px;font-weight:500">Scanning the market...</span>
-              </div>
-              <div class="pt2"><span>Stock: <strong id="scan-sym">—</strong></span><span id="scan-pct">0%</span></div>
-              <div class="pw">
-                <div class="pf" id="scan-bar" style="width:0%"></div>
-              </div>
-              <div class="logbox" id="scan-log" style="margin-top:16px;"></div>
-            </div>
-
-            <div id="scan-summary" style="display:none" class="stats">
-              <div class="stat g">
-                <div class="sl">Scanned</div>
-                <div class="sv g" id="ss-tot">—</div>
-              </div>
-              <div class="stat g">
-                <div class="sl">Signals Found</div>
-                <div class="sv g" id="ss-pass">—</div>
-              </div>
-              <div class="stat r">
-                <div class="sl">Rejected</div>
-                <div class="sv r" id="ss-fail">—</div>
-              </div>
-              <div class="stat a">
-                <div class="sl">Time</div>
-                <div class="sv a" id="ss-time">—</div>
-              </div>
-            </div>
-
-            <div id="signals-area">
-              <div style="color:var(--muted);font-size:14px;padding:12px 0">Run the scanner to see today's setups.</div>
+              <strong>AUTO:</strong> Smartly switches between Harman1 (Bull Market) and MRB (Bear Market) to protect your capital.<br><br>
+              <strong>HARMAN1:</strong> Hybrid strategy combining DEP's explosive volume with VT's 20 EMA momentum confirmation.<br><br>
+              <strong>MRB:</strong> Mean Reversion Bounce. Buys high-quality stocks that are oversold (RSI &lt; 30) during market crashes. 
             </div>
           </div>
 
-          <div class="page" id="page-backtest">
-            <div class="ph">
-              <div class="pt">⏪ Backtest</div>
-              <div class="ps">Test both strategies on historical NSE data. No real money needed.</div>
+          <div class="br">
+            <select id="scan-strat" style="min-width:240px;">
+              <option value="AUTO">AUTO (AI Market Switch)</option>
+              <option value="HARMAN1">HARMAN1 (Hybrid Merge)</option>
+              <option value="MRB">MRB (Bear Market Bounce)</option>
+              <option value="DEP">DEP (Sniper Only)</option>
+              <option value="VT">VT (Momentum Only)</option>
+            </select>
+            <button class="btn btn-g" id="scan-btn" onclick="startScan()">Run Scanner Now</button>
+            <button class="btn btn-s" onclick="reloadSignals()">Last Results</button>
+            <span id="scan-status-txt" style="font-size:13px;color:var(--muted)"></span>
+          </div>
+
+          <div id="scan-prog" style="display:none" class="card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div class="spin"></div><span style="font-size:14px;font-weight:500">Scanning the market...</span>
             </div>
-
-            <div class="ex">
-              <div class="ext">📖 What is a backtest?</div>
-              <div class="exb">
-                The bot replays the strategy day-by-day on <strong>real past prices</strong>. It never cheats — on day
-                50 it only looks at day 1-50 data. Results show Win Rate, Profit Factor, and Max Drawdown.
-              </div>
+            <div class="pt2"><span>Stock: <strong id="scan-sym">—</strong></span><span id="scan-pct">0%</span></div>
+            <div class="pw">
+              <div class="pf" id="scan-bar" style="width:0%"></div>
             </div>
+            <div class="logbox" id="scan-log" style="margin-top:16px;"></div>
+          </div>
 
-            <div class="card">
-              <div class="ch">
-                <div class="ct">Backtest Settings</div>
-              </div>
-              <div class="fg">
-                <div class="fi"><label>Start Date</label><input type="date" id="bt-start" value="2024-01-01"></div>
-                <div class="fi"><label>End Date</label><input type="date" id="bt-end" value="2024-12-31"></div>
-                <div class="fi"><label>Capital (Rs)</label><input type="number" id="bt-cap" value="100000" step="5000">
-                </div>
-
-                <div class="fi"><label>Strategy</label>
-                  <select id="bt-strat">
-                    <option value="AUTO">🤖 AUTO (AI Market Switch)</option>
-                    <option value="HARMAN1">⚡ HARMAN1 (Hybrid Merge)</option>
-                    <option value="MRB">🐻 MRB (Bear Market Bounce)</option>
-                    <option value="DEP">🎯 DEP (Sniper Only)</option>
-                    <option value="VT">🌊 VT (Momentum Only)</option>
-                    <option value="INTRADAY_ORB">⏱️ 9:20 AM INTRADAY (VWAP+EMA)</option>
-                  </select>
-                </div>
-
-                <div class="fi"><label>Stocks to test</label>
-                  <select id="bt-uni">
-                    <option value="full">All 215 stocks (slower, more complete)</option>
-                    <option value="50">Top 50 stocks (medium)</option>
-                    <option value="20">Top 20 stocks (fastest)</option>
-                  </select>
-                </div>
-              </div>
-              <button class="btn btn-g" id="bt-btn" onclick="startBt()" style="margin-top: 8px;">▶ Run Backtest</button>
+          <div id="scan-summary" style="display:none" class="stats">
+            <div class="stat g">
+              <div class="sl">Scanned</div>
+              <div class="sv g" id="ss-tot">—</div>
             </div>
-
-            <div id="bt-prog" style="display:none" class="card">
-              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                <div class="spin"></div><span style="font-size:14px;font-weight:500">Running backtest — this takes 3-8
-                  minutes...</span>
-              </div>
-              <div class="pt2"><span>Testing: <strong id="bt-sym">—</strong></span><span id="bt-pct">0%</span></div>
-              <div class="pw">
-                <div class="pf" id="bt-bar" style="width:0%"></div>
-              </div>
+            <div class="stat g">
+              <div class="sl">Signals Found</div>
+              <div class="sv g" id="ss-pass">—</div>
             </div>
-
-            <div id="bt-results" style="display:none">
-              <div class="stats" id="bt-stat-cards"></div>
-              <div class="alert" id="bt-verdict" style="display:none"></div>
-
-              <div class="g2">
-                <div class="card">
-                  <div class="ch">
-                    <div class="ct">Equity Curve</div>
-                    <div class="cn">How your capital grew or shrank</div>
-                  </div>
-                  <div class="cb" style="height:240px"><canvas id="bt-eq"></canvas></div>
-                </div>
-                <div class="card">
-                  <div class="ch">
-                    <div class="ct">P&amp;L per Trade</div>
-                    <div class="cn">Green = win, red = loss</div>
-                  </div>
-                  <div class="cb" style="height:240px"><canvas id="bt-pl"></canvas></div>
-                </div>
-              </div>
-              <div class="g2">
-                <div class="card">
-                  <div class="ch">
-                    <div class="ct">Exit Reasons</div>
-                    <div class="cn">How trades ended</div>
-                  </div>
-                  <div class="cb" style="height:220px"><canvas id="bt-exit"></canvas></div>
-                </div>
-                <div class="card">
-                  <div class="ch">
-                    <div class="ct">Monthly Returns</div>
-                    <div class="cn">% gain/loss per month</div>
-                  </div>
-                  <div class="cb" style="height:220px"><canvas id="bt-month"></canvas></div>
-                </div>
-              </div>
-              <div class="card">
-                <div class="ch">
-                  <div class="ct">Trade Log</div>
-                  <div class="cn" id="bt-tc"></div>
-                </div>
-                <div class="tw">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Stock</th>
-                        <th>Strategy</th>
-                        <th>Bought</th>
-                        <th>Sold</th>
-                        <th>Entry Rs</th>
-                        <th>Exit Rs</th>
-                        <th>Shares</th>
-                        <th>P&amp;L Rs</th>
-                        <th>P&amp;L %</th>
-                        <th>How it ended</th>
-                      </tr>
-                    </thead>
-                    <tbody id="bt-tbody"></tbody>
-                  </table>
-                </div>
-              </div>
+            <div class="stat r">
+              <div class="sl">Rejected</div>
+              <div class="sv r" id="ss-fail">—</div>
+            </div>
+            <div class="stat a">
+              <div class="sl">Time</div>
+              <div class="sv a" id="ss-time">—</div>
             </div>
           </div>
 
-          <div class="page" id="page-learn">
-            <div class="ph">
-              <div class="pt">📖 How It Works</div>
-              <div class="ps">The strategies and how to use this bot — explained simply.</div>
+          <div id="signals-area">
+            <div style="color:var(--muted);font-size:14px;padding:12px 0">Run the scanner to see today's setups.</div>
+          </div>
+        </div>
+
+        <div class="page" id="page-backtest">
+          <div class="ph">
+            <div class="pt">Backtest</div>
+            <div class="ps">Test both strategies on historical NSE data. No real money needed.</div>
+          </div>
+
+          <div class="ex">
+            <div class="ext">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              What is a backtest?
             </div>
+            <div class="exb">
+              The bot replays the strategy day-by-day on <strong>real past prices</strong>. It never cheats — on day 50 it only looks at day 1-50 data. Results show Win Rate, Profit Factor, and Max Drawdown.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <div class="ct">Backtest Settings</div>
+            </div>
+            <div class="fg">
+              <div class="fi"><label>Start Date</label><input type="date" id="bt-start" value="2024-01-01"></div>
+              <div class="fi"><label>End Date</label><input type="date" id="bt-end" value="2024-12-31"></div>
+              <div class="fi"><label>Capital (Rs)</label><input type="number" id="bt-cap" value="100000" step="5000"></div>
+              <div class="fi"><label>Strategy</label>
+                <select id="bt-strat">
+                  <option value="AUTO">AUTO (AI Market Switch)</option>
+                  <option value="HARMAN1">HARMAN1 (Hybrid Merge)</option>
+                  <option value="MRB">MRB (Bear Market Bounce)</option>
+                  <option value="DEP">DEP (Sniper Only)</option>
+                  <option value="VT">VT (Momentum Only)</option>
+                  <option value="INTRADAY_ORB">INTRADAY (VWAP+EMA)</option>
+                </select>
+              </div>
+              <div class="fi"><label>Stocks to test</label>
+                <select id="bt-uni">
+                  <option value="full">All 215 stocks (slower, more complete)</option>
+                  <option value="50">Top 50 stocks (medium)</option>
+                  <option value="20">Top 20 stocks (fastest)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-g" id="bt-btn" onclick="startBt()" style="margin-top: 8px;">Run Backtest</button>
+          </div>
+
+          <div id="bt-prog" style="display:none" class="card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div class="spin"></div><span style="font-size:14px;font-weight:500">Running backtest — this takes 3-8 minutes...</span>
+            </div>
+            <div class="pt2"><span>Testing: <strong id="bt-sym">—</strong></span><span id="bt-pct">0%</span></div>
+            <div class="pw">
+              <div class="pf" id="bt-bar" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div id="bt-results" style="display:none">
+            <div class="stats" id="bt-stat-cards"></div>
+            <div class="alert" id="bt-verdict" style="display:none"></div>
 
             <div class="g2">
               <div class="card">
                 <div class="ch">
-                  <div>
-                    <div class="ct">🤖 AUTO — AI Market Switch</div>
-                    <div class="cs">The ultimate dynamic strategy for all conditions.</div>
-                  </div>
+                  <div class="ct">Equity Curve</div>
+                  <div class="cn">How your capital grew or shrank</div>
                 </div>
-                <div class="step">
-                  <div class="stepn">1</div>
-                  <div>
-                    <div class="stept">The Brain</div>
-                    <div class="stepb">Checks Nifty 50. If Bullish, switches to Harman1. If Bearish, switches to MRB.
-                    </div>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="stepn">2</div>
-                  <div>
-                    <div class="stept">Capital Defense</div>
-                    <div class="stepb">Never fights the trend. Automatically adapts your portfolio to market weather.
-                    </div>
-                  </div>
-                </div>
+                <div class="cb" style="height:240px"><canvas id="bt-eq"></canvas></div>
               </div>
-
               <div class="card">
                 <div class="ch">
-                  <div>
-                    <div class="ct">⚡ HARMAN1 — Hybrid Merge</div>
-                    <div class="cs">Explosive volume + Momentum confirmation.</div>
-                  </div>
+                  <div class="ct">P&amp;L per Trade</div>
+                  <div class="cn">Green = win, red = loss</div>
                 </div>
-                <div class="step">
-                  <div class="stepn">1</div>
-                  <div>
-                    <div class="stept">The DEP Catalyst</div>
-                    <div class="stepb">Stock must have a massive volume explosion (+4% on 200% vol) in the last 15 days.
-                    </div>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="stepn">2</div>
-                  <div>
-                    <div class="stept">The VT Trigger</div>
-                    <div class="stepb">Waits patiently for price to hold the 20 EMA and MACD to turn positive.</div>
-                  </div>
-                </div>
+                <div class="cb" style="height:240px"><canvas id="bt-pl"></canvas></div>
               </div>
-
+            </div>
+            <div class="g2">
               <div class="card">
                 <div class="ch">
-                  <div>
-                    <div class="ct">🐻 MRB — Bear Market Bounce</div>
-                    <div class="cs">Defensive cash-market mean reversion.</div>
-                  </div>
+                  <div class="ct">Exit Reasons</div>
+                  <div class="cn">How trades ended</div>
                 </div>
-                <div class="step">
-                  <div class="stepn">1</div>
-                  <div>
-                    <div class="stept">Extreme Panic</div>
-                    <div class="stepb">RSI must drop below 30 (deeply oversold) during a bearish market.</div>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="stepn">2</div>
-                  <div>
-                    <div class="stept">The Snap-Back</div>
-                    <div class="stepb">Enters only when today's price aggressively crosses above yesterday's High.</div>
-                  </div>
-                </div>
+                <div class="cb" style="height:220px"><canvas id="bt-exit"></canvas></div>
               </div>
-
               <div class="card">
                 <div class="ch">
-                  <div>
-                    <div class="ct">🎯 DEP / 🌊 VT</div>
-                    <div class="cs">The foundational base strategies.</div>
-                  </div>
+                  <div class="ct">Monthly Returns</div>
+                  <div class="cn">% gain/loss per month</div>
                 </div>
-                <div class="step">
-                  <div class="stepn">1</div>
-                  <div>
-                    <div class="stept">DEP (Sniper)</div>
-                    <div class="stepb">Look for an explosion: price up 4% on massive volume. Wait for dead volume and a
-                      bounce off the 10 EMA.</div>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="stepn">2</div>
-                  <div>
-                    <div class="stept">VT (Momentum)</div>
-                    <div class="stepb">Price must be trading above the 20 EMA and Daily Pivot. Enter when MACD Histogram
-                      rises.</div>
-                  </div>
-                </div>
+                <div class="cb" style="height:220px"><canvas id="bt-month"></canvas></div>
               </div>
             </div>
-
             <div class="card">
               <div class="ch">
-                <div class="ct">Exit Rules (Universal)</div>
+                <div class="ct">Trade Log</div>
+                <div class="cn" id="bt-tc"></div>
               </div>
-              <div class="step">
-                <div class="stepn" style="font-size: 10px;">SL</div>
-                <div>
-                  <div class="stept">Stop Loss Hit</div>
-                  <div class="stepb">Price touches your stop loss level. Exit immediately. Take the small loss.
-                    <strong>Never move the SL further away.</strong></div>
-                </div>
-              </div>
-              <div class="step">
-                <div class="stepn" style="font-size: 10px;">2R</div>
-                <div>
-                  <div class="stept">Move SL to Break Even</div>
-                  <div class="stepb">When the trade is up 2× your initial risk, move the stop loss to your <strong>entry
-                      price</strong>. Now the worst outcome is 0% — you can't lose on this trade.</div>
-                </div>
-              </div>
-              <div class="step">
-                <div class="stepn" style="font-size: 10px;">3R</div>
-                <div>
-                  <div class="stept">Sell Half the Position</div>
-                  <div class="stepb">When up 3× initial risk, sell 50% of your shares. This locks in profits while
-                    letting the rest run.</div>
-                </div>
-              </div>
-              <div class="step">
-                <div class="stepn" style="font-size: 10px;">EMA</div>
-                <div>
-                  <div class="stept">Trail on 20 EMA</div>
-                  <div class="stepb">For the remaining 50%, use the <strong>20-day EMA as a trailing stop</strong>. When
-                    price closes below the 20 EMA, sell.</div>
-                </div>
+              <div class="tw">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Stock</th>
+                      <th>Strategy</th>
+                      <th>Bought</th>
+                      <th>Sold</th>
+                      <th>Entry Rs</th>
+                      <th>Exit Rs</th>
+                      <th>Shares</th>
+                      <th>P&amp;L Rs</th>
+                      <th>P&amp;L %</th>
+                      <th>How it ended</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bt-tbody"></tbody>
+                </table>
               </div>
             </div>
           </div>
-
-          <div class="page" id="page-glossary">
-            <div class="ph">
-              <div class="pt">📚 Glossary</div>
-              <div class="ps">Every term used in this bot, explained in plain English.</div>
-            </div>
-            <div class="card">
-              <div id="gloss-list"></div>
-            </div>
-          </div>
-
-          <div class="page" id="page-config">
-            <div class="ph">
-              <div class="pt">⚙ Settings</div>
-              <div class="ps">API credentials and dynamic strategy parameters.</div>
-            </div>
-
-            <div class="alert aw">⚠ <div>Your API key is stored <strong>only on your computer</strong> in the .env file.
-                Never shared anywhere.</div>
-            </div>
-
-            <div class="card">
-              <div class="ch">
-                <div class="ct">Groww API</div>
-                <div class="cs">Only needed for live order placement</div>
-              </div>
-              <div class="fg">
-                <div class="fi"><label>API Key</label><input type="password" id="cfg-key" placeholder="Groww API Key">
-                </div>
-                <div class="fi"><label>Secret Key</label><input type="password" id="cfg-sec"
-                    placeholder="Groww Secret Key"></div>
-                <div class="fi"><label>Client ID</label><input type="text" id="cfg-cid" placeholder="Client ID"></div>
-                <div class="fi"><label>Mode</label>
-                  <select id="cfg-mode">
-                    <option value="true">Paper Trading (safe — recommended)</option>
-                    <option value="false">Live Trading (real orders)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="ch">
-                <div class="ct">Capital &amp; Risk</div>
-              </div>
-              <div class="fg">
-                <div class="fi"><label>Capital (Rs)</label><input type="number" id="cfg-cap" value="100000" step="5000">
-                </div>
-                <div class="fi"><label>Risk per Trade (%)</label><input type="number" id="cfg-risk" value="2" step="0.5"
-                    min="0.5" max="5"></div>
-                <div class="fi"><label>Max Stop Loss (%)</label><input type="number" id="cfg-sl" value="15.0" step="0.5"
-                    min="1" max="25"></div>
-              </div>
-              <div class="alert ai" style="margin-top:20px; margin-bottom:0;">💡 <div>With Rs 1,00,000 capital and 2%
-                  risk per trade, you risk Rs 2,000 per trade. Even 10 losses in a row = only Rs 20,000 lost (20% of
-                  capital). This is the correct way to manage risk.</div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="ch">
-                <div class="ct">Advanced Strategy Parameters</div>
-                <div class="cs">Dynamically tune the bot's mathematical thresholds.</div>
-              </div>
-              <div class="fg">
-                <div class="fi"><label>Min Quality Score (1-100)</label><input type="number" id="cfg-q" value="70"
-                    title="Lower = more trades, less strict. Higher = fewer trades, textbook setups."></div>
-                <div class="fi"><label>Vol Explosion Multiplier</label><input type="number" id="cfg-vol" value="1.5"
-                    step="0.1" title="1.5 = 150% of 50-day average."></div>
-                <div class="fi"><label>Expansion Breakout (%)</label><input type="number" id="cfg-exp" value="3.5"
-                    step="0.5" title="Min % jump required to trigger a DEP catalyst."></div>
-                <div class="fi"><label>MRB RSI Oversold Level</label><input type="number" id="cfg-rsi" value="35"
-                    title="RSI threshold to trigger a Bear Market Bounce."></div>
-              </div>
-            </div>
-
-            <div class="br" style="margin-top:20px"><button class="btn btn-g" onclick="saveConfig()">Save
-                Settings</button></div>
-            <div id="cfg-msg" style="font-size:14px;color:var(--g);margin-top:8px"></div>
-          </div>
-
-          <div class="page" id="page-logs">
-            <div class="ph">
-              <div class="pt">📋 Activity Log</div>
-              <div class="ps">Real-time output from the scanner and trade engine.</div>
-            </div>
-            <div class="br"><button class="btn btn-s" onclick="loadLogs()">↺ Refresh</button></div>
-            <div class="logbox" style="max-height:700px;font-size:12.5px" id="log-box">Loading...</div>
-          </div>
-
         </div>
+
+        <div class="page" id="page-learn">
+          <div class="ph">
+            <div class="pt">How It Works</div>
+            <div class="ps">The strategies and how to use this bot — explained simply.</div>
+          </div>
+
+          <div class="g2">
+            <div class="card">
+              <div class="ch">
+                <div>
+                  <div class="ct">AUTO — AI Market Switch</div>
+                  <div class="cs">The ultimate dynamic strategy for all conditions.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">1</div>
+                <div>
+                  <div class="stept">The Brain</div>
+                  <div class="stepb">Checks Nifty 50. If Bullish, switches to Harman1. If Bearish, switches to MRB.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">2</div>
+                <div>
+                  <div class="stept">Capital Defense</div>
+                  <div class="stepb">Never fights the trend. Automatically adapts your portfolio to market weather.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="ch">
+                <div>
+                  <div class="ct">HARMAN1 — Hybrid Merge</div>
+                  <div class="cs">Explosive volume + Momentum confirmation.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">1</div>
+                <div>
+                  <div class="stept">The DEP Catalyst</div>
+                  <div class="stepb">Stock must have a massive volume explosion (+4% on 200% vol) in the last 15 days.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">2</div>
+                <div>
+                  <div class="stept">The VT Trigger</div>
+                  <div class="stepb">Waits patiently for price to hold the 20 EMA and MACD to turn positive.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="ch">
+                <div>
+                  <div class="ct">MRB — Bear Market Bounce</div>
+                  <div class="cs">Defensive cash-market mean reversion.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">1</div>
+                <div>
+                  <div class="stept">Extreme Panic</div>
+                  <div class="stepb">RSI must drop below 30 (deeply oversold) during a bearish market.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">2</div>
+                <div>
+                  <div class="stept">The Snap-Back</div>
+                  <div class="stepb">Enters only when today's price aggressively crosses above yesterday's High.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="ch">
+                <div>
+                  <div class="ct">DEP &amp; VT</div>
+                  <div class="cs">The foundational base strategies.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">1</div>
+                <div>
+                  <div class="stept">DEP (Sniper)</div>
+                  <div class="stepb">Look for an explosion: price up 4% on massive volume. Wait for dead volume and a bounce off the 10 EMA.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="stepn">2</div>
+                <div>
+                  <div class="stept">VT (Momentum)</div>
+                  <div class="stepb">Price must be trading above the 20 EMA and Daily Pivot. Enter when MACD Histogram rises.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <div class="ct">Exit Rules (Universal)</div>
+            </div>
+            <div class="step">
+              <div class="stepn" style="font-size: 11px;">SL</div>
+              <div>
+                <div class="stept">Stop Loss Hit</div>
+                <div class="stepb">Price touches your stop loss level. Exit immediately. Take the small loss. <strong>Never move the SL further away.</strong></div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="stepn" style="font-size: 11px;">2R</div>
+              <div>
+                <div class="stept">Move SL to Break Even</div>
+                <div class="stepb">When the trade is up 2× your initial risk, move the stop loss to your <strong>entry price</strong>. Now the worst outcome is 0% — you can't lose on this trade.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="stepn" style="font-size: 11px;">3R</div>
+              <div>
+                <div class="stept">Sell Half the Position</div>
+                <div class="stepb">When up 3× initial risk, sell 50% of your shares. This locks in profits while letting the rest run.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="stepn" style="font-size: 11px;">EMA</div>
+              <div>
+                <div class="stept">Trail on 20 EMA</div>
+                <div class="stepb">For the remaining 50%, use the <strong>20-day EMA as a trailing stop</strong>. When price closes below the 20 EMA, sell.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" id="page-glossary">
+          <div class="ph">
+            <div class="pt">Glossary</div>
+            <div class="ps">Every term used in this bot, explained in plain English.</div>
+          </div>
+          <div class="card">
+            <div id="gloss-list"></div>
+          </div>
+        </div>
+
+        <div class="page" id="page-config">
+          <div class="ph">
+            <div class="pt">Settings</div>
+            <div class="ps">API credentials and dynamic strategy parameters.</div>
+          </div>
+
+          <div class="alert aw">
+            <div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+            <div>Your API key is stored <strong>only on your computer</strong> in the .env file. Never shared anywhere.</div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <div class="ct">Groww API</div>
+              <div class="cs">Only needed for live order placement</div>
+            </div>
+            <div class="fg">
+              <div class="fi"><label>API Key</label><input type="password" id="cfg-key" placeholder="Groww API Key"></div>
+              <div class="fi"><label>Secret Key</label><input type="password" id="cfg-sec" placeholder="Groww Secret Key"></div>
+              <div class="fi"><label>Client ID</label><input type="text" id="cfg-cid" placeholder="Client ID"></div>
+              <div class="fi"><label>Mode</label>
+                <select id="cfg-mode">
+                  <option value="true">Paper Trading (safe — recommended)</option>
+                  <option value="false">Live Trading (real orders)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <div class="ct">Capital &amp; Risk</div>
+            </div>
+            <div class="fg">
+              <div class="fi"><label>Capital (Rs)</label><input type="number" id="cfg-cap" value="100000" step="5000"></div>
+              <div class="fi"><label>Risk per Trade (%)</label><input type="number" id="cfg-risk" value="2" step="0.5" min="0.5" max="5"></div>
+              <div class="fi"><label>Max Stop Loss (%)</label><input type="number" id="cfg-sl" value="15.0" step="0.5" min="1" max="25"></div>
+            </div>
+            <div class="alert ai" style="margin-top:20px; margin-bottom:0;">
+              <div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+              <div>With Rs 1,00,000 capital and 2% risk per trade, you risk Rs 2,000 per trade. Even 10 losses in a row = only Rs 20,000 lost (20% of capital). This is the correct way to manage risk.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <div class="ct">Advanced Strategy Parameters</div>
+              <div class="cs">Dynamically tune the bot's mathematical thresholds.</div>
+            </div>
+            <div class="fg">
+              <div class="fi"><label>Min Quality Score (1-100)</label><input type="number" id="cfg-q" value="70" title="Lower = more trades, less strict. Higher = fewer trades, textbook setups."></div>
+              <div class="fi"><label>Vol Explosion Multiplier</label><input type="number" id="cfg-vol" value="1.5" step="0.1" title="1.5 = 150% of 50-day average."></div>
+              <div class="fi"><label>Expansion Breakout (%)</label><input type="number" id="cfg-exp" value="3.5" step="0.5" title="Min % jump required to trigger a DEP catalyst."></div>
+              <div class="fi"><label>MRB RSI Oversold Level</label><input type="number" id="cfg-rsi" value="35" title="RSI threshold to trigger a Bear Market Bounce."></div>
+            </div>
+          </div>
+
+          <div class="br" style="margin-top:20px">
+            <button class="btn btn-g" onclick="saveConfig()">Save Settings</button>
+          </div>
+          <div id="cfg-msg" style="font-size:14px;color:var(--g);margin-top:8px"></div>
+        </div>
+
+        <div class="page" id="page-logs">
+          <div class="ph">
+            <div class="pt">Activity Log</div>
+            <div class="ps">Real-time output from the scanner and trade engine.</div>
+          </div>
+          <div class="br"><button class="btn btn-s" onclick="loadLogs()">Refresh Logs</button></div>
+          <div class="logbox" id="log-box">Loading...</div>
+        </div>
+
       </div>
     </div>
-    <div class="overlay" id="modal-overlay" onclick="maybeCloseModal(event)">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-t">Close Trade — <span id="modal-sym2"></span></div>
-        <div class="fi" style="margin-bottom:16px"><label>Actual Exit Price (Rs)</label><input type="number"
-            id="modal-ep" placeholder="e.g. 248.50" step="0.05" oninput="calcModal()"></div>
-        <div class="fi" style="margin-bottom:20px"><label>Exit Reason</label>
-          <select id="modal-reason">
-            <option value="Stop Loss Hit">Stop Loss Hit</option>
-            <option value="Break Even Exit">Break Even Exit (SL moved to entry, exited flat)</option>
-            <option value="3R Target">3R Target (sold half)</option>
-            <option value="20 EMA Trail">20 EMA Trail</option>
-            <option value="Aggressive Exit 40%+">Aggressive Exit (40%+ move)</option>
-            <option value="Manual Exit">Manual Exit</option>
-          </select>
-        </div>
-        <div class="mcalc" id="modal-calc">Enter exit price to see P&amp;L preview</div>
-        <div style="display:flex;gap:12px">
-          <button class="btn btn-g" onclick="submitClose()">Confirm Close</button>
-          <button class="btn btn-s" onclick="hideModal()">Cancel</button>
-        </div>
+  </div>
+
+  <div class="overlay" id="modal-overlay" onclick="maybeCloseModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-t">Close Trade — <span id="modal-sym2"></span></div>
+      <div class="fi" style="margin-bottom:16px"><label>Actual Exit Price (Rs)</label><input type="number" id="modal-ep" placeholder="e.g. 248.50" step="0.05" oninput="calcModal()"></div>
+      <div class="fi" style="margin-bottom:20px"><label>Exit Reason</label>
+        <select id="modal-reason">
+          <option value="Stop Loss Hit">Stop Loss Hit</option>
+          <option value="Break Even Exit">Break Even Exit (SL moved to entry, exited flat)</option>
+          <option value="3R Target">3R Target (sold half)</option>
+          <option value="20 EMA Trail">20 EMA Trail</option>
+          <option value="Aggressive Exit 40%+">Aggressive Exit (40%+ move)</option>
+          <option value="Manual Exit">Manual Exit</option>
+        </select>
+      </div>
+      <div class="mcalc" id="modal-calc">Enter exit price to see P&amp;L preview</div>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-g" onclick="submitClose()">Confirm Close</button>
+        <button class="btn btn-s" onclick="hideModal()">Cancel</button>
       </div>
     </div>
+  </div>
 
-    <script>
-      const isGH = window.location.hostname.includes("github.io");
+  <script>
+    const isGH = window.location.hostname.includes("github.io");
 
-      // ════════════════════════════════════════════════════════════════
-      //  GLOBALS
-      // ════════════════════════════════════════════════════════════════
-      const $ = id => document.getElementById(id);
-      let btCharts = {}, ftCharts = {}, homeEqChart = null;
-      let modalTradeId = null, modalEntryPrice = 0, modalShares = 0;
-      let scanPoll = null, btPoll = null, scanStart = 0;
+    const $ = id => document.getElementById(id);
+    let btCharts = {}, ftCharts = {}, homeEqChart = null;
+    let modalTradeId = null, modalEntryPrice = 0, modalShares = 0;
+    let scanPoll = null, btPoll = null, scanStart = 0;
 
+    // Mobile Sidebar Toggle
+    function toggleSidebar() {
+      const sb = $('sidebar');
+      sb.classList.toggle('open');
+    }
 
+    // ════════════════════════════════════════════════════════════════
+    //  RESTORED DASHBOARD CHARTS
+    // ════════════════════════════════════════════════════════════════
+    function drawHomeEq(eq, cap) {
+      if (homeEqChart) homeEqChart.destroy();
+      if (!eq || eq.length === 0) return;
+      homeEqChart = mkLineChart('home-eq-chart', eq.map(p => p.date), eq.map(p => p.equity), 'Rs ');
+    }
 
-      // ════════════════════════════════════════════════════════════════
-      //  RESTORED DASHBOARD CHARTS
-      // ════════════════════════════════════════════════════════════════
-      function drawHomeEq(eq, cap) {
-        if (homeEqChart) homeEqChart.destroy();
-        if (!eq || eq.length === 0) return;
-        homeEqChart = mkLineChart('home-eq-chart', eq.map(p => p.date), eq.map(p => p.equity), 'Rs ');
-      }
-
-      function drawFtCharts(eq, trades, cap) {
-        if (ftCharts.eq) ftCharts.eq.destroy();
-        if (ftCharts.bar) ftCharts.bar.destroy();
-        
-        if (eq && eq.length > 0) {
-          ftCharts.eq = mkLineChart('ft-eq-chart', eq.map(p => p.date), eq.map(p => p.equity), 'Rs ');
-        }
-        
-        const closed = trades.filter(t => t.status === "CLOSED").reverse();
-        if (closed.length > 0) {
-          ftCharts.bar = new Chart($('ft-bar-chart'), {
-            type: 'bar',
-            data: {
-              labels: closed.map((_, i) => 'T' + (i + 1)),
-              datasets: [{ 
-                data: closed.map(t => t.realized_pnl || 0), 
-                backgroundColor: closed.map(t => (t.realized_pnl || 0) >= 0 ? 'rgba(109, 179, 135, 0.7)' : 'rgba(224, 122, 109, 0.7)'), 
-                borderRadius: 4 
-              }]
-            },
-            options: { 
-              responsive: true, maintainAspectRatio: false, 
-              plugins: { legend: { display: false } }, 
-              scales: { 
-                x: { display: false }, 
-                y: { ticks: { color: '#a8a5a0', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } } 
-              } 
-            }
-          });
-        }
-      }
-
-
-      const PAGE_NAMES = {
-        home: 'Dashboard', fwd: 'Forward Test', scanner: 'Scanner',
-        backtest: 'Backtest', learn: 'How It Works', glossary: 'Glossary',
-        config: 'Settings', logs: 'Logs'
-      };
-
-      // ════════════════════════════════════════════════════════════════
-      //  NAV
-      // ════════════════════════════════════════════════════════════════
-      function go(name) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-        document.querySelectorAll('.nl').forEach(n => n.classList.remove('on'));
-        $('page-' + name).classList.add('on');
-        const link = document.querySelector(`.nl[onclick="go('${name}')"]`);
-        if (link) link.classList.add('on');
-        $('tb-title').textContent = PAGE_NAMES[name] || name;
-
-        if (name === 'home') refreshHome();
-        if (name === 'fwd') refreshFwd();
-        if (name === 'logs') loadLogs();
-        if (name === 'glossary') renderGloss();
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  CLOCK & MARKET
-      // ════════════════════════════════════════════════════════════════
-      function tick() {
-        const now = new Date();
-        $('tb-clock').textContent = now.toLocaleTimeString('en-IN', { hour12: false });
-        const h = now.getHours(), m = now.getMinutes(), d = now.getDay();
-        const open = d >= 1 && d <= 5 && (h > 9 || (h === 9 && m >= 15)) && (h < 15 || (h === 15 && m <= 30));
-        const pill = $('mkt-pill');
-        pill.className = 'mpill ' + (open ? 'open' : 'closed');
-        pill.innerHTML = open ? '<div class="pulse"></div> NSE Open' : '⏸ NSE Closed';
-
-        const hr = now.getHours();
-        const greet = hr < 12 ? 'Good morning 👋' : hr < 17 ? 'Good afternoon 👋' : 'Good evening 👋';
-        $('home-greeting').textContent = greet;
-      }
-      setInterval(tick, 1000); tick();
-
-      // ════════════════════════════════════════════════════════════════
-      //  STATUS CHECK (GitHub Pages Safe)
-      // ════════════════════════════════════════════════════════════════
-      async function checkStatus() {
-        if (isGH) {
-            $('d-data').className = 'dot g'; $('t-data').textContent = 'Data: yfinance OK';
-            $('d-api').className = 'dot g'; $('t-api').textContent = 'Groww: Live';
-            $('t-mode').textContent = '📋 Paper Mode';
-            $('hs-cap').textContent = 'Rs 1,00,000'; 
-            return;
-        }
-        
-        try {
-          const d = await (await fetch('/api/status')).json();
-          const dd = $('d-data'), dt = $('t-data'), da = $('d-api'), ta = $('t-api');
-          dd.className = 'dot ' + (d.api_connected ? 'g' : 'r');
-          dt.textContent = d.api_connected ? 'Data: yfinance OK' : 'Data: no internet?';
-          da.className = 'dot ' + (d.groww_connected ? 'g' : d.api_configured ? 'a' : 'r');
-          ta.textContent = d.groww_connected ? 'Groww: connected' : d.api_configured ? 'Groww: key error' : 'Groww: not configured';
-          $('t-mode').textContent = d.paper_trading ? '📋 Paper Mode' : '💰 LIVE Mode';
-          const b = $('mode-badge');
-          b.textContent = d.paper_trading ? 'PAPER TRADING' : 'LIVE TRADING';
-          b.style.background = d.paper_trading ? 'var(--gd)' : 'var(--rd)';
-          b.style.color = d.paper_trading ? 'var(--g)' : 'var(--r)';
-          $('hs-cap').textContent = 'Rs ' + (d.capital || 0).toLocaleString('en-IN');
-        } catch (e) { }
-      }
-      checkStatus(); setInterval(checkStatus, 30000);
-
-      // ════════════════════════════════════════════════════════════════
-      //  HOME
-      // ════════════════════════════════════════════════════════════════
-      async function refreshHome() {
-        try {
-          const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
-          
-          const allTrades = s.trades || [];
-          const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
-
-          const closed = trades.filter(t => t.status === "CLOSED");
-          const active = trades.filter(t => t.status === "ACTIVE");
-          const watching = trades.filter(t => t.status === "WATCHING");
-
-          let totalPnl = 0, wins = 0;
-          closed.forEach(t => {
-            totalPnl += (t.realized_pnl || 0);
-            if ((t.realized_pnl || 0) > 0) wins++;
-          });
-
-          $('hs-act').textContent = active.length + watching.length;
-          $('hs-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
-          $('hs-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
-          $('hs-wr').textContent = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(1) + '%' : '—';
-
-          const recentTrades = trades.slice().reverse().slice(0, 5);
-          const el = $('home-ft-list');
-          if (!recentTrades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:14px">No trades tracked yet.</div>'; }
-          else {
-            el.innerHTML = recentTrades.map(t => {
-              const pnl = t.realized_pnl || 0;
-              const cls = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
-              const val = t.status === 'CLOSED' ? (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0) : t.status;
-              return `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
-          <div><div style="font-weight:500;font-size:14.5px;color:var(--txt)">${t.symbol} <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px">${t.strategy}</span></div>
-          <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Entry Rs${t.entry_price} · SL ${t.sl_pct || 0}%</div></div>
-          <span class="badge ${cls}" style="align-self:center">${val}</span>
-        </div>`;
-            }).join('');
-          }
-
-          drawHomeEq(s.equity_curve || [], s.capital || 3000);
-        } catch (e) { console.error("Home error:", e); }
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  FORWARD TEST
-      // ════════════════════════════════════════════════════════════════
-      async function refreshFwd() {
-        try {
-          const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
-
-          const allTrades = s.trades || [];
-          const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
-
-          const closed = trades.filter(t => t.status === "CLOSED");
-          const active = trades.filter(t => t.status === "ACTIVE");
-          const watching = trades.filter(t => t.status === "WATCHING");
-
-          let totalPnl = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0;
-          closed.forEach(t => {
-            const pnl = t.realized_pnl || 0;
-            totalPnl += pnl;
-            if (pnl > 0) { wins++; grossWin += pnl; }
-            else if (pnl < 0) { losses++; grossLoss += Math.abs(pnl); }
-          });
-
-          const pf = grossLoss > 0 ? (grossWin / grossLoss).toFixed(2) : (grossWin > 0 ? '∞' : '—');
-
-          $('ft-total').textContent = trades.length;
-          $('ft-watching').textContent = watching.length;
-          $('ft-active2').textContent = active.length;
-          $('ft-wins').textContent = wins;
-          $('ft-losses').textContent = losses;
-          $('ft-wr').textContent = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(1) + '%' : '—';
-
-          $('ft-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
-          $('ft-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
-          $('ft-pf').textContent = pf;
-
-          const activeCount = active.length + watching.length;
-          const b = $('ft-badge'); b.textContent = activeCount; b.style.display = activeCount > 0 ? '' : 'none';
-
-          drawFtCharts(s.equity_curve || [], trades, s.capital || 3000);
-          renderFtList(trades);
-        } catch (e) { console.error("Fwd error:", e); }
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  LIST RENDERER (ULTRA-SAFE VERSION)
-      // ════════════════════════════════════════════════════════════════
-      function renderFtList(trades) {
-        const el = $('ft-list');
-        if (!trades.length) { 
-          el.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:12px 0">No trades yet. Add from the Scanner page.</div>'; 
-          return; 
-        }
-        
-        let html = '';
-        
-        trades.slice().reverse().forEach(t => {
-          try {
-            const ep = parseFloat(t.entry_price) || 0;
-            const sl = parseFloat(t.stop_loss) || 0;
-            const one_r = parseFloat(t.one_r) || (ep - sl) || 1;
-            const be = ep + (2 * one_r);
-            const t3r = ep + (3 * one_r);
-            const pnl = parseFloat(t.realized_pnl) || 0;
-            const pnl_pct = parseFloat(t.pnl_pct) || 0;
-            const sl_pct = parseFloat(t.sl_pct) || 0;
-            
-            const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
-            const stages = [
-              { label: 'Scan', done: true },
-              { label: 'Enter @ Rs' + ep.toFixed(1), done: t.status !== 'WATCHING' },
-              { label: 'BE @ Rs' + be.toFixed(1), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
-              { label: '3R @ Rs' + t3r.toFixed(1), done: false },
-              { label: 'Trail EMA', done: false },
-            ];
-            
-            html += `<div class="ft-trade">
-              <div class="ft-head">
-                <div>
-                  <div class="ft-sym">${t.symbol} <span style="font-size:12.5px;color:var(--muted);font-weight:400;margin-left:6px">${t.strategy || 'SYS'}</span></div>
-                  <div class="ft-meta">Entry Rs${ep} · SL Rs${sl} (${sl_pct}%) · 1R=Rs${one_r.toFixed(1)}</div>
-                  <div class="ft-meta">${t.notes || ''}</div>
-                </div>
-                <div class="ft-right">
-                  ${t.status === 'CLOSED'
-                      ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
-                       <div style="font-size:12px;color:var(--muted);margin-top:6px">${t.exit_reason || 'Manual'}</div>`
-                      : `<span class="badge ${statusBadge}">${t.status}</span><br>
-                       ${t.status === 'WATCHING'
-                        ? `<button class="btn btn-b" style="margin-top:10px;font-size:12px;padding:6px 12px" onclick="markEntered('${t.id}',${ep})">Mark Entered</button>`
-                        : ''}
-                       <button class="btn btn-r" style="margin-top:10px;font-size:12px;padding:6px 12px" onclick="openModal('${t.id}',${ep},${t.shares || 1})">Close Trade</button>`
-                    }
-                </div>
-              </div>
-              <div class="ft-stages">
-                ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
-              </div>
-            </div>`;
-          } catch (err) {
-            console.error("Skipping corrupted trade:", t.symbol, err);
-          }
-        });
-        
-        if (html === '') {
-          html = '<div style="color:var(--r);font-size:14px;padding:12px 0">Error rendering trades. Data might be corrupted.</div>';
-        }
-        
-        el.innerHTML = html;
-      }
-
-      async function addToFt(signal) {
-        try {
-          const r = await (await fetch('/api/forward/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(signal) })).json();
-          if (r.success) {
-            alert('✓ ' + signal.symbol + ' added to Forward Test!');
-            refreshFwd();
-          } else alert('Error: ' + r.error);
-        } catch (e) { alert('Network error'); }
-      }
-
-      async function markEntered(id, price) {
-        const actual = prompt(`Confirm: what price did you actually get filled at? (default: Rs${price})`, price);
-        if (actual === null) return;
-        const r = await (await fetch('/api/forward/enter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trade_id: id, actual_entry_price: parseFloat(actual) || price }) })).json();
-        if (r.success) refreshFwd(); else alert(r.error);
-      }
-
-      async function deleteFt(id) {
-        if (!confirm('Remove this trade from forward test?')) return;
-        await fetch('/api/forward/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trade_id: id }) });
-        refreshFwd();
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  MODAL
-      // ════════════════════════════════════════════════════════════════
-      function openModal(id, entryPrice, shares) {
-        modalTradeId = id; modalEntryPrice = entryPrice; modalShares = shares;
-        const el = document.querySelector(`[onclick*="${id}"]`);
-        $('modal-sym2').textContent = '';
-        $('modal-ep').value = '';
-        $('modal-calc').innerHTML = 'Enter exit price to see P&L preview';
-        $('modal-overlay').classList.add('show');
-        setTimeout(() => $('modal-ep').focus(), 50);
-      }
-      function hideModal() { $('modal-overlay').classList.remove('show'); modalTradeId = null; }
-      function maybeCloseModal(e) { if (e.target === $('modal-overlay')) hideModal(); }
-
-      function calcModal() {
-        const ep = parseFloat($('modal-ep').value);
-        if (!ep || !modalEntryPrice) { $('modal-calc').innerHTML = 'Enter exit price to see P&L preview'; return; }
-        const one_r = modalEntryPrice - (modalEntryPrice * 0.97);
-        const pnl_pct = (ep - modalEntryPrice) / modalEntryPrice * 100;
-        const pnl_rs = (ep - modalEntryPrice) * (modalShares || 1);
-        const col = pnl_rs >= 0 ? 'var(--g)' : 'var(--r)';
-        $('modal-calc').innerHTML =
-          `<span style="color:${col};font-size:18px;font-weight:500;font-family:ui-serif,Georgia,serif">${pnl_rs >= 0 ? '+' : ''}Rs ${pnl_rs.toFixed(2)} (${pnl_pct.toFixed(1)}%)</span><br>
-     <div style="margin-top:8px">Shares: ${modalShares} · Entry: Rs${modalEntryPrice} · Exit: Rs${ep}</div>`;
-      }
-
-      async function submitClose() {
-        const ep = parseFloat($('modal-ep').value);
-        const reason = $('modal-reason').value;
-        if (!ep) { alert('Enter exit price'); return; }
-        const r = await (await fetch('/api/forward/close', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trade_id: modalTradeId, exit_price: ep, exit_reason: reason }) })).json();
-        if (r.success) { hideModal(); refreshFwd(); } else alert(r.error);
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  SCANNER
-      // ════════════════════════════════════════════════════════════════
-      let lastScanN = 0;
-      function startScan() {
-        $('scan-btn').disabled = true;
-        scanStart = Date.now(); lastScanN = 0;
-        $('scan-prog').style.display = 'block';
-        $('scan-summary').style.display = 'none';
-        $('scan-log').innerHTML = '';
-        $('signals-area').innerHTML = '<div style="color:var(--muted);font-size:14px;padding:12px 0">Scanning...</div>';
-        const strat = $('scan-strat').value;
-        $('scan-status-txt').textContent = '';
-
-        fetch('/api/scan/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ strategy: strat }) })
-          .then(r => r.json()).then(d => {
-            if (d.error) { alert(d.error); $('scan-btn').disabled = false; return; }
-            scanPoll = setInterval(pollScan, 1200);
-          }).catch(() => { $('scan-btn').disabled = false; });
-      }
-
-      async function pollScan() {
-        try {
-          const d = await (await fetch('/api/scan/progress')).json();
-          const pct = d.total > 0 ? Math.round(d.current / d.total * 100) : 0;
-          $('scan-bar').style.width = pct + '%';
-          $('scan-pct').textContent = pct + '%';
-          $('scan-sym').textContent = d.symbol || '—';
-
-          if (d.current > lastScanN && d.symbol) {
-            lastScanN = d.current;
-            const line = document.createElement('div');
-            line.className = 'll';
-            line.innerHTML = `<span class="lsym">${d.current}. ${d.symbol}</span><span style="color:var(--muted);font-size:12px">checking...</span>`;
-            $('scan-log').appendChild(line);
-            $('scan-log').scrollTop = 9999;
-          }
-
-          if (d.done) {
-            clearInterval(scanPoll); scanPoll = null;
-            $('scan-btn').disabled = false;
-            const secs = Math.round((Date.now() - scanStart) / 1000);
-            $('scan-prog').style.display = 'none';
-            $('scan-status-txt').textContent = '✓ Done in ' + secs + 's';
-            loadAndShowSignals(d.total || 0, secs);
-          }
-          if (d.error) {
-            clearInterval(scanPoll); scanPoll = null;
-            $('scan-btn').disabled = false;
-            $('scan-prog').style.display = 'none';
-            $('scan-status-txt').textContent = '✗ ' + d.error;
-          }
-        } catch (e) { }
-      }
-
-      async function reloadSignals() { loadAndShowSignals(0, 0); }
-
-      async function loadAndShowSignals(total, secs) {
-        try {
-          const sigs = await (await fetch(isGH ? 'data/signals.json' : '/api/scan/signals')).json();
-
-          if (sigs.length > 0 && sigs[0].market_bearish) {
-            $('market-safety-alert').style.display = 'flex';
-            if (total > 0) {
-              $('ss-tot').textContent = total;
-              $('ss-pass').textContent = '0';
-              $('ss-fail').textContent = total;
-              $('ss-time').textContent = secs + 's';
-              $('scan-summary').style.display = 'flex';
-            }
-            $('signals-area').innerHTML = '<div style="margin-top:24px; color:var(--r); font-weight:500; font-size:15px;">Scan aborted due to unsafe market conditions. Auto-switching to defensive measures required.</div>';
-            return;
-          }
-
-          $('market-safety-alert').style.display = 'none';
-
-          if (total > 0) {
-            $('ss-tot').textContent = total;
-            $('ss-pass').textContent = sigs.length;
-            $('ss-fail').textContent = total - sigs.length;
-            $('ss-time').textContent = secs + 's';
-            $('scan-summary').style.display = 'flex';
-            $('hs-sigs').textContent = sigs.length;
-          }
-
-          const el = $('signals-area');
-          if (!sigs.length) {
-            el.innerHTML = `<div class="alert aw">⚠ <div><strong>No perfect setups found today.</strong> This is normal — the strategy is very selective. Try the AUTO strategy or run again tomorrow.</div></div>`;
-            return;
-          }
-
-          el.innerHTML = `<div style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:20px">✓ ${sigs.length} setup${sigs.length > 1 ? 's' : ''} found</div>` +
-            sigs.map(s => {
-              const one_r = s.entry_price - s.stop_loss;
-              const be = (s.entry_price + 2 * one_r).toFixed(0);
-              const t3r = (s.entry_price + 3 * one_r).toFixed(0);
-              const t4r = (s.entry_price + 4 * one_r).toFixed(0);
-              const qcol = s.quality_score >= 80 ? 'var(--g)' : s.quality_score >= 65 ? 'var(--a)' : 'var(--r)';
-              return `<div class="sc ${s.quality_score >= 80 ? 'strong' : ''}">
-          <div class="sl2">
-            <div class="sn">${s.symbol} <span style="font-size:12.5px;font-weight:400;color:var(--muted);margin-left:6px;font-family:sans-serif">${s.strategy}</span></div>
-            <div class="stags">
-              <span class="stag ${s.pullback_pct > 0 ? 'g' : 'b'}">Pullback ${s.pullback_pct}%</span>
-              <span class="stag b">Vol ${Math.round((s.vol_ratio || 1) * 100)}% of avg</span>
-              <span class="stag a">SL ${s.sl_pct}%</span>
-              <span class="stag g">${s.strategy}</span>
-            </div>
-            <div class="swhy">${s.notes || ''}</div>
-            <div style="margin-top:16px">
-              <div class="ql">Quality: <strong style="color:${qcol};font-weight:600">${s.quality_score}/100</strong></div>
-              <div class="qbar" style="width:200px"><div class="qfill" style="width:${s.quality_score}%;background:${qcol}"></div></div>
-            </div>
-          </div>
-          <div class="sr2">
-            <div><div style="font-size:12px;color:var(--muted)">BUY above</div><div class="se">Rs ${s.entry_price}</div></div>
-            <div><div style="font-size:12px;color:var(--muted);margin-top:8px">Stop Loss</div><div class="ssl">Rs ${s.stop_loss} (${s.sl_pct}%)</div></div>
-            <div class="star">
-              Break Even: Rs ${be}<br>
-              3R target: Rs ${t3r}<br>
-              4R target: Rs ${t4r}<br>
-              Shares: ${s.shares}<br>
-              Capital: Rs ${(s.invested || 0).toLocaleString('en-IN')}
-            </div>
-            <button class="btn btn-g" style="font-size:13px;padding:8px 16px;margin-top:12px" onclick='addToFt(${JSON.stringify(s).replace(/'/g, "&#39;")})'>Track This Trade</button>
-          </div>
-        </div>`;
-            }).join('');
-        } catch (e) { console.error(e); }
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  BACKTEST
-      // ════════════════════════════════════════════════════════════════
-      function startBt() {
-        $('bt-btn').disabled = true;
-        $('bt-prog').style.display = 'block';
-        $('bt-results').style.display = 'none';
-        const count = $('bt-uni').value;
-        const payload = {
-          start_date: $('bt-start').value, end_date: $('bt-end').value,
-          capital: parseFloat($('bt-cap').value), strategy: $('bt-strat').value
-        };
-        if (count && count !== 'full') payload.symbols_count = parseInt(count);
-
-        fetch('/api/backtest/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-          .then(r => r.json()).then(d => {
-            if (d.error) { alert(d.error); $('bt-btn').disabled = false; return; }
-            btPoll = setInterval(pollBt, 2000);
-          }).catch(() => { $('bt-btn').disabled = false; });
-      }
-
-      async function pollBt() {
-        try {
-          const d = await (await fetch('/api/backtest/progress')).json();
-          const pct = d.total > 0 ? Math.round(d.current / d.total * 100) : 0;
-          $('bt-bar').style.width = pct + '%'; $('bt-pct').textContent = pct + '%'; $('bt-sym').textContent = d.symbol || '—';
-          if (d.done) { clearInterval(btPoll); $('bt-btn').disabled = false; $('bt-prog').style.display = 'none'; loadBtResults(); }
-          if (d.error) { clearInterval(btPoll); $('bt-btn').disabled = false; alert('Backtest error: ' + d.error); }
-        } catch (e) { }
-      }
-
-      async function loadBtResults() {
-        try {
-          const r = await (await fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results')).json();
-          if (r.error) return;
-          const m = r.metrics;
-          $('bt-results').style.display = 'block';
-          $('bt-tc').textContent = m.total_trades + ' trades';
-
-          $('bt-stat-cards').innerHTML = [
-            { l: 'Total Return', v: (m.total_return_pct >= 0 ? '+' : '') + m.total_return_pct + '%', c: m.total_return_pct >= 0 ? 'g' : 'r', s: 'vs starting capital' },
-            { l: 'Win Rate', v: m.win_rate + '%', c: m.win_rate >= 50 ? 'g' : 'a', s: m.winning_trades + 'W / ' + m.losing_trades + 'L' },
-            { l: 'Profit Factor', v: m.profit_factor, c: m.profit_factor >= 1.5 ? 'g' : 'a', s: 'Wins ÷ Losses ratio' },
-            { l: 'Max Drawdown', v: m.max_drawdown_pct + '%', c: m.max_drawdown_pct <= 15 ? 'g' : m.max_drawdown_pct <= 30 ? 'a' : 'r', s: 'Worst losing streak' },
-            { l: 'Avg Win', v: '+' + m.avg_win_pct + '%', c: 'g', s: 'Per winning trade' },
-            { l: 'Avg Loss', v: m.avg_loss_pct + '%', c: 'r', s: 'Per losing trade' },
-            { l: 'Total Trades', v: m.total_trades, c: 'b', s: r.strategy_run + ' strategy' },
-            { l: 'Final Equity', v: 'Rs ' + m.final_equity.toLocaleString('en-IN'), c: 'p', s: 'Ending capital' },
-          ].map(x => `<div class="stat ${x.c}"><div class="sl">${x.l}</div><div class="sv ${x.c}">${x.v}</div><div class="ss">${x.s}</div></div>`).join('');
-
-          const vb = $('bt-verdict'); vb.style.display = 'block';
-          let vc = 'ai', vt;
-          if (m.win_rate >= 50 && m.profit_factor >= 1.5 && m.max_drawdown_pct <= 30) {
-            vc = 'ag'; vt = `<strong>Good backtest results.</strong> Win rate ${m.win_rate}%, profit factor ${m.profit_factor}, max drawdown ${m.max_drawdown_pct}%. This looks viable. Now run a 30-day forward test before going live.`;
-          } else if (m.profit_factor >= 1.0) {
-            vc = 'aw'; vt = `<strong>Mixed results.</strong> Win rate ${m.win_rate}%, PF ${m.profit_factor}. The strategy is profitable but borderline. This could be due to market conditions in the selected period.`;
-          } else {
-            vc = 'ar'; vt = `<strong>Poor results on this date range.</strong> Win rate ${m.win_rate}%, PF ${m.profit_factor}. Do NOT go live based on these results alone.`;
-          }
-          vb.className = 'alert ' + vc;
-          vb.innerHTML = '📊 <div>' + vt + '</div>';
-
-          drawBtCharts(r);
-          renderBtTable(r.trades || []);
-        } catch (e) { console.error(e); }
-      }
-
-      function drawBtCharts(data) {
-        Object.values(btCharts).forEach(c => c.destroy()); btCharts = {};
-        const eq = data.equity_curve || [], trades = data.trades || [];
-        if (eq.length > 1) {
-          btCharts.eq = mkLineChart('bt-eq', eq.map(p => p.date), eq.map(p => p.equity), 'Rs ');
-        }
-        if (trades.length) {
-          btCharts.pl = new Chart($('bt-pl'), {
-            type: 'bar',
-            data: { labels: trades.map((_, i) => 'T' + (i + 1)), datasets: [{ data: trades.map(t => t.pnl_pct), backgroundColor: trades.map(t => t.pnl_pct >= 0 ? 'rgba(109, 179, 135, 0.7)' : 'rgba(224, 122, 109, 0.7)'), borderRadius: 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a8a5a0', maxTicksLimit: 14, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#a8a5a0', callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } } } }
-          });
-
-          const reasons = {};
-          trades.forEach(t => { const k = t.exit_reason || 'Other'; reasons[k] = (reasons[k] || 0) + 1; });
-          btCharts.exit = new Chart($('bt-exit'), {
-            type: 'doughnut',
-            data: { labels: Object.keys(reasons), datasets: [{ data: Object.values(reasons), backgroundColor: ['#6db387', '#6d93b3', '#d97757', '#e07a6d', '#ab87c2', '#6daeb3'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#a8a5a0', font: { size: 12 }, padding: 12 } } } }
-          });
-
-          const monthly = {};
-          trades.forEach(t => { if (!t.exit_date) return; const m = t.exit_date.slice(0, 7); monthly[m] = (monthly[m] || 0) + t.pnl; });
-          const mkeys = Object.keys(monthly).sort();
-          const cap = data.starting_capital || 100000;
-          btCharts.month = new Chart($('bt-month'), {
-            type: 'bar',
-            data: { labels: mkeys, datasets: [{ data: mkeys.map(k => parseFloat((monthly[k] / cap * 100).toFixed(1))), backgroundColor: mkeys.map(k => monthly[k] >= 0 ? 'rgba(109, 179, 135, 0.7)' : 'rgba(224, 122, 109, 0.7)'), borderRadius: 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#a8a5a0', font: { size: 11 } }, grid: { display: false } }, y: { ticks: { color: '#a8a5a0', callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } } } }
-          });
-        }
-      }
-
-      function renderBtTable(trades) {
-        $('bt-tbody').innerHTML = trades.slice(0, 60).map((t, i) => {
-          const pnl = t.pnl || 0, pct = t.pnl_pct || 0;
-          let stratBadge = 'bm';
-          if (t.strategy === 'HARMAN1') stratBadge = 'ba2';
-          if (t.strategy === 'MRB') stratBadge = 'br2';
-          if (t.strategy === 'DEP') stratBadge = 'bg2';
-          if (t.strategy === 'VT') stratBadge = 'bb2';
-
-          return `<tr>
-      <td style="color:var(--muted)">${i + 1}</td>
-      <td style="font-weight:500;color:var(--txt)">${t.symbol}</td>
-      <td><span class="badge ${stratBadge}">${t.strategy || '—'}</span></td>
-      <td>${t.entry_date || '—'}</td>
-      <td>${t.exit_date || '—'}</td>
-      <td>Rs ${(t.entry_price || 0).toLocaleString('en-IN')}</td>
-      <td>${t.exit_price ? 'Rs ' + t.exit_price.toLocaleString('en-IN') : '—'}</td>
-      <td>${t.shares || 0}</td>
-      <td style="font-weight:500;color:var(--${pnl >= 0 ? 'g' : 'r'})">${pnl >= 0 ? '+' : ''}Rs ${Math.abs(pnl).toLocaleString('en-IN')}</td>
-      <td style="color:var(--${pct >= 0 ? 'g' : 'r'})">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</td>
-      <td><span class="badge ${pnl >= 0 ? 'bg2' : 'br2'}">${t.exit_reason || '—'}</span></td>
-    </tr>`;
-        }).join('');
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  CHART HELPER
-      // ════════════════════════════════════════════════════════════════
-      function mkLineChart(canvasId, labels, data, prefix) {
-        return new Chart($(canvasId), {
-          type: 'line',
-          data: { labels, datasets: [{ data, borderColor: '#6db387', backgroundColor: 'rgba(109, 179, 135, 0.08)', borderWidth: 2, pointRadius: 2, tension: .4, fill: true }] },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: '#a8a5a0', maxTicksLimit: 8, font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } },
-              y: { ticks: { color: '#a8a5a0', callback: v => prefix + Math.round(v / 1000) + 'k', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } }
-            }
-          }
-        });
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  GLOSSARY
-      // ════════════════════════════════════════════════════════════════
-      const GLOSSARY = [
-        { t: 'AUTO Mode', d: 'An intelligent AI mode that automatically monitors the broader market (Nifty 50). If the market is healthy, it runs the HARMAN1 strategy. If the market is crashing, it switches defensively to the MRB strategy.' },
-        { t: 'HARMAN1 Strategy', d: 'A hybrid strategy merging the explosive volume requirements of DEP with the safer, trend-following momentum confirmation of VT. It buys strong stocks right when their momentum flips bullish.' },
-        { t: 'MRB (Mean Reversion Bounce)', d: 'A defensive cash-market strategy used only during bearish market conditions. It looks for high-quality stocks that have been oversold in a panic (RSI < 30) and buys them precisely as they bounce above the previous day\'s high.' },
-        { t: 'RSI (Relative Strength Index)', d: 'A momentum oscillator that measures the speed and change of price movements on a scale of 0 to 100. A reading below 30 typically indicates a stock is "oversold" and due for a bounce.' },
-        { t: 'EMA (Exponential Moving Average)', d: 'An average of a stock\'s closing price over N days, weighted more toward recent days. The 10-day EMA reacts fast; the 200-day EMA shows the big-picture trend. If price is above the 200 EMA, the stock is in an uptrend.' },
-        { t: 'DEP — Delayed Episodic Pivot', d: 'A setup that waits for a catalyst event (earnings, news) that causes a big single-day move, then buys the quiet pullback near the 10 EMA. The "delay" refers to waiting for the excitement to calm down before entering.' },
-        { t: 'VCP — Volatility Contraction Pattern', d: 'As a stock consolidates after a rally, the price swings get smaller and smaller. Volume also dries up. This coiling action (the VCP) precedes a breakout. The bot looks for this pattern near the 20 EMA.' },
-        { t: 'Stop Loss (SL)', d: 'The price at which you accept a small loss and exit. Example: bought at Rs 100, SL at Rs 95 = 5% max loss. The bot sets SL below the day\'s low. Rule: SL must be within 5% of entry or the trade is rejected.' },
-        { t: '1R, 2R, 3R (R-Multiple)', d: '1R = your risk per share = Entry - SL. Example: Entry Rs100, SL Rs97 → 1R = Rs3. At 2R (Rs106) you move SL to entry (breakeven). At 3R (Rs109) you sell half. At 4R (Rs112) you sell more.' },
-        { t: 'Profit Factor', d: 'Total profit from winning trades ÷ total loss from losing trades. PF of 2.0 means you made Rs2 for every Rs1 lost. PF > 1.5 is good. PF < 1.0 means you are losing money overall.' },
-        { t: 'Max Drawdown', d: 'The biggest peak-to-trough decline your account experienced during the test period. If the account went from Rs1,00,000 to Rs75,000 at some point, that\'s a 25% drawdown. Lower is better.' },
-        { t: 'MACD', d: 'Moving Average Convergence Divergence. Shows momentum. When the MACD histogram is rising (green getting taller), buyers have more power than sellers. The VT strategy requires MACD to be rising at entry.' },
-        { t: 'Volume', d: 'How many shares traded that day. High volume = strong participation. During a pullback, volume should decrease (sellers exhausted). On a breakout, volume should increase (buyers entering).' },
-        { t: 'Paper Trading', d: 'Simulating trades without real money. The bot tracks everything as if real — entries, exits, P&L — but no actual orders. Always paper trade first.' },
-        { t: 'Forward Test', d: 'Running the strategy on real upcoming market data starting from today. More realistic than a backtest because the future is truly unknown. 30 days of forward testing is the minimum before considering going live.' },
-        { t: 'Circuit Breaker', d: 'A safety rule: if the account loses 50% of capital, the bot stops all trading. This prevents catastrophic loss due to a broken strategy or extreme market condition.' },
-      ];
-
-      function renderGloss() {
-        $('gloss-list').innerHTML = GLOSSARY.map(g => `
-    <div class="step">
-      <div class="stepn" style="font-size:16px;background:none;color:var(--muted);width:auto;min-width:20px;justify-content:flex-start;">•</div>
-      <div><div class="stept">${g.t}</div><div class="stepb">${g.d}</div></div>
-    </div>`).join('');
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      //  CONFIG
-      // ════════════════════════════════════════════════════════════════
-      async function saveConfig() {
-        const p = {
-          api_key: $('cfg-key').value,
-          secret_key: $('cfg-sec').value,
-          client_id: $('cfg-cid').value,
-          paper_trading: $('cfg-mode').value === 'true',
-          capital: parseFloat($('cfg-cap').value),
-          risk_pct: parseFloat($('cfg-risk').value),
-          max_sl_pct: parseFloat($('cfg-sl').value),
-          min_quality: parseInt($('cfg-q').value),
-          vol_mult: parseFloat($('cfg-vol').value),
-          expansion_pct: parseFloat($('cfg-exp').value),
-          rsi_oversold: parseInt($('cfg-rsi').value)
-        };
-        try {
-          const d = await (await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) })).json();
-          $('cfg-msg').textContent = '✓ ' + d.message;
-          $('cfg-msg').style.color = 'var(--g)';
-          checkStatus();
-        } catch (e) { $('cfg-msg').textContent = 'Error saving'; $('cfg-msg').style.color = 'var(--r)'; }
+    function drawFtCharts(eq, trades, cap) {
+      if (ftCharts.eq) ftCharts.eq.destroy();
+      if (ftCharts.bar) ftCharts.bar.destroy();
+      
+      if (eq && eq.length > 0) {
+        ftCharts.eq = mkLineChart('ft-eq-chart', eq.map(p => p.date), eq.map(p => p.equity), 'Rs ');
       }
       
-      // ════════════════════════════════════════════════════════════════
-      //  LOGS
-      // ════════════════════════════════════════════════════════════════
-      async function loadLogs() {
-        try {
-          const d = await (await fetch('/api/logs')).json();
-          const b = $('log-box');
-          b.innerHTML = (d.lines || []).reverse().map(l => {
-            const col = l.includes('[ERROR]') ? 'var(--r)' : l.includes('[WARNING]') ? 'var(--a)' : l.includes('✓') ? 'var(--g)' : 'var(--muted)';
-            return `<div style="padding:3px 0;border-bottom:1px solid var(--dim);color:${col}">${l.replace(/&/g, '&amp;').replace(/</g, '&lt;').trim()}</div>`;
-          }).join('');
-        } catch (e) { $('log-box').textContent = 'Could not load logs.'; }
+      const closed = trades.filter(t => t.status === "CLOSED").reverse();
+      if (closed.length > 0) {
+        ftCharts.bar = new Chart($('ft-bar-chart'), {
+          type: 'bar',
+          data: {
+            labels: closed.map((_, i) => 'T' + (i + 1)),
+            datasets: [{ 
+              data: closed.map(t => t.realized_pnl || 0), 
+              backgroundColor: closed.map(t => (t.realized_pnl || 0) >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'), 
+              borderRadius: 4 
+            }]
+          },
+          options: { 
+            responsive: true, maintainAspectRatio: false, 
+            plugins: { legend: { display: false } }, 
+            scales: { 
+              x: { display: false }, 
+              y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.04)' } } 
+            } 
+          }
+        });
+      }
+    }
+
+    const PAGE_NAMES = {
+      home: 'Dashboard', fwd: 'Forward Test', scanner: 'Scanner',
+      backtest: 'Backtest', learn: 'How It Works', glossary: 'Glossary',
+      config: 'Settings', logs: 'Logs'
+    };
+
+    // ════════════════════════════════════════════════════════════════
+    //  NAV
+    // ════════════════════════════════════════════════════════════════
+    function go(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+      document.querySelectorAll('.nl').forEach(n => n.classList.remove('on'));
+      $('page-' + name).classList.add('on');
+      const link = document.querySelector(`.nl[onclick="go('${name}')"]`);
+      if (link) link.classList.add('on');
+      $('tb-title').textContent = PAGE_NAMES[name] || name;
+
+      // Close sidebar on mobile after clicking
+      if(window.innerWidth <= 768) {
+        $('sidebar').classList.remove('open');
       }
 
-      // ════════════════════════════════════════════════════════════════
-      //  INIT
-      // ════════════════════════════════════════════════════════════════
-      refreshHome();
-      renderGloss();
-      loadAndShowSignals(0, 0).catch(() => { });
-      fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results').then(r => r.json()).then(d => { if (!d.error) { $('bt-results').style.display = 'block'; loadBtResults(); } }).catch(() => { });
-    </script>
+      if (name === 'home') refreshHome();
+      if (name === 'fwd') refreshFwd();
+      if (name === 'logs') loadLogs();
+      if (name === 'glossary') renderGloss();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CLOCK & MARKET
+    // ════════════════════════════════════════════════════════════════
+    function tick() {
+      const now = new Date();
+      $('tb-clock').textContent = now.toLocaleTimeString('en-IN', { hour12: false });
+      const h = now.getHours(), m = now.getMinutes(), d = now.getDay();
+      const open = d >= 1 && d <= 5 && (h > 9 || (h === 9 && m >= 15)) && (h < 15 || (h === 15 && m <= 30));
+      const pill = $('mkt-pill');
+      pill.className = 'mpill ' + (open ? 'open' : 'closed');
+      pill.innerHTML = open ? '<div class="pulse"></div> NSE Open' : 'NSE Closed';
+
+      const hr = now.getHours();
+      const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+      $('home-greeting').textContent = greet;
+    }
+    setInterval(tick, 1000); tick();
+
+    // ════════════════════════════════════════════════════════════════
+    //  STATUS CHECK (GitHub Pages Safe)
+    // ════════════════════════════════════════════════════════════════
+    async function checkStatus() {
+      if (isGH) {
+          $('d-data').className = 'dot g'; $('t-data').textContent = 'Data: yfinance OK';
+          $('d-api').className = 'dot g'; $('t-api').textContent = 'Groww: Live';
+          $('t-mode').textContent = 'Paper Mode';
+          $('hs-cap').textContent = 'Rs 1,00,000'; 
+          return;
+      }
+      
+      try {
+        const d = await (await fetch('/api/status')).json();
+        const dd = $('d-data'), dt = $('t-data'), da = $('d-api'), ta = $('t-api');
+        dd.className = 'dot ' + (d.api_connected ? 'g' : 'r');
+        dt.textContent = d.api_connected ? 'Data: yfinance OK' : 'Data: no internet?';
+        da.className = 'dot ' + (d.groww_connected ? 'g' : d.api_configured ? 'a' : 'r');
+        ta.textContent = d.groww_connected ? 'Groww: connected' : d.api_configured ? 'Groww: key error' : 'Groww: not configured';
+        $('t-mode').textContent = d.paper_trading ? 'Paper Mode' : 'LIVE Mode';
+        const b = $('mode-badge');
+        b.textContent = d.paper_trading ? 'PAPER TRADING' : 'LIVE TRADING';
+        b.style.background = d.paper_trading ? 'var(--gd)' : 'var(--rd)';
+        b.style.color = d.paper_trading ? 'var(--g)' : 'var(--r)';
+        $('hs-cap').textContent = 'Rs ' + (d.capital || 0).toLocaleString('en-IN');
+      } catch (e) { }
+    }
+    checkStatus(); setInterval(checkStatus, 30000);
+
+    // ════════════════════════════════════════════════════════════════
+    //  HOME
+    // ════════════════════════════════════════════════════════════════
+    async function refreshHome() {
+      try {
+        const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
+        
+        const allTrades = s.trades || [];
+        const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
+
+        const closed = trades.filter(t => t.status === "CLOSED");
+        const active = trades.filter(t => t.status === "ACTIVE");
+        const watching = trades.filter(t => t.status === "WATCHING");
+
+        let totalPnl = 0, wins = 0;
+        closed.forEach(t => {
+          totalPnl += (t.realized_pnl || 0);
+          if ((t.realized_pnl || 0) > 0) wins++;
+        });
+
+        $('hs-act').textContent = active.length + watching.length;
+        $('hs-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
+        $('hs-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
+        $('hs-wr').textContent = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(1) + '%' : '—';
+
+        const recentTrades = trades.slice().reverse().slice(0, 5);
+        const el = $('home-ft-list');
+        if (!recentTrades.length) { el.innerHTML = '<div style="color:var(--muted);font-size:14px">No trades tracked yet.</div>'; }
+        else {
+          el.innerHTML = recentTrades.map(t => {
+            const pnl = t.realized_pnl || 0;
+            const cls = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
+            const val = t.status === 'CLOSED' ? (pnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(pnl).toFixed(0) : t.status;
+            return `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-weight:500;font-size:14.5px;color:var(--txt)">${t.symbol} <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:4px">${t.strategy}</span></div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Entry Rs${t.entry_price} · SL ${t.sl_pct || 0}%</div></div>
+        <span class="badge ${cls}" style="align-self:center">${val}</span>
+      </div>`;
+          }).join('');
+        }
+
+        drawHomeEq(s.equity_curve || [], s.capital || 3000);
+      } catch (e) { console.error("Home error:", e); }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  FORWARD TEST
+    // ════════════════════════════════════════════════════════════════
+    async function refreshFwd() {
+      try {
+        const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
+
+        const allTrades = s.trades || [];
+        const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
+
+        const closed = trades.filter(t => t.status === "CLOSED");
+        const active = trades.filter(t => t.status === "ACTIVE");
+        const watching = trades.filter(t => t.status === "WATCHING");
+
+        let totalPnl = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0;
+        closed.forEach(t => {
+          const pnl = t.realized_pnl || 0;
+          totalPnl += pnl;
+          if (pnl > 0) { wins++; grossWin += pnl; }
+          else if (pnl < 0) { losses++; grossLoss += Math.abs(pnl); }
+        });
+
+        const pf = grossLoss > 0 ? (grossWin / grossLoss).toFixed(2) : (grossWin > 0 ? '∞' : '—');
+
+        $('ft-total').textContent = trades.length;
+        $('ft-watching').textContent = watching.length;
+        $('ft-active2').textContent = active.length;
+        $('ft-wins').textContent = wins;
+        $('ft-losses').textContent = losses;
+        $('ft-wr').textContent = closed.length > 0 ? ((wins / closed.length) * 100).toFixed(1) + '%' : '—';
+
+        $('ft-pnl').textContent = (totalPnl >= 0 ? '+' : '') + 'Rs ' + Math.abs(totalPnl).toFixed(0);
+        $('ft-pnl').className = 'sv ' + (totalPnl >= 0 ? 'g' : 'r');
+        $('ft-pf').textContent = pf;
+
+        const activeCount = active.length + watching.length;
+        const b = $('ft-badge'); b.textContent = activeCount; b.style.display = activeCount > 0 ? '' : 'none';
+
+        drawFtCharts(s.equity_curve || [], trades, s.capital || 3000);
+        renderFtList(trades);
+      } catch (e) { console.error("Fwd error:", e); }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  LIST RENDERER
+    // ════════════════════════════════════════════════════════════════
+    function renderFtList(trades) {
+      const el = $('ft-list');
+      if (!trades.length) { 
+        el.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:12px 0">No trades yet. Add from the Scanner page.</div>'; 
+        return; 
+      }
+      
+      let html = '';
+      
+      trades.slice().reverse().forEach(t => {
+        try {
+          const ep = parseFloat(t.entry_price) || 0;
+          const sl = parseFloat(t.stop_loss) || 0;
+          const one_r = parseFloat(t.one_r) || (ep - sl) || 1;
+          const be = ep + (2 * one_r);
+          const t3r = ep + (3 * one_r);
+          const pnl = parseFloat(t.realized_pnl) || 0;
+          const pnl_pct = parseFloat(t.pnl_pct) || 0;
+          const sl_pct = parseFloat(t.sl_pct) || 0;
+          
+          const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
+          const stages = [
+            { label: 'Scan', done: true },
+            { label: 'Enter @ Rs' + ep.toFixed(1), done: t.status !== 'WATCHING' },
+            { label: 'BE @ Rs' + be.toFixed(1), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
+            { label: '3R @ Rs' + t3r.toFixed(1), done: false },
+            { label: 'Trail EMA', done: false },
+          ];
+          
+          html += `<div class="ft-trade">
+            <div class="ft-head">
+              <div>
+                <div class="ft-sym">${t.symbol} <span style="font-size:12.5px;color:var(--muted);font-weight:500;margin-left:8px;font-family:sans-serif">${t.strategy || 'SYS'}</span></div>
+                <div class="ft-meta">Entry Rs${ep} · SL Rs${sl} (${sl_pct}%) · 1R=Rs${one_r.toFixed(1)}</div>
+                <div class="ft-meta">${t.notes || ''}</div>
+              </div>
+              <div class="ft-right">
+                ${t.status === 'CLOSED'
+                    ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
+                     <div style="font-size:12px;color:var(--muted);margin-top:6px">${t.exit_reason || 'Manual'}</div>`
+                    : `<span class="badge ${statusBadge}">${t.status}</span><br>
+                     ${t.status === 'WATCHING'
+                      ? `<button class="btn btn-s" style="margin-top:10px;font-size:12px;padding:6px 12px" onclick="markEntered('${t.id}',${ep})">Mark Entered</button>`
+                      : ''}
+                     <button class="btn btn-s" style="margin-top:10px;font-size:12px;padding:6px 12px;color:var(--r);border-color:rgba(239, 68, 68, 0.3)" onclick="openModal('${t.id}',${ep},${t.shares || 1})">Close Trade</button>`
+                  }
+              </div>
+            </div>
+            <div class="ft-stages">
+              ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
+            </div>
+          </div>`;
+        } catch (err) {
+          console.error("Skipping corrupted trade:", t.symbol, err);
+        }
+      });
+      
+      if (html === '') {
+        html = '<div style="color:var(--r);font-size:14px;padding:12px 0">Error rendering trades. Data might be corrupted.</div>';
+      }
+      
+      el.innerHTML = html;
+    }
+
+    async function addToFt(signal) {
+      try {
+        const r = await (await fetch('/api/forward/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(signal) })).json();
+        if (r.success) {
+          refreshFwd();
+        }
+      } catch (e) { }
+    }
+
+    async function markEntered(id, price) {
+      const actual = prompt(`Confirm: what price did you actually get filled at? (default: Rs${price})`, price);
+      if (actual === null) return;
+      const r = await (await fetch('/api/forward/enter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trade_id: id, actual_entry_price: parseFloat(actual) || price }) })).json();
+      if (r.success) refreshFwd();
+    }
+
+    async function deleteFt(id) {
+      if (!confirm('Remove this trade from forward test?')) return;
+      await fetch('/api/forward/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trade_id: id }) });
+      refreshFwd();
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  MODAL
+    // ════════════════════════════════════════════════════════════════
+    function openModal(id, entryPrice, shares) {
+      modalTradeId = id; modalEntryPrice = entryPrice; modalShares = shares;
+      const el = document.querySelector(`[onclick*="${id}"]`);
+      $('modal-sym2').textContent = '';
+      $('modal-ep').value = '';
+      $('modal-calc').innerHTML = 'Enter exit price to see P&L preview';
+      $('modal-overlay').classList.add('show');
+      setTimeout(() => $('modal-ep').focus(), 50);
+    }
+    function hideModal() { $('modal-overlay').classList.remove('show'); modalTradeId = null; }
+    function maybeCloseModal(e) { if (e.target === $('modal-overlay')) hideModal(); }
+
+    function calcModal() {
+      const ep = parseFloat($('modal-ep').value);
+      if (!ep || !modalEntryPrice) { $('modal-calc').innerHTML = 'Enter exit price to see P&L preview'; return; }
+      const one_r = modalEntryPrice - (modalEntryPrice * 0.97);
+      const pnl_pct = (ep - modalEntryPrice) / modalEntryPrice * 100;
+      const pnl_rs = (ep - modalEntryPrice) * (modalShares || 1);
+      const col = pnl_rs >= 0 ? 'var(--g)' : 'var(--r)';
+      $('modal-calc').innerHTML =
+        `<span style="color:${col};font-size:18px;font-weight:600;">${pnl_rs >= 0 ? '+' : ''}Rs ${pnl_rs.toFixed(2)} (${pnl_pct.toFixed(1)}%)</span><br>
+   <div style="margin-top:8px">Shares: ${modalShares} · Entry: Rs${modalEntryPrice} · Exit: Rs${ep}</div>`;
+    }
+
+    async function submitClose() {
+      const ep = parseFloat($('modal-ep').value);
+      const reason = $('modal-reason').value;
+      if (!ep) { return; }
+      const r = await (await fetch('/api/forward/close', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trade_id: modalTradeId, exit_price: ep, exit_reason: reason }) })).json();
+      if (r.success) { hideModal(); refreshFwd(); } 
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  SCANNER
+    // ════════════════════════════════════════════════════════════════
+    let lastScanN = 0;
+    function startScan() {
+      $('scan-btn').disabled = true;
+      scanStart = Date.now(); lastScanN = 0;
+      $('scan-prog').style.display = 'block';
+      $('scan-summary').style.display = 'none';
+      $('scan-log').innerHTML = '';
+      $('signals-area').innerHTML = '<div style="color:var(--muted);font-size:14px;padding:12px 0">Scanning...</div>';
+      const strat = $('scan-strat').value;
+      $('scan-status-txt').textContent = '';
+
+      fetch('/api/scan/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ strategy: strat }) })
+        .then(r => r.json()).then(d => {
+          if (d.error) { $('scan-btn').disabled = false; return; }
+          scanPoll = setInterval(pollScan, 1200);
+        }).catch(() => { $('scan-btn').disabled = false; });
+    }
+
+    async function pollScan() {
+      try {
+        const d = await (await fetch('/api/scan/progress')).json();
+        const pct = d.total > 0 ? Math.round(d.current / d.total * 100) : 0;
+        $('scan-bar').style.width = pct + '%';
+        $('scan-pct').textContent = pct + '%';
+        $('scan-sym').textContent = d.symbol || '—';
+
+        if (d.current > lastScanN && d.symbol) {
+          lastScanN = d.current;
+          const line = document.createElement('div');
+          line.className = 'll';
+          line.innerHTML = `<span class="lsym">${d.current}. ${d.symbol}</span><span style="color:var(--muted);font-size:12px">checking...</span>`;
+          $('scan-log').appendChild(line);
+          $('scan-log').scrollTop = 9999;
+        }
+
+        if (d.done) {
+          clearInterval(scanPoll); scanPoll = null;
+          $('scan-btn').disabled = false;
+          const secs = Math.round((Date.now() - scanStart) / 1000);
+          $('scan-prog').style.display = 'none';
+          $('scan-status-txt').textContent = 'Done in ' + secs + 's';
+          loadAndShowSignals(d.total || 0, secs);
+        }
+        if (d.error) {
+          clearInterval(scanPoll); scanPoll = null;
+          $('scan-btn').disabled = false;
+          $('scan-prog').style.display = 'none';
+          $('scan-status-txt').textContent = d.error;
+        }
+      } catch (e) { }
+    }
+
+    async function reloadSignals() { loadAndShowSignals(0, 0); }
+
+    async function loadAndShowSignals(total, secs) {
+      try {
+        const sigs = await (await fetch(isGH ? 'data/signals.json' : '/api/scan/signals')).json();
+
+        if (sigs.length > 0 && sigs[0].market_bearish) {
+          $('market-safety-alert').style.display = 'flex';
+          if (total > 0) {
+            $('ss-tot').textContent = total;
+            $('ss-pass').textContent = '0';
+            $('ss-fail').textContent = total;
+            $('ss-time').textContent = secs + 's';
+            $('scan-summary').style.display = 'flex';
+          }
+          $('signals-area').innerHTML = '<div style="margin-top:24px; color:var(--r); font-weight:600; font-size:15px;">Scan aborted due to unsafe market conditions. Auto-switching to defensive measures required.</div>';
+          return;
+        }
+
+        $('market-safety-alert').style.display = 'none';
+
+        if (total > 0) {
+          $('ss-tot').textContent = total;
+          $('ss-pass').textContent = sigs.length;
+          $('ss-fail').textContent = total - sigs.length;
+          $('ss-time').textContent = secs + 's';
+          $('scan-summary').style.display = 'flex';
+          $('hs-sigs').textContent = sigs.length;
+        }
+
+        const el = $('signals-area');
+        if (!sigs.length) {
+          el.innerHTML = `<div class="alert aw"><div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div><div><strong>No perfect setups found today.</strong> This is normal — the strategy is very selective. Try the AUTO strategy or run again tomorrow.</div></div>`;
+          return;
+        }
+
+        el.innerHTML = `<div style="font-size:15px;color:var(--txt);font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ${sigs.length} setup${sigs.length > 1 ? 's' : ''} found</div>` +
+          sigs.map(s => {
+            const one_r = s.entry_price - s.stop_loss;
+            const be = (s.entry_price + 2 * one_r).toFixed(0);
+            const t3r = (s.entry_price + 3 * one_r).toFixed(0);
+            const t4r = (s.entry_price + 4 * one_r).toFixed(0);
+            const qcol = s.quality_score >= 80 ? 'var(--g)' : s.quality_score >= 65 ? 'var(--a)' : 'var(--r)';
+            return `<div class="sc ${s.quality_score >= 80 ? 'strong' : ''}">
+        <div class="sl2">
+          <div class="sn">${s.symbol} <span style="font-size:12.5px;font-weight:500;color:var(--muted);margin-left:8px;font-family:sans-serif">${s.strategy}</span></div>
+          <div class="stags">
+            <span class="stag ${s.pullback_pct > 0 ? 'g' : 'b'}">Pullback ${s.pullback_pct}%</span>
+            <span class="stag b">Vol ${Math.round((s.vol_ratio || 1) * 100)}% of avg</span>
+            <span class="stag a">SL ${s.sl_pct}%</span>
+            <span class="stag g">${s.strategy}</span>
+          </div>
+          <div class="swhy">${s.notes || ''}</div>
+          <div style="margin-top:16px">
+            <div class="ql">Quality: <strong style="color:${qcol};font-weight:700">${s.quality_score}/100</strong></div>
+            <div class="qbar" style="width:200px; max-width:100%"><div class="qfill" style="width:${s.quality_score}%;background:${qcol}"></div></div>
+          </div>
+        </div>
+        <div class="sr2">
+          <div><div style="font-size:12px;color:var(--muted)">BUY above</div><div class="se">Rs ${s.entry_price}</div></div>
+          <div><div style="font-size:12px;color:var(--muted);margin-top:8px">Stop Loss</div><div class="ssl">Rs ${s.stop_loss} (${s.sl_pct}%)</div></div>
+          <div class="star">
+            Break Even: Rs ${be}<br>
+            3R target: Rs ${t3r}<br>
+            4R target: Rs ${t4r}<br>
+            Shares: ${s.shares}<br>
+            Capital: Rs ${(s.invested || 0).toLocaleString('en-IN')}
+          </div>
+          <button class="btn btn-g" style="font-size:13px;padding:8px 16px;margin-top:12px" onclick='addToFt(${JSON.stringify(s).replace(/'/g, "&#39;")})'>Track This Trade</button>
+        </div>
+      </div>`;
+          }).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  BACKTEST
+    // ════════════════════════════════════════════════════════════════
+    function startBt() {
+      $('bt-btn').disabled = true;
+      $('bt-prog').style.display = 'block';
+      $('bt-results').style.display = 'none';
+      const count = $('bt-uni').value;
+      const payload = {
+        start_date: $('bt-start').value, end_date: $('bt-end').value,
+        capital: parseFloat($('bt-cap').value), strategy: $('bt-strat').value
+      };
+      if (count && count !== 'full') payload.symbols_count = parseInt(count);
+
+      fetch('/api/backtest/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(r => r.json()).then(d => {
+          if (d.error) { $('bt-btn').disabled = false; return; }
+          btPoll = setInterval(pollBt, 2000);
+        }).catch(() => { $('bt-btn').disabled = false; });
+    }
+
+    async function pollBt() {
+      try {
+        const d = await (await fetch('/api/backtest/progress')).json();
+        const pct = d.total > 0 ? Math.round(d.current / d.total * 100) : 0;
+        $('bt-bar').style.width = pct + '%'; $('bt-pct').textContent = pct + '%'; $('bt-sym').textContent = d.symbol || '—';
+        if (d.done) { clearInterval(btPoll); $('bt-btn').disabled = false; $('bt-prog').style.display = 'none'; loadBtResults(); }
+        if (d.error) { clearInterval(btPoll); $('bt-btn').disabled = false; }
+      } catch (e) { }
+    }
+
+    async function loadBtResults() {
+      try {
+        const r = await (await fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results')).json();
+        if (r.error) return;
+        const m = r.metrics;
+        $('bt-results').style.display = 'block';
+        $('bt-tc').textContent = m.total_trades + ' trades';
+
+        $('bt-stat-cards').innerHTML = [
+          { l: 'Total Return', v: (m.total_return_pct >= 0 ? '+' : '') + m.total_return_pct + '%', c: m.total_return_pct >= 0 ? 'g' : 'r', s: 'vs starting capital' },
+          { l: 'Win Rate', v: m.win_rate + '%', c: m.win_rate >= 50 ? 'g' : 'a', s: m.winning_trades + 'W / ' + m.losing_trades + 'L' },
+          { l: 'Profit Factor', v: m.profit_factor, c: m.profit_factor >= 1.5 ? 'g' : 'a', s: 'Wins ÷ Losses ratio' },
+          { l: 'Max Drawdown', v: m.max_drawdown_pct + '%', c: m.max_drawdown_pct <= 15 ? 'g' : m.max_drawdown_pct <= 30 ? 'a' : 'r', s: 'Worst losing streak' },
+          { l: 'Avg Win', v: '+' + m.avg_win_pct + '%', c: 'g', s: 'Per winning trade' },
+          { l: 'Avg Loss', v: m.avg_loss_pct + '%', c: 'r', s: 'Per losing trade' },
+          { l: 'Total Trades', v: m.total_trades, c: 'b', s: r.strategy_run + ' strategy' },
+          { l: 'Final Equity', v: 'Rs ' + m.final_equity.toLocaleString('en-IN'), c: 'p', s: 'Ending capital' },
+        ].map(x => `<div class="stat ${x.c}"><div class="sl">${x.l}</div><div class="sv ${x.c}">${x.v}</div><div class="ss">${x.s}</div></div>`).join('');
+
+        const vb = $('bt-verdict'); vb.style.display = 'flex';
+        let vc = 'ai', vt;
+        if (m.win_rate >= 50 && m.profit_factor >= 1.5 && m.max_drawdown_pct <= 30) {
+          vc = 'ag'; vt = `<strong>Good backtest results.</strong> Win rate ${m.win_rate}%, profit factor ${m.profit_factor}, max drawdown ${m.max_drawdown_pct}%. This looks viable. Now run a 30-day forward test before going live.`;
+        } else if (m.profit_factor >= 1.0) {
+          vc = 'aw'; vt = `<strong>Mixed results.</strong> Win rate ${m.win_rate}%, PF ${m.profit_factor}. The strategy is profitable but borderline. This could be due to market conditions in the selected period.`;
+        } else {
+          vc = 'ar'; vt = `<strong>Poor results on this date range.</strong> Win rate ${m.win_rate}%, PF ${m.profit_factor}. Do NOT go live based on these results alone.`;
+        }
+        vb.className = 'alert ' + vc;
+        vb.innerHTML = `<div class="alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div><div>${vt}</div>`;
+
+        drawBtCharts(r);
+        renderBtTable(r.trades || []);
+      } catch (e) { console.error(e); }
+    }
+
+    function drawBtCharts(data) {
+      Object.values(btCharts).forEach(c => c.destroy()); btCharts = {};
+      const eq = data.equity_curve || [], trades = data.trades || [];
+      if (eq.length > 1) {
+        btCharts.eq = mkLineChart('bt-eq', eq.map(p => p.date), eq.map(p => p.equity), 'Rs ');
+      }
+      if (trades.length) {
+        btCharts.pl = new Chart($('bt-pl'), {
+          type: 'bar',
+          data: { labels: trades.map((_, i) => 'T' + (i + 1)), datasets: [{ data: trades.map(t => t.pnl_pct), backgroundColor: trades.map(t => t.pnl_pct >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'), borderRadius: 4 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', maxTicksLimit: 14, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#94a3b8', callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } } } }
+        });
+
+        const reasons = {};
+        trades.forEach(t => { const k = t.exit_reason || 'Other'; reasons[k] = (reasons[k] || 0) + 1; });
+        btCharts.exit = new Chart($('bt-exit'), {
+          type: 'doughnut',
+          data: { labels: Object.keys(reasons), datasets: [{ data: Object.values(reasons), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6'], borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 12 }, padding: 12 } } } }
+        });
+
+        const monthly = {};
+        trades.forEach(t => { if (!t.exit_date) return; const m = t.exit_date.slice(0, 7); monthly[m] = (monthly[m] || 0) + t.pnl; });
+        const mkeys = Object.keys(monthly).sort();
+        const cap = data.starting_capital || 100000;
+        btCharts.month = new Chart($('bt-month'), {
+          type: 'bar',
+          data: { labels: mkeys, datasets: [{ data: mkeys.map(k => parseFloat((monthly[k] / cap * 100).toFixed(1))), backgroundColor: mkeys.map(k => monthly[k] >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'), borderRadius: 4 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } }, y: { ticks: { color: '#94a3b8', callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } } } }
+        });
+      }
+    }
+
+    function renderBtTable(trades) {
+      $('bt-tbody').innerHTML = trades.slice(0, 60).map((t, i) => {
+        const pnl = t.pnl || 0, pct = t.pnl_pct || 0;
+        let stratBadge = 'bm';
+        if (t.strategy === 'HARMAN1') stratBadge = 'ba2';
+        if (t.strategy === 'MRB') stratBadge = 'br2';
+        if (t.strategy === 'DEP') stratBadge = 'bg2';
+        if (t.strategy === 'VT') stratBadge = 'bb2';
+
+        return `<tr>
+    <td style="color:var(--muted)">${i + 1}</td>
+    <td style="font-weight:600;color:var(--txt)">${t.symbol}</td>
+    <td><span class="badge ${stratBadge}">${t.strategy || '—'}</span></td>
+    <td>${t.entry_date || '—'}</td>
+    <td>${t.exit_date || '—'}</td>
+    <td>Rs ${(t.entry_price || 0).toLocaleString('en-IN')}</td>
+    <td>${t.exit_price ? 'Rs ' + t.exit_price.toLocaleString('en-IN') : '—'}</td>
+    <td>${t.shares || 0}</td>
+    <td style="font-weight:600;color:var(--${pnl >= 0 ? 'g' : 'r'})">${pnl >= 0 ? '+' : ''}Rs ${Math.abs(pnl).toLocaleString('en-IN')}</td>
+    <td style="font-weight:500;color:var(--${pct >= 0 ? 'g' : 'r'})">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</td>
+    <td><span class="badge ${pnl >= 0 ? 'bg2' : 'br2'}">${t.exit_reason || '—'}</span></td>
+  </tr>`;
+      }).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CHART HELPER
+    // ════════════════════════════════════════════════════════════════
+    function mkLineChart(canvasId, labels, data, prefix) {
+      return new Chart($(canvasId), {
+        type: 'line',
+        data: { labels, datasets: [{ data, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)', borderWidth: 2, pointRadius: 2, tension: .4, fill: true }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } },
+            y: { ticks: { color: '#94a3b8', callback: v => prefix + Math.round(v / 1000) + 'k', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,.03)' } }
+          }
+        }
+      });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  GLOSSARY
+    // ════════════════════════════════════════════════════════════════
+    const GLOSSARY = [
+      { t: 'AUTO Mode', d: 'An intelligent AI mode that automatically monitors the broader market (Nifty 50). If the market is healthy, it runs the HARMAN1 strategy. If the market is crashing, it switches defensively to the MRB strategy.' },
+      { t: 'HARMAN1 Strategy', d: 'A hybrid strategy merging the explosive volume requirements of DEP with the safer, trend-following momentum confirmation of VT. It buys strong stocks right when their momentum flips bullish.' },
+      { t: 'MRB (Mean Reversion Bounce)', d: 'A defensive cash-market strategy used only during bearish market conditions. It looks for high-quality stocks that have been oversold in a panic (RSI < 30) and buys them precisely as they bounce above the previous day\'s high.' },
+      { t: 'RSI (Relative Strength Index)', d: 'A momentum oscillator that measures the speed and change of price movements on a scale of 0 to 100. A reading below 30 typically indicates a stock is "oversold" and due for a bounce.' },
+      { t: 'EMA (Exponential Moving Average)', d: 'An average of a stock\'s closing price over N days, weighted more toward recent days. The 10-day EMA reacts fast; the 200-day EMA shows the big-picture trend. If price is above the 200 EMA, the stock is in an uptrend.' },
+      { t: 'DEP — Delayed Episodic Pivot', d: 'A setup that waits for a catalyst event (earnings, news) that causes a big single-day move, then buys the quiet pullback near the 10 EMA. The "delay" refers to waiting for the excitement to calm down before entering.' },
+      { t: 'VCP — Volatility Contraction Pattern', d: 'As a stock consolidates after a rally, the price swings get smaller and smaller. Volume also dries up. This coiling action (the VCP) precedes a breakout. The bot looks for this pattern near the 20 EMA.' },
+      { t: 'Stop Loss (SL)', d: 'The price at which you accept a small loss and exit. Example: bought at Rs 100, SL at Rs 95 = 5% max loss. The bot sets SL below the day\'s low. Rule: SL must be within 5% of entry or the trade is rejected.' },
+      { t: '1R, 2R, 3R (R-Multiple)', d: '1R = your risk per share = Entry - SL. Example: Entry Rs100, SL Rs97 → 1R = Rs3. At 2R (Rs106) you move SL to entry (breakeven). At 3R (Rs109) you sell half. At 4R (Rs112) you sell more.' },
+      { t: 'Profit Factor', d: 'Total profit from winning trades ÷ total loss from losing trades. PF of 2.0 means you made Rs2 for every Rs1 lost. PF > 1.5 is good. PF < 1.0 means you are losing money overall.' },
+      { t: 'Max Drawdown', d: 'The biggest peak-to-trough decline your account experienced during the test period. If the account went from Rs1,00,000 to Rs75,000 at some point, that\'s a 25% drawdown. Lower is better.' },
+      { t: 'MACD', d: 'Moving Average Convergence Divergence. Shows momentum. When the MACD histogram is rising (green getting taller), buyers have more power than sellers. The VT strategy requires MACD to be rising at entry.' },
+      { t: 'Volume', d: 'How many shares traded that day. High volume = strong participation. During a pullback, volume should decrease (sellers exhausted). On a breakout, volume should increase (buyers entering).' },
+      { t: 'Paper Trading', d: 'Simulating trades without real money. The bot tracks everything as if real — entries, exits, P&L — but no actual orders. Always paper trade first.' },
+      { t: 'Forward Test', d: 'Running the strategy on real upcoming market data starting from today. More realistic than a backtest because the future is truly unknown. 30 days of forward testing is the minimum before considering going live.' },
+      { t: 'Circuit Breaker', d: 'A safety rule: if the account loses 50% of capital, the bot stops all trading. This prevents catastrophic loss due to a broken strategy or extreme market condition.' },
+    ];
+
+    function renderGloss() {
+      $('gloss-list').innerHTML = GLOSSARY.map(g => `
+  <div class="step">
+    <div class="stepn" style="background:transparent; border:none; color:var(--muted); width:auto; min-width:20px; justify-content:flex-start;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 12 12 10 12"></polyline><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    </div>
+    <div><div class="stept">${g.t}</div><div class="stepb">${g.d}</div></div>
+  </div>`).join('');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CONFIG
+    // ════════════════════════════════════════════════════════════════
+    async function saveConfig() {
+      const p = {
+        api_key: $('cfg-key').value,
+        secret_key: $('cfg-sec').value,
+        client_id: $('cfg-cid').value,
+        paper_trading: $('cfg-mode').value === 'true',
+        capital: parseFloat($('cfg-cap').value),
+        risk_pct: parseFloat($('cfg-risk').value),
+        max_sl_pct: parseFloat($('cfg-sl').value),
+        min_quality: parseInt($('cfg-q').value),
+        vol_mult: parseFloat($('cfg-vol').value),
+        expansion_pct: parseFloat($('cfg-exp').value),
+        rsi_oversold: parseInt($('cfg-rsi').value)
+      };
+      try {
+        const d = await (await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) })).json();
+        $('cfg-msg').textContent = d.message;
+        $('cfg-msg').style.color = 'var(--g)';
+        checkStatus();
+      } catch (e) { $('cfg-msg').textContent = 'Error saving'; $('cfg-msg').style.color = 'var(--r)'; }
+    }
+    
+    // ════════════════════════════════════════════════════════════════
+    //  LOGS
+    // ════════════════════════════════════════════════════════════════
+    async function loadLogs() {
+      try {
+        const d = await (await fetch('/api/logs')).json();
+        const b = $('log-box');
+        b.innerHTML = (d.lines || []).reverse().map(l => {
+          const col = l.includes('[ERROR]') ? 'var(--r)' : l.includes('[WARNING]') ? 'var(--a)' : l.includes('✓') || l.includes('✅') || l.includes('🟢') ? 'var(--g)' : 'var(--muted)';
+          return `<div style="padding:4px 0;border-bottom:1px solid var(--dim);color:${col}">${l.replace(/&/g, '&amp;').replace(/</g, '&lt;').trim()}</div>`;
+        }).join('');
+      } catch (e) { $('log-box').textContent = 'Could not load logs.'; }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  INIT
+    // ════════════════════════════════════════════════════════════════
+    refreshHome();
+    renderGloss();
+    loadAndShowSignals(0, 0).catch(() => { });
+    fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results').then(r => r.json()).then(d => { if (!d.error) { $('bt-results').style.display = 'block'; loadBtResults(); } }).catch(() => { });
+  </script>
 </body>
 
 </html>
