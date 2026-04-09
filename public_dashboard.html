@@ -5,56 +5,235 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MarketBot | Live Forward Test</title>
     <style>
-        body { background: #0f172a; color: #f8fafc; font-family: -apple-system, sans-serif; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { color: #38bdf8; text-align: center; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
-        .stat-value { font-size: 24px; font-weight: bold; color: #e2e8f0; margin-top: 10px; }
-        .profit { color: #22c55e; }
-        .loss { color: #ef4444; }
+        :root {
+            /* Modern Professional Finance Dark Theme */
+            --bg: #0a0e17; 
+            --surf: #121620; 
+            --card: #191e2b; 
+            --border: #2a3143; 
+            --txt: #f1f4f9; 
+            --muted: #94a3b8; 
+            
+            /* Refined Semantic Colors */
+            --g: #10b981; /* Emerald */
+            --r: #ef4444; /* Red */
+            --a: #f59e0b; /* Amber */
+            --b: #3b82f6; /* Blue */
+            --p: #8b5cf6; /* Purple */
+        }
 
-        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
-        th { background: #0f172a; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
-        tr:hover { background: #283548; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .b-watching { background: #ca8a0420; color: #facc15; }
-        .b-active { background: #3b82f620; color: #60a5fa; }
-        .b-closed { background: #64748b20; color: #cbd5e1; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--txt); 
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            padding: 40px 20px; 
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: 0 auto; 
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .header-icon {
+            color: var(--b);
+            display: flex;
+            align-items: center;
+        }
+
+        h1 { 
+            color: var(--txt); 
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle { 
+            text-align: center; 
+            color: var(--muted); 
+            font-size: 14.5px;
+            margin-bottom: 40px; 
+        }
+        
+        /* STATS GRID */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 32px; 
+        }
+
+        .stat-card { 
+            background: var(--card); 
+            padding: 24px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #3b4256;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        
+        .stat-card:nth-child(1)::before { background: var(--b); }
+        .stat-card:nth-child(2)::before { background: var(--g); }
+        .stat-card:nth-child(3)::before { background: var(--a); }
+        .stat-card:nth-child(4)::before { background: var(--p); }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .stat-value { 
+            font-size: 28px; 
+            font-weight: 700; 
+            color: var(--txt); 
+            margin-top: 8px;
+            letter-spacing: -0.01em; 
+        }
+
+        .profit { color: var(--g) !important; }
+        .loss { color: var(--r) !important; }
+
+        /* TABLE RESPONSIVENESS */
+        .table-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-x: auto; /* Allows horizontal swipe on mobile */
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 700px; /* Forces scroll on tiny screens */
+        }
+
+        th, td { 
+            padding: 16px 20px; 
+            text-align: left; 
+            border-bottom: 1px solid var(--border); 
+        }
+
+        th { 
+            background: var(--surf); 
+            color: var(--muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-size: 11px; 
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            font-size: 13.5px;
+            white-space: nowrap;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        /* TYPOGRAPHY HELPERS */
+        .font-semibold { font-weight: 600; color: var(--txt); }
+        .text-muted { color: var(--muted); }
+
+        /* BADGES */
+        .badge { 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 11.5px; 
+            font-weight: 600; 
+            display: inline-flex;
+            align-items: center;
+        }
+        .b-watching { background: rgba(245, 158, 11, 0.15); color: #facc15; }
+        .b-active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .b-closed { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🤖 MarketBot Live Ledger</h1>
+    <div class="header">
+        <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        </div>
+        <h1>MarketBot Live Ledger</h1>
+    </div>
     <p class="subtitle">Live Forward Testing & Paper Trading Results</p>
 
     <div class="stats-grid">
-        <div class="stat-card">Starting Capital<div class="stat-value" id="val-cap">Loading...</div></div>
-        <div class="stat-card">Live P&L<div class="stat-value" id="val-pnl">Loading...</div></div>
-        <div class="stat-card">Win Rate<div class="stat-value" id="val-wr">Loading...</div></div>
-        <div class="stat-card">Active Trades<div class="stat-value" id="val-active">Loading...</div></div>
+        <div class="stat-card">
+            <div class="stat-label">Starting Capital</div>
+            <div class="stat-value" id="val-cap">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Live P&L</div>
+            <div class="stat-value" id="val-pnl">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Win Rate</div>
+            <div class="stat-value" id="val-wr">Loading...</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active Trades</div>
+            <div class="stat-value" id="val-active">Loading...</div>
+        </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Symbol</th>
-                <th>Strategy</th>
-                <th>Status</th>
-                <th>Entry Price</th>
-                <th>Exit Price</th>
-                <th>P&L</th>
-                <th>Reason</th>
-            </tr>
-        </thead>
-        <tbody id="trade-table">
-            <tr><td colspan="7" style="text-align: center;">Fetching live data from GitHub...</td></tr>
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Strategy</th>
+                    <th>Status</th>
+                    <th>Entry Price</th>
+                    <th>Exit Price</th>
+                    <th>P&L</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody id="trade-table">
+                <tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--muted);">Fetching live data from GitHub...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
@@ -81,7 +260,7 @@
         document.getElementById('val-cap').innerText = "Rs 3000"; 
         
         const pnlEl = document.getElementById('val-pnl');
-        pnlEl.innerText = `Rs ${totalPnl.toFixed(2)}`;
+        pnlEl.innerText = `${totalPnl >= 0 ? '+' : ''}Rs ${Math.abs(totalPnl).toFixed(2)}`;
         pnlEl.className = `stat-value ${totalPnl >= 0 ? 'profit' : 'loss'}`;
         
         document.getElementById('val-wr').innerText = closed.length > 0 ? `${((wins/closed.length)*100).toFixed(1)}%` : "0%";
@@ -93,25 +272,25 @@
         
         // Sort to show Active first, then newest closed
         trades.reverse().forEach(t => {
-            let pnlStr = t.realized_pnl ? `Rs ${t.realized_pnl}` : '-';
+            let pnlStr = t.realized_pnl ? `${t.realized_pnl >= 0 ? '+' : ''}Rs ${Math.abs(t.realized_pnl).toFixed(2)}` : '-';
             let pnlClass = t.realized_pnl > 0 ? 'profit' : (t.realized_pnl < 0 ? 'loss' : '');
             let statusClass = t.status === 'WATCHING' ? 'b-watching' : (t.status === 'ACTIVE' ? 'b-active' : 'b-closed');
 
             tbody.innerHTML += `
                 <tr>
-                    <td style="font-weight: bold;">${t.symbol}</td>
-                    <td style="color: #94a3b8;">${t.strategy}</td>
+                    <td class="font-semibold">${t.symbol}</td>
+                    <td class="text-muted">${t.strategy}</td>
                     <td><span class="badge ${statusClass}">${t.status}</span></td>
                     <td>${t.entry_price ? 'Rs ' + t.entry_price : '-'}</td>
                     <td>${t.exit_price ? 'Rs ' + t.exit_price : '-'}</td>
-                    <td class="${pnlClass}">${pnlStr}</td>
-                    <td style="color: #94a3b8;">${t.exit_reason || '-'}</td>
+                    <td class="font-semibold ${pnlClass}">${pnlStr}</td>
+                    <td class="text-muted">${t.exit_reason || '-'}</td>
                 </tr>
             `;
         });
     })
     .catch(err => {
-        document.getElementById('trade-table').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center;">Error loading trade data. Make sure GitHub Pages is updated.</td></tr>`;
+        document.getElementById('trade-table').innerHTML = `<tr><td colspan="7" style="color: var(--r); text-align: center; padding: 30px;">Error loading trade data. Make sure GitHub Pages is updated.</td></tr>`;
     });
 </script>
 
