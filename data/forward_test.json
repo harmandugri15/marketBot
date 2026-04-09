@@ -858,8 +858,8 @@
     {
       "id": "RECLTD_20260408",
       "symbol": "RECLTD",
-      "strategy": "HARMAN1",
-      "entry_price": 341.95,
+      "strategy": "INTRADAY_TEST",
+      "entry_price": 330.95,
       "stop_loss": 323.71,
       "sl_pct": 5.0,
       "shares": 11,
