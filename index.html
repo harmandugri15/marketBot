@@ -1772,7 +1772,19 @@
       // ════════════════════════════════════════════════════════════════
       //  STATUS CHECK (every 30s)
       // ════════════════════════════════════════════════════════════════
+      // ════════════════════════════════════════════════════════════════
+      //  STATUS CHECK (GitHub Pages Safe)
+      // ════════════════════════════════════════════════════════════════
       async function checkStatus() {
+        if (isGH) {
+            // Hardcode visuals for GitHub Pages since there is no live backend
+            $('d-data').className = 'dot g'; $('t-data').textContent = 'Data: yfinance OK';
+            $('d-api').className = 'dot g'; $('t-api').textContent = 'Groww: Live';
+            $('t-mode').textContent = '📋 Paper Mode';
+            $('hs-cap').textContent = 'Rs 1,00,000'; // Change this to your actual starting capital
+            return;
+        }
+        
         try {
           const d = await (await fetch('/api/status')).json();
           const dd = $('d-data'), dt = $('t-data'), da = $('d-api'), ta = $('t-api');

@@ -1668,6 +1668,21 @@
       "notes": "EMA 20 Pullback"
     },
     {
+      "id": "TEST_INTRADAY_001",
+      "symbol": "RELIANCE",
+      "strategy": "INTRADAY_ORB",
+      "entry_price": 3000.50,
+      "stop_loss": 2980.00,
+      "sl_pct": 0.68,
+      "shares": 15,
+      "status": "WATCHING",
+      "entry_date": null,
+      "exit_date": null,
+      "realized_pnl": 0,
+      "pnl_pct": 0,
+      "notes": "Testing the Intraday Dashboard logic!"
+    },
+    {
       "id": "NETWORK18_20260408",
       "symbol": "NETWORK18",
       "strategy": "HARMAN1",
