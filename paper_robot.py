@@ -90,7 +90,7 @@ def run_paper_trading():
             if t["status"] == "WATCHING":
                 if live_price >= t["entry_price"]:
                     logger.info(f"🚀 {t['symbol']} crossed entry! Moving to ACTIVE.")
-                    send_telegram_alert(f"🟢 *TRADE ENTERED: {t['symbol']}*\nPrice crossed entry at Rs {t['entry_price']}!")
+                    send_telegram_alert(f"🟢 *TRADE ENTERED: {t['symbol']} ({t['strategy']})*\nPrice crossed entry at Rs {t['entry_price']}!")
                     ft.mark_entered(t["id"], live_price)
                     data_changed = True
 
@@ -112,7 +112,7 @@ def run_paper_trading():
 
                 if exit_px:
                     logger.info(f"💸 Closing {t['symbol']} at {exit_px} ({reason})")
-                    send_telegram_alert(f"🔴 *TRADE CLOSED: {t['symbol']}*\nExit Price: Rs {exit_px}\nReason: {reason}")
+                    send_telegram_alert(f"🔴 *TRADE CLOSED: {t['symbol']} ({t['strategy']})*\nExit Price: Rs {exit_px}\nReason: {reason}")
                     ft.close_trade(t["id"], exit_px, reason)
                     data_changed = True
 

@@ -125,22 +125,22 @@ def run_intraday_engine():
             if not live_price: continue
 
             if t["status"] == "WATCHING" and live_price >= t["entry_price"]:
-                send_telegram_alert(f"🚀 *INTRADAY ENTRY:* {t['symbol']} triggered at {live_price}!")
+                send_telegram_alert(f"🚀 *INTRADAY ENTRY: {t['symbol']} ({t['strategy']})*\nTriggered at Rs {live_price}!")
                 ft.mark_entered(t["id"], live_price)
                 data_changed = True
             
             elif t["status"] == "ACTIVE":
                 if current_time >= "15:15:00":
-                    send_telegram_alert(f"💸 *INTRADAY EXIT:* Auto Square-off for {t['symbol']} at {live_price}")
+                    send_telegram_alert(f"💸 *INTRADAY EXIT: {t['symbol']} ({t['strategy']})*\nAuto Square-off at Rs {live_price}")
                     ft.close_trade(t["id"], live_price, "3:15 Auto Square Off")
                     data_changed = True
                 elif live_price <= t["stop_loss"]:
-                    send_telegram_alert(f"🔴 *INTRADAY SL HIT:* {t['symbol']} exited at {live_price}")
+                    send_telegram_alert(f"🔴 *INTRADAY SL HIT: {t['symbol']} ({t['strategy']})*\nExited at Rs {live_price}")
                     ft.close_trade(t["id"], live_price, "Stop Loss Hit")
                     data_changed = True
                 elif live_price >= (t["entry_price"] + (2 * (t["entry_price"] - t["stop_loss"]))):
                     # 2R Target Hit!
-                    send_telegram_alert(f"🟢 *INTRADAY TARGET HIT:* {t['symbol']} exited at {live_price} (2R)")
+                    send_telegram_alert(f"🟢 *INTRADAY TARGET HIT: {t['symbol']} ({t['strategy']})*\nExited at Rs {live_price} (2R)")
                     ft.close_trade(t["id"], live_price, "Target Hit (2R)")
                     data_changed = True
 
