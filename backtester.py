@@ -17,6 +17,27 @@ class NpEncoder(json.JSONEncoder):
         if isinstance(obj, np.bool_): return bool(obj)
         return super(NpEncoder, self).default(obj)
 
+def _build_indicators(df):
+    # FIX 1: Create a true copy to stop Pandas from throwing the SettingWithCopyWarning spam
+    df = df.copy() 
+    
+    df["ema10"] = df["close"].ewm(span=10, adjust=False).mean()
+    df["ema20"] = df["close"].ewm(span=20, adjust=False).mean()
+    
+    delta = df["close"].diff()
+    gain = (delta.where(delta > 0, 0)).ewm(alpha=1/14, adjust=False).mean()
+    loss = (-delta.where(delta < 0, 0)).ewm(alpha=1/14, adjust=False).mean()
+    df["rsi"] = 100 - (100 / (1 + (gain / loss)))
+    
+    # FIX 2: Safely check if volume exists before calculating it, so it doesn't crash!
+    if "volume" in df.columns:
+        df["vol_sma50"] = df["volume"].rolling(50).mean()
+    else:
+        df["vol_sma50"] = 0 
+        
+    return df
+
+
 def _format_dataframe(raw_data):
     if not raw_data: return pd.DataFrame()
     df = pd.DataFrame(raw_data)
@@ -39,26 +60,16 @@ def _format_dataframe(raw_data):
     df.dropna(subset=["close"], inplace=True)
     return df
 
-def _build_indicators(df):
-    df["ema10"] = df["close"].ewm(span=10, adjust=False).mean()
-    df["ema20"] = df["close"].ewm(span=20, adjust=False).mean()
-    delta = df["close"].diff()
-    gain = (delta.where(delta > 0, 0)).ewm(alpha=1/14, adjust=False).mean()
-    loss = (-delta.where(delta < 0, 0)).ewm(alpha=1/14, adjust=False).mean()
-    df["rsi"] = 100 - (100 / (1 + (gain / loss)))
-    df["vol_sma50"] = df["volume"].rolling(50).mean()
-    return df
-
 def run_backtest(api, start_date, end_date, capital, symbols=None, progress_callback=None, strategy="AUTO"):
     settings = get_settings()
     capital = float(capital or settings['capital'])
     symbols = symbols or STOCK_UNIVERSE
     
     # =========================================================================
-    # ⏱️ SPECIAL INTRADAY ENGINE (LONG ONLY + TIME FILTER)
+    # THE LEVERAGED STUDENT ENGINE: VWAP RUNNER
     # =========================================================================
-    if strategy == "INTRADAY_ORB":
-        logger.info("Running Phase 1: Scanning for setups...")
+    if "INTRADAY" in strategy:
+        logger.info("Running Phase 1: Scanning for Leveraged VWAP Bounces...")
         
         running_equity = capital
         all_trades = []
@@ -67,87 +78,96 @@ def run_backtest(api, start_date, end_date, capital, symbols=None, progress_call
         
         for idx, symbol in enumerate(symbols, 1):
             if progress_callback: progress_callback(idx, len(symbols), symbol)
-            time.sleep(1.5)
+            time.sleep(0.5)
             
             try:
                 raw_data = api.get_historical_intraday_data(symbol, start_date, end_date)
                 if not raw_data: continue
                 
                 df = pd.DataFrame(raw_data)
-                df['ema7'] = df['close'].ewm(span=7, adjust=False).mean()
-                df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
+                df.rename(columns={'open': 'o', 'high': 'h', 'low': 'l', 'close': 'c', 'volume': 'v'}, inplace=True)
                 
                 for date, daily_df in df.groupby('date'):
                     if len(daily_df) < 5: continue
+                    
                     daily_df = daily_df.copy()
-                    daily_df['vwap'] = (daily_df['typical_price'] * daily_df['volume']).cumsum() / daily_df['volume'].cumsum()
                     
-                    morning_candles = daily_df.iloc[0:3]
-                    range_high = float(morning_candles['high'].max())
-                    range_low = float(morning_candles['low'].min())
-                    third_candle = morning_candles.iloc[-1]
-                    c3_close, vwap, ema7 = float(third_candle['close']), float(third_candle['vwap']), float(third_candle['ema7'])
+                    # Calculate VWAP
+                    daily_df['typical_price'] = (daily_df['h'] + daily_df['l'] + daily_df['c']) / 3
+                    daily_df['vwap'] = (daily_df['typical_price'] * daily_df['v']).cumsum() / daily_df['v'].cumsum()
                     
-                    buffer = range_high * 0.001 
-                    setup_type = None
-                    trigger = target = sl = 0
+                    day_open = float(daily_df.iloc[0]['o'])
+                    trade_active = False
+                    entry_price = sl = one_r_amount = 0
+                    entry_time = ""
                     
-                    if c3_close > vwap and c3_close > ema7:
-                        setup_type = "LONG"
-                        trigger = range_high + buffer
-                        sl = range_low - buffer
-                        target = trigger + (1.5 * (trigger - sl)) 
-
-                    if setup_type:
-                        trade_active = False
-                        entry_price = one_r_amount = 0
-                        entry_time = ""
+                    # Start scanning at 9:35 AM
+                    for i in range(4, len(daily_df)):
+                        c_time = str(daily_df.iloc[i]['time'])
+                        current_candle = daily_df.iloc[i]
+                        prev_candle = daily_df.iloc[i-1]
                         
-                        for _, candle in daily_df.iloc[3:].iterrows():
-                            c_high, c_low, c_close = float(candle['high']), float(candle['low']), float(candle['close'])
-                            c_time = str(candle['time'])
+                        c_high, c_low, c_close = float(current_candle['h']), float(current_candle['l']), float(current_candle['c'])
+                        vwap = float(current_candle['vwap'])
+                        
+                        # --- EXIT & TRAILING LOGIC ---
+                        if trade_active:
+                            exit_px = None
+                            reason = ""
                             
-                            if not trade_active:
-                                # 👇 THE TIME FIX: DO NOT take new trades after 2:45 PM
-                                if c_time >= "14:45:00":
-                                    continue 
-                                    
-                                if c_high >= trigger:
-                                    trade_active = True
-                                    entry_price = trigger
-                                    one_r_amount = abs(trigger - sl)
-                                    entry_time = c_time
-                                    
-                            if trade_active:
-                                exit_px = None
-                                reason = ""
+                            # 1. Trailing Stop Math
+                            # If we hit 2R profit, move Stop Loss to Break Even (Free Trade!)
+                            if c_high >= entry_price + (2 * one_r_amount) and sl < entry_price:
+                                sl = entry_price
+                            
+                            # If we are in profit, trail the SL just underneath the rising VWAP line
+                            if sl >= entry_price and vwap > sl:
+                                sl = vwap * 0.998
                                 
-                                if c_high >= (entry_price + one_r_amount) and sl < entry_price: 
-                                    sl = entry_price 
-                                    
-                                if c_low <= sl: 
-                                    exit_px = sl
-                                    reason = "Stop Loss Hit" if sl < entry_price else "Breakeven Stop"
-                                elif c_high >= target: 
-                                    exit_px, reason = target, "Target Hit (1.5R)"
+                            # 2. Check Exits
+                            if c_low <= sl:
+                                exit_px = sl
+                                reason = "Trailed Profit Blocked" if sl >= entry_price else "Stop Loss Hit"
+                            elif c_time >= "14:45:00":
+                                exit_px, reason = c_close, "End of Day Square Off"
                                 
-                                if not exit_px and c_time >= "15:15:00":
-                                    exit_px, reason = c_close, "3:15 Auto Square Off"
+                            if exit_px:
+                                potential_trades.append({
+                                    "symbol": symbol, "type": "LONG", "date": str(date),
+                                    "entry_time": entry_time, "exit_time": c_time,
+                                    "entry_price": entry_price, "exit_price": exit_px,
+                                    "sl": sl, "reason": reason
+                                })
+                                trade_active = False 
+                                
+                        # --- ENTRY LOGIC (THE BOUNCE) ---
+                        if not trade_active and "09:35:00" <= c_time <= "11:30:00": 
+                            
+                            distance_to_vwap = abs(prev_candle['l'] - vwap) / vwap
+                            
+                            if current_candle['c'] > day_open and distance_to_vwap < 0.002:
+                                if current_candle['c'] > current_candle['o']: 
                                     
-                                if exit_px:
-                                    potential_trades.append({
-                                        "symbol": symbol, "type": setup_type, "date": str(date),
-                                        "entry_time": entry_time, "exit_time": c_time,
-                                        "entry_price": entry_price, "exit_price": exit_px,
-                                        "sl": sl, "reason": reason
-                                    })
-                                    break 
+                                    entry = current_candle['c']
+                                    potential_sl = vwap * 0.998 
+                                    one_r = entry - potential_sl
+                                    
+                                    # Strict Risk Control: Never risk a Stop Loss wider than 1.5%
+                                    if one_r > 0 and (one_r / entry * 100) < 1.5:
+                                        trade_active = True
+                                        entry_price = entry
+                                        sl = potential_sl
+                                        one_r_amount = one_r
+                                        entry_time = c_time
 
             except Exception as e:
                 logger.error(f"Intraday BT failed for {symbol}: {e}")
 
-        logger.info("Running Phase 2: Simulating unified global wallet...")
+        logger.info("Running Phase 2: Simulating 5x Leveraged MIS Wallet...")
         dates = sorted(list(set([t['date'] for t in potential_trades])))
+        
+        # THIS IS THE MAGIC MULTIPLIER FOR INDIAN INTRADAY TRADING
+        MIS_LEVERAGE = 5.0 
         
         for date in dates:
             day_trades = [t for t in potential_trades if t['date'] == date]
@@ -164,23 +184,31 @@ def run_backtest(api, start_date, end_date, capital, symbols=None, progress_call
                         all_trades.append(active['record'])
                         active_day_positions.remove(active)
                 
+                # Risk 2% of the BASE account (Safety first!)
                 risk_amt = running_equity * (settings.get('risk_pct', 2.0) / 100)
                 one_r = abs(trade['entry_price'] - trade['sl'])
                 desired_shares = int(risk_amt / one_r) if one_r > 0 else 1
                 
-                max_affordable = int(daily_bp / trade['entry_price']) if trade['entry_price'] > 0 else 0
+                # THE FIX: Multiply daily buying power by 5x to calculate max affordable shares!
+                max_affordable = int((daily_bp * MIS_LEVERAGE) / trade['entry_price']) if trade['entry_price'] > 0 else 0
                 actual_shares = min(desired_shares, max_affordable)
                 
                 if actual_shares > 0:
-                    margin_used = actual_shares * trade['entry_price']
+                    # Margin used is only 1/5th of the actual trade value
+                    trade_value = actual_shares * trade['entry_price']
+                    margin_used = trade_value / MIS_LEVERAGE
                     daily_bp -= margin_used 
                     
-                    pnl = (trade['exit_price'] - trade['entry_price']) * actual_shares
+                    raw_pnl = (trade['exit_price'] - trade['entry_price']) * actual_shares
                     
-                    # 👇 TIMESTAMP FIX: Attaching the exact time to the date so you can see it in the UI!
+                    # STUDENT FEE MATH: 0.05% of total leveraged turnover 
+                    turnover = (trade['entry_price'] + trade['exit_price']) * actual_shares
+                    fees_and_taxes = turnover * 0.0005 
+                    pnl = raw_pnl - fees_and_taxes
+                        
                     record = {
                         "symbol": trade['symbol'], 
-                        "strategy": "INTRADAY (LONG)", 
+                        "strategy": f"VWAP RUNNER", 
                         "entry_date": f"{trade['date']} {trade['entry_time'][:5]}", 
                         "exit_date": f"{trade['date']} {trade['exit_time'][:5]}", 
                         "entry_price": round(trade['entry_price'],2), "exit_price": round(trade['exit_price'],2), 
@@ -204,7 +232,7 @@ def run_backtest(api, start_date, end_date, capital, symbols=None, progress_call
                 equity_curve[-1]["equity"] = round(running_equity, 2)
 
     # =========================================================================
-    # 🌊 STANDARD SWING ENGINE 
+    # STANDARD SWING ENGINE 
     # =========================================================================
     else:
         raw_nifty = api.get_historical_data("^NSEI", from_date=(datetime.strptime(start_date, "%Y-%m-%d") - timedelta(days=365)).strftime("%Y-%m-%d"), to_date=end_date)
@@ -219,17 +247,17 @@ def run_backtest(api, start_date, end_date, capital, symbols=None, progress_call
 
         for idx, symbol in enumerate(symbols, 1):
             if progress_callback: progress_callback(idx, len(symbols), symbol)
-            time.sleep(2.1) 
+            time.sleep(1) 
             
             try:
                 raw = api.get_historical_data(symbol, from_date=(datetime.strptime(start_date, "%Y-%m-%d") - timedelta(days=200)).strftime("%Y-%m-%d"), to_date=end_date)
                 if not raw:
-                    time.sleep(2.0)
+                    time.sleep(1)
                     raw = api.get_historical_data(symbol, from_date=(datetime.strptime(start_date, "%Y-%m-%d") - timedelta(days=200)).strftime("%Y-%m-%d"), to_date=end_date)
 
                 df = _format_dataframe(raw)
                 if len(df) > 50:
-                    market_data[symbol] = _build_indicators(df)
+                    market_data[symbol] =_build_indicators(df)
             except Exception as e: pass
 
         all_dates = sorted(list(set().union(*(df.index for df in market_data.values()))))
@@ -320,7 +348,7 @@ def run_backtest(api, start_date, end_date, capital, symbols=None, progress_call
                 all_trades.append(t)
 
     # =========================================================================
-    # 📊 RESULTS COMPILATION (Universal)
+    # RESULTS COMPILATION (Universal)
     # =========================================================================
     wins = [t for t in all_trades if t["pnl"] > 0]
     losses = [t for t in all_trades if t["pnl"] <= 0]

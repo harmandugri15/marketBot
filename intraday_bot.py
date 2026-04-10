@@ -12,8 +12,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [INTRADAY]: %(messag
 logger = logging.getLogger(__name__)
 IST = pytz.timezone('Asia/Kolkata')
 
-# A focused list of highly liquid stocks perfect for intraday
+# Highly liquid stocks perfect for VWAP Bounces
 INTRADAY_WATCHLIST = ["RELIANCE", "HDFCBANK", "ICICIBANK", "INFY", "TCS", "TATAMOTORS", "SBIN", "AXISBANK", "M&M", "MARUTI"]
+
+# STUDENT ACCOUNT SETTINGS
+STUDENT_CAPITAL = 4000.0  # Base capital
+MIS_LEVERAGE = 5.0        # 5x Margin for Intraday
+RISK_PCT = 2.0            # Risk 2% of Base Capital (Rs 80)
 
 def send_telegram_alert(message):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -37,70 +42,68 @@ def push_to_github():
     except Exception as e:
         logger.error(f"Failed to push to GitHub: {e}")
 
-def hunt_inside_candles(api):
-    """Scans the watchlist for high-probability Inside Candle setups."""
-    logger.info("🔍 Hunting for 5m Inside Candle Setups...")
+def hunt_vwap_bounces(api):
+    """Scans the watchlist for high-probability morning VWAP bounces."""
+    logger.info("🔍 Hunting for Leveraged VWAP Bounces...")
     db = ft._load()
     active_symbols = [t["symbol"] for t in db.get("trades", []) if t["status"] in ["ACTIVE", "WATCHING"]]
     
     new_trades = 0
     for symbol in INTRADAY_WATCHLIST:
         if symbol in active_symbols: 
-            continue # Already tracking a setup for this stock today
+            continue 
 
         # Fetch 5-min intraday candles
         data = api.get_intraday_data(symbol, "5m")
-        if not data or len(data) < 4: 
+        if not data or len(data) < 3: 
             continue
 
         df = pd.DataFrame(data)
         
-        # Define the candles (-1 is the LIVE forming candle, we only scan completed candles)
-        mother = df.iloc[-3]
-        inside = df.iloc[-2]
+        # Calculate Live VWAP
+        df['typical_price'] = (df['h'] + df['l'] + df['c']) / 3
+        df['vwap'] = (df['typical_price'] * df['v']).cumsum() / df['v'].cumsum()
         
-        # Initial Trend Filter: Day's Open vs Current Price
         day_open = df.iloc[0]['o']
-        current_close = inside['c']
-        bias = "LONG" if current_close > day_open else "SHORT"
+        curr_candle = df.iloc[-1]
+        prev_candle = df.iloc[-2]
+        
+        distance_to_vwap = abs(prev_candle['l'] - prev_candle['vwap']) / prev_candle['vwap']
 
-        # STRATEGY RULE 1: Is it an Inside Candle?
-        if inside['h'] < mother['h'] and inside['l'] > mother['l']:
-            
-            # STRATEGY RULE 2: Body Size Filter (Inside body must be < 60% of Mother's range)
-            inside_body = abs(inside['c'] - inside['o'])
-            mother_range = mother['h'] - mother['l']
-            
-            if inside_body < (0.6 * mother_range):
+        # THE STRATEGY: Morning VWAP Bounce
+        if curr_candle['c'] > day_open and distance_to_vwap < 0.002:
+            if curr_candle['c'] > curr_candle['o']: # Green Confirmation
                 
-                # STRATEGY RULE 3: Setup Entry and SL based on Trend Bias
-                if bias == "LONG":
-                    entry = round(inside['h'] + 0.05, 2) # Trigger just above the inside high
-                    sl = round(min(inside['l'], mother['l']), 2) # Safety SL rule
-                    one_r = entry - sl
-                else: # SHORT (If your broker/API supports intraday shorting)
-                    entry = round(inside['l'] - 0.05, 2) # Trigger just below the inside low
-                    sl = round(max(inside['h'], mother['h']), 2) # Safety SL rule
-                    one_r = sl - entry
+                entry = round(curr_candle['c'], 2)
+                sl = round(curr_candle['vwap'] * 0.998, 2)
+                one_r = entry - sl
                 
-                # Risk Management Filter
-                if one_r > 0 and (one_r / entry * 100) < 2.0: # Keep risk under 2%
-                    new_trade = {
-                        "id": f"ID_{symbol}_{datetime.now().strftime('%Y%m%d%H%M')}",
-                        "symbol": symbol,
-                        "strategy": f"INTRADAY_INSIDE_{bias}",
-                        "trade_type": bias, # Tag for executioner
-                        "entry_price": entry,
-                        "stop_loss": sl,
-                        "sl_pct": round(one_r/entry*100, 2),
-                        "shares": int((100000 * 0.02) / one_r) if one_r > 0 else 1,
-                        "status": "WATCHING",
-                        "entry_date": None, "exit_date": None, "realized_pnl": 0, "pnl_pct": 0,
-                        "notes": f"Inside Candle {bias} setup. Body size optimized."
-                    }
-                    db.setdefault("trades", []).append(new_trade)
-                    new_trades += 1
-                    send_telegram_alert(f"🎯 *LIVE SETUP FOUND: {symbol} (INSIDE {bias})*\nMother-Baby pattern formed! Trigger at Rs {entry}.")
+                # Strict Risk Control: Max 1.5% SL width
+                if one_r > 0 and (one_r / entry * 100) < 1.5:
+                    
+                    # 5X LEVERAGE MATH
+                    risk_amt = STUDENT_CAPITAL * (RISK_PCT / 100)
+                    desired_shares = int(risk_amt / one_r) if one_r > 0 else 1
+                    max_affordable = int((STUDENT_CAPITAL * MIS_LEVERAGE) / entry)
+                    shares = min(desired_shares, max_affordable)
+                    
+                    if shares > 0:
+                        new_trade = {
+                            "id": f"ID_{symbol}_{datetime.now().strftime('%Y%m%d%H%M')}",
+                            "symbol": symbol,
+                            "strategy": "VWAP_RUNNER_5X",
+                            "entry_price": entry,
+                            "stop_loss": sl,
+                            "one_r": round(one_r, 2),
+                            "sl_pct": round(one_r/entry*100, 2),
+                            "shares": shares, 
+                            "status": "WATCHING",
+                            "entry_date": None, "exit_date": None, "realized_pnl": 0, "pnl_pct": 0,
+                            "notes": f"Leveraged VWAP Bounce. Target: Infinite Trail."
+                        }
+                        db.setdefault("trades", []).append(new_trade)
+                        new_trades += 1
+                        send_telegram_alert(f"🎯 *LIVE SETUP: {symbol} (5X LEVERAGE)*\nVWAP Bounce detected! Entry at Rs {entry}.")
 
     if new_trades > 0:
         ft._save(db)
@@ -108,108 +111,107 @@ def hunt_inside_candles(api):
     return False
 
 def run_intraday_engine():
-    send_telegram_alert("⏱️ *Intraday Engine Awakening...* Hunting 5m Inside Candles.")
+    send_telegram_alert(f"⏱️ *Student Engine Awakening...* Base Capital: Rs {STUDENT_CAPITAL} | Buying Power: Rs {STUDENT_CAPITAL * MIS_LEVERAGE}")
     
     api = GrowwAPI()
     if not api.connected: 
         logger.error("❌ Groww API not connected.")
         return
 
-    last_hunt_time = datetime.now(IST) - timedelta(minutes=15) # Force hunt immediately
-    alerted_today = set() # Anti-Spam Memory Shield
+    last_hunt_time = datetime.now(IST) - timedelta(minutes=15) 
+    alerted_today = set() 
 
     while True:
         now = datetime.now(IST)
         current_time = now.strftime("%H:%M:%S")
         
-        if current_time > "15:20:00":
-            send_telegram_alert("🕒 Intraday session over. Closing up shop.")
+        # Hard Stop at 2:50 PM
+        if current_time > "14:50:00":
+            send_telegram_alert("🕒 Intraday session over. All positions should be clear.")
             push_to_github()
             break
 
         data_changed = False
 
-        # 1. THE HUNTER: Scan for new setups every 5 minutes (300 seconds)
-        if (now - last_hunt_time).total_seconds() > 300:
-            if hunt_inside_candles(api):
-                data_changed = True
-            last_hunt_time = now
+        # 1. THE HUNTER: Scan 9:35 AM to 11:30 AM every 5 minutes
+        if "09:35:00" <= current_time <= "11:30:00":
+            if (now - last_hunt_time).total_seconds() > 300:
+                if hunt_vwap_bounces(api):
+                    data_changed = True
+                last_hunt_time = now
 
         # 2. THE EXECUTIONER: Manage active/watching trades
         db = ft._load()
-        trades = [t for t in db.get("trades", []) if "INTRADAY_INSIDE" in t["strategy"] and t["status"] != "CLOSED"]
+        trades = [t for t in db.get("trades", []) if "VWAP_RUNNER" in t["strategy"] and t["status"] != "CLOSED"]
         
         for t in trades:
             live_price = api.get_live_price(t["symbol"])
             if not live_price: continue
 
             trade_id = t["id"]
-            trade_type = t.get("trade_type", "LONG")
-            one_r = abs(t["entry_price"] - t["stop_loss"])
+            one_r = t.get("one_r", abs(t["entry_price"] - t["stop_loss"]))
 
-            # --- ENTRY LOGIC ---
-            if t["status"] == "WATCHING":
-                triggered = (trade_type == "LONG" and live_price >= t["entry_price"]) or \
-                            (trade_type == "SHORT" and live_price <= t["entry_price"])
-                
-                if triggered:
-                    if trade_id not in alerted_today:
-                        send_telegram_alert(f"🚀 *INTRADAY ENTRY: {t['symbol']} ({t['strategy']})*\nTriggered breakout at Rs {live_price}!")
-                        alerted_today.add(trade_id)
-                    ft.mark_entered(trade_id, live_price)
-                    data_changed = True
+            # --- ENTRY TRIGGER ---
+            if t["status"] == "WATCHING" and live_price >= t["entry_price"]:
+                if trade_id not in alerted_today:
+                    send_telegram_alert(f"🚀 *ORDER FILLED: {t['symbol']}*\nBought {t['shares']} shares at Rs {live_price}!")
+                    alerted_today.add(trade_id)
+                ft.mark_entered(trade_id, live_price)
+                data_changed = True
             
-            # --- ACTIVE MANAGEMENT LOGIC ---
+            # --- ACTIVE TRAILING & EXITS ---
             elif t["status"] == "ACTIVE":
-                if current_time >= "15:15:00":
+                
+                # Auto Square-Off at 2:45 PM
+                if current_time >= "14:45:00":
                     if trade_id not in alerted_today:
-                        send_telegram_alert(f"💸 *INTRADAY EXIT: {t['symbol']} ({t['strategy']})*\nAuto Square-off at Rs {live_price}")
+                        send_telegram_alert(f"💸 *END OF DAY: {t['symbol']}*\nAuto Square-off at Rs {live_price}")
                         alerted_today.add(trade_id)
-                    ft.close_trade(trade_id, live_price, "3:15 Auto Square Off")
+                    ft.close_trade(trade_id, live_price, "14:45 Auto Square Off")
                     data_changed = True
                     continue
 
-                # Math for Exits
-                sl_hit = (trade_type == "LONG" and live_price <= t["stop_loss"]) or \
-                         (trade_type == "SHORT" and live_price >= t["stop_loss"])
-                
-                target_3r = t["entry_price"] + (3 * one_r) if trade_type == "LONG" else t["entry_price"] - (3 * one_r)
-                target_2r = t["entry_price"] + (2 * one_r) if trade_type == "LONG" else t["entry_price"] - (2 * one_r)
-                
-                hit_3r = (trade_type == "LONG" and live_price >= target_3r) or \
-                         (trade_type == "SHORT" and live_price <= target_3r)
+                # Fetch Live VWAP for trailing
+                live_vwap = t["stop_loss"]
+                data = api.get_intraday_data(t["symbol"], "5m")
+                if data and len(data) > 0:
+                    df = pd.DataFrame(data)
+                    df['typical_price'] = (df['h'] + df['l'] + df['c']) / 3
+                    df['vwap'] = (df['typical_price'] * df['v']).cumsum() / df['v'].cumsum()
+                    live_vwap = df.iloc[-1]['vwap']
 
-                # Trap Detection: Drops violently back through entry (Half an R against you)
-                trap_hit = (trade_type == "LONG" and live_price < t["entry_price"] - (0.5 * one_r)) or \
-                           (trade_type == "SHORT" and live_price > t["entry_price"] + (0.5 * one_r))
+                new_sl = t["stop_loss"]
 
-                # 1. Stop Loss Hit
-                if sl_hit:
-                    if trade_id not in alerted_today:
-                        send_telegram_alert(f"🔴 *INTRADAY SL HIT: {t['symbol']} ({t['strategy']})*\nExited at Rs {live_price}")
-                        alerted_today.add(trade_id)
-                    ft.close_trade(trade_id, live_price, "Stop Loss Hit")
-                    data_changed = True
+                # Trailing Rule 1: 2R = Break Even (Risk Free Trade)
+                if live_price >= t["entry_price"] + (2 * one_r) and new_sl < t["entry_price"]:
+                    new_sl = t["entry_price"]
+                    send_telegram_alert(f"🛡️ *RISK FREE: {t['symbol']}*\n2R Hit! Stop Loss moved to Break Even.")
+
+                # Trailing Rule 2: Ride the VWAP
+                if new_sl >= t["entry_price"] and live_vwap > new_sl:
+                    trail_sl = round(live_vwap * 0.998, 2)
+                    if trail_sl > new_sl:
+                        new_sl = trail_sl
                 
-                # 2. Trap Exit (Emergency Cut)
-                elif trap_hit and not t.get("trailed_3r", False):
-                    if trade_id not in alerted_today:
-                        send_telegram_alert(f"⚠️ *TRAP DETECTED: {t['symbol']} ({t['strategy']})*\nFalse breakout reversed! Emergency exit at Rs {live_price}")
-                        alerted_today.add(trade_id)
-                    ft.close_trade(trade_id, live_price, "Trap Reversal Exit")
+                if new_sl != t["stop_loss"]:
+                    t["stop_loss"] = new_sl
                     data_changed = True
 
-                # 3. Target Reached -> Trail SL
-                elif hit_3r and not t.get("trailed_3r", False):
-                    t["stop_loss"] = target_2r # Move SL into profit
-                    t["trailed_3r"] = True     # Mark as trailed
+                # Exit Trigger (Hit Stop Loss or Trailed Stop)
+                if live_price <= t["stop_loss"]:
+                    reason = "Trailed Profit Blocked" if t["stop_loss"] >= t["entry_price"] else "Stop Loss Hit"
                     
-                    # We only log to Telegram, we let the loop save the updated SL to DB below
-                    send_telegram_alert(f"🔥 *3R TARGET REACHED: {t['symbol']} ({t['strategy']})*\nTrailing Stop Loss moved into profit at Rs {target_2r}!")
+                    # Prevent duplicate alerts
+                    alert_key = f"{trade_id}_exit"
+                    if alert_key not in alerted_today:
+                        send_telegram_alert(f"🔴 *TRADE CLOSED: {t['symbol']}*\n{reason} at Rs {live_price}")
+                        alerted_today.add(alert_key)
+                        
+                    ft.close_trade(trade_id, live_price, reason)
                     data_changed = True
 
         if data_changed:
-            ft._save(db) # Save any trailed SL updates
+            ft._save(db)
             push_to_github()
 
         time.sleep(20)
