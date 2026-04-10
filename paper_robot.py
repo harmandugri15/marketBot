@@ -31,7 +31,7 @@ def send_telegram_alert(message):
         logger.warning("⚠️ Telegram keys not found! Could not send message.")
 
 # ==========================================
-# GITHUB SYNC FUNCTION
+# GITHUB SYNC FUNCTION (Crash-Proofed)
 # ==========================================
 def push_to_github():
     """Commits the updated JSON file to GitHub so the public website updates."""
@@ -39,23 +39,19 @@ def push_to_github():
         os.system('git config --global user.email "bot@marketbot.com"')
         os.system('git config --global user.name "MarketBot Engine"')
         os.system('git add data/forward_test.json')
-        os.system('git commit -m "🤖 Auto-update trades" || echo "No changes to commit"')
-        
-        # 👇 THIS LINE MUST BE IN BOTH PYTHON FILES TO PREVENT CRASHES
+        # 👇 CRITICAL FIX: Added || echo to prevent crashes!
+        os.system('git commit -m "🤖 Auto-update paper trades" || echo "No changes to commit"')
         os.system('git pull origin main --rebase')
-        
         os.system('git push')
         logger.info("☁️ Pushed live trade updates to GitHub Pages!")
     except Exception as e:
         logger.error(f"Failed to push to GitHub: {e}")
 
 # ==========================================
-# MAIN TRADING ENGINE
+# MAIN TRADING ENGINE (Spam-Proofed)
 # ==========================================
 def run_paper_trading():
     logger.info("🌅 Paper Trading Engine Booting Up...")
-    
-    # 👇 THE WAKE UP MESSAGE
     send_telegram_alert("🚀 *MarketBot Engine Online*\nBooting up and scanning active positions...")
     
     api = GrowwAPI()
@@ -63,6 +59,9 @@ def run_paper_trading():
         logger.error("❌ Groww API not connected. Exiting.")
         send_telegram_alert("❌ *Error:* Groww API failed to connect. Check credentials.")
         return
+
+    # 👇 THE ANTI-SPAM MEMORY: Bot will remember alerts so it never repeats them!
+    alerted_today = set()
 
     while True:
         now = datetime.now(IST)
@@ -86,12 +85,19 @@ def run_paper_trading():
             if not live_price: 
                 continue
 
+            trade_id = t["id"]
+
             # 1. WATCHING -> ACTIVE (Entry Logic)
             if t["status"] == "WATCHING":
                 if live_price >= t["entry_price"]:
                     logger.info(f"🚀 {t['symbol']} crossed entry! Moving to ACTIVE.")
-                    send_telegram_alert(f"🟢 *TRADE ENTERED: {t['symbol']} ({t['strategy']})*\nPrice crossed entry at Rs {t['entry_price']}!")
-                    ft.mark_entered(t["id"], live_price)
+                    
+                    # Check if we already alerted this exact trade ID today
+                    if trade_id not in alerted_today:
+                        send_telegram_alert(f"🟢 *TRADE ENTERED: {t['symbol']} ({t.get('strategy', 'SYS')})*\nPrice crossed entry at Rs {t['entry_price']}!")
+                        alerted_today.add(trade_id) # Remember it!
+                        
+                    ft.mark_entered(trade_id, live_price)
                     data_changed = True
 
             # 2. ACTIVE -> CLOSED (Exit Logic)
@@ -112,14 +118,17 @@ def run_paper_trading():
 
                 if exit_px:
                     logger.info(f"💸 Closing {t['symbol']} at {exit_px} ({reason})")
-                    send_telegram_alert(f"🔴 *TRADE CLOSED: {t['symbol']} ({t['strategy']})*\nExit Price: Rs {exit_px}\nReason: {reason}")
-                    ft.close_trade(t["id"], exit_px, reason)
+                    
+                    if trade_id not in alerted_today:
+                        send_telegram_alert(f"🔴 *TRADE CLOSED: {t['symbol']} ({t.get('strategy', 'SYS')})*\nExit Price: Rs {exit_px}\nReason: {reason}")
+                        alerted_today.add(trade_id) # Remember it!
+                        
+                    ft.close_trade(trade_id, exit_px, reason)
                     data_changed = True
 
         if data_changed:
             push_to_github()
 
-        # Sleep for 30 seconds before checking prices again to respect API limits
         time.sleep(30)
 
 if __name__ == "__main__":
