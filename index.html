@@ -1763,7 +1763,7 @@
         const s = await (await fetch(isGH ? 'data/forward_test.json?v=' + new Date().getTime() : '/api/forward/summary')).json();
         
         const allTrades = s.trades || [];
-        const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY"));
+        const trades = allTrades.filter(t => !t.strategy.includes("INTRADAY_ORB")); // Keep VWAP trades
 
         const closed = trades.filter(t => t.status === "CLOSED");
         const active = trades.filter(t => t.status === "ACTIVE");
@@ -1796,7 +1796,19 @@
           }).join('');
         }
 
-        drawHomeEq(s.equity_curve || [], s.capital || 3000);
+        // --- ON-THE-FLY EQUITY CURVE CALCULATION ---
+        let startCap = s.capital || 4000;
+        let eqCurve = [{ date: 'Start', equity: startCap }];
+        let runningCap = startCap;
+        
+        // Sort closed trades by date and calculate running balance
+        [...closed].sort((a,b) => (a.exit_date||'').localeCompare(b.exit_date||'')).forEach(t => {
+            runningCap += (t.realized_pnl || 0);
+            let shortDate = t.exit_date ? t.exit_date.slice(5,10) : ''; // Gets MM-DD
+            eqCurve.push({ date: shortDate, equity: runningCap });
+        });
+
+        drawHomeEq(eqCurve, startCap);
       } catch (e) { console.error("Home error:", e); }
     }
 
