@@ -1,0 +1,41 @@
+{
+  "capital": 10000.0,
+  "trades": [
+    {
+      "id": "SWING_TCS_20260415",
+      "symbol": "TCS",
+      "strategy": "HARMAN1_PULLBACK",
+      "entry_price": 2552.0,
+      "stop_loss": 2424.4,
+      "one_r": 127.6,
+      "shares": 1,
+      "status": "ACTIVE",
+      "entry_date": "2026-04-15",
+      "realized_pnl": 0
+    },
+    {
+      "id": "SWING_HDFCBANK_20260415",
+      "symbol": "HDFCBANK",
+      "strategy": "HARMAN1_PULLBACK",
+      "entry_price": 809.6,
+      "stop_loss": 769.12,
+      "one_r": 40.48,
+      "shares": 4,
+      "status": "ACTIVE",
+      "entry_date": "2026-04-15",
+      "realized_pnl": 0
+    },
+    {
+      "id": "SWING_INFY_20260415",
+      "symbol": "INFY",
+      "strategy": "HARMAN1_PULLBACK",
+      "entry_price": 1305.0,
+      "stop_loss": 1239.75,
+      "one_r": 65.25,
+      "shares": 3,
+      "status": "ACTIVE",
+      "entry_date": "2026-04-15",
+      "realized_pnl": 0
+    }
+  ]
+}
