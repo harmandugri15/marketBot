@@ -49,7 +49,7 @@ def calc_inds(df):
 def run_swing_engine():
     api = GrowwAPI()
     now = datetime.now(IST)
-    #if not ("15:10:00" <= now.strftime("%H:%M:%S") <= "15:30:00"): return
+    if not ("15:10:00" <= now.strftime("%H:%M:%S") <= "15:30:00"): return
 
     send_telegram_alert("🔎 *Swing Engine Awake:* Scanning for End-of-Day Setups...")
     db = _load()
