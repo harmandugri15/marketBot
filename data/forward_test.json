@@ -1286,12 +1286,14 @@
       "stop_loss": 191.88,
       "sl_pct": 5.0,
       "shares": 19,
-      "status": "ACTIVE",
+      "status": "CLOSED",
       "entry_date": "2026-04-08",
-      "exit_date": null,
-      "realized_pnl": 0,
-      "pnl_pct": 0,
-      "notes": "EMA 20 Pullback"
+      "exit_date": "2026-04-15",
+      "realized_pnl": 368.22,
+      "pnl_pct": 9.48,
+      "notes": "EMA 20 Pullback",
+      "exit_price": 223.79,
+      "exit_reason": "Target Hit (1.5R)"
     },
     {
       "id": "KRSNAA_20260408",
@@ -1742,7 +1744,7 @@
       "id": "HFCL_20260409",
       "symbol": "HFCL",
       "strategy": "HARMAN1",
-      "entry_price": 88.56,
+      "entry_price": 88.75,
       "stop_loss": 74.64,
       "sl_pct": 6.18,
       "shares": 40,
