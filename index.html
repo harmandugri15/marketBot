@@ -1163,15 +1163,26 @@
           <div class="card">
             <div class="ch">
               <div>
-                <div class="ct">All Forward Test Trades</div>
-                <div class="cs" id="ft-started-label"></div>
+                <div class="ct">Active &amp; Watching Trades</div>
+                <div class="cs">Trades waiting for entry or currently running</div>
               </div>
             </div>
-            <div id="ft-list">
-              <div style="color:var(--muted);font-size:14px;padding:12px 0">No trades yet. Add from the Scanner page.</div>
+            <div id="ft-list-active">
+              <div style="color:var(--muted);font-size:14px;padding:12px 0">No active trades yet. Add from the Scanner page.</div>
             </div>
           </div>
 
+          <div class="card">
+            <div class="ch">
+              <div>
+                <div class="ct">Closed Trades</div>
+                <div class="cs">Completed trades and realized P&amp;L</div>
+              </div>
+            </div>
+            <div id="ft-list-closed">
+              <div style="color:var(--muted);font-size:14px;padding:12px 0">No closed trades yet.</div>
+            </div>
+          </div>
           <div class="ex">
             <div class="ext">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -1839,70 +1850,74 @@
     }
 
     // ════════════════════════════════════════════════════════════════
-    //  LIST RENDERER
+    //  LIST RENDERER (Updated for Split View)
     // ════════════════════════════════════════════════════════════════
     function renderFtList(trades) {
-      const el = $('ft-list');
-      if (!trades.length) { 
-        el.innerHTML = '<div style="color:var(--muted);font-size:14px;padding:12px 0">No trades yet. Add from the Scanner page.</div>'; 
-        return; 
-      }
-      
-      let html = '';
-      
-      trades.slice().reverse().forEach(t => {
-        try {
-          const ep = parseFloat(t.entry_price) || 0;
-          const sl = parseFloat(t.stop_loss) || 0;
-          const one_r = parseFloat(t.one_r) || (ep - sl) || 1;
-          const be = ep + (2 * one_r);
-          const t3r = ep + (3 * one_r);
-          const pnl = parseFloat(t.realized_pnl) || 0;
-          const pnl_pct = parseFloat(t.pnl_pct) || 0;
-          const sl_pct = parseFloat(t.sl_pct) || 0;
-          
-          const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
-          const stages = [
-            { label: 'Scan', done: true },
-            { label: 'Enter @ Rs' + ep.toFixed(1), done: t.status !== 'WATCHING' },
-            { label: 'BE @ Rs' + be.toFixed(1), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
-            { label: '3R @ Rs' + t3r.toFixed(1), done: false },
-            { label: 'Trail EMA', done: false },
-          ];
-          
-          html += `<div class="ft-trade">
-            <div class="ft-head">
-              <div>
-                <div class="ft-sym">${t.symbol} <span style="font-size:12.5px;color:var(--muted);font-weight:500;margin-left:8px;font-family:sans-serif">${t.strategy || 'SYS'}</span></div>
-                <div class="ft-meta">Entry Rs${ep} · SL Rs${sl} (${sl_pct}%) · 1R=Rs${one_r.toFixed(1)}</div>
-                <div class="ft-meta">${t.notes || ''}</div>
-              </div>
-              <div class="ft-right">
-                ${t.status === 'CLOSED'
-                    ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
-                     <div style="font-size:12px;color:var(--muted);margin-top:6px">${t.exit_reason || 'Manual'}</div>`
-                    : `<span class="badge ${statusBadge}">${t.status}</span><br>
-                     ${t.status === 'WATCHING'
-                      ? `<button class="btn btn-s" style="margin-top:10px;font-size:12px;padding:6px 12px" onclick="markEntered('${t.id}',${ep})">Mark Entered</button>`
-                      : ''}
-                     <button class="btn btn-s" style="margin-top:10px;font-size:12px;padding:6px 12px;color:var(--r);border-color:rgba(239, 68, 68, 0.3)" onclick="openModal('${t.id}',${ep},${t.shares || 1})">Close Trade</button>`
-                  }
-              </div>
-            </div>
-            <div class="ft-stages">
-              ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
-            </div>
-          </div>`;
-        } catch (err) {
-          console.error("Skipping corrupted trade:", t.symbol, err);
+      const activeEl = $('ft-list-active');
+      const closedEl = $('ft-list-closed');
+
+      const activeTrades = trades.filter(t => t.status !== 'CLOSED').reverse();
+      const closedTrades = trades.filter(t => t.status === 'CLOSED').reverse();
+
+      const generateHtml = (tradeArray, emptyMsg) => {
+        if (!tradeArray.length) {
+          return `<div style="color:var(--muted);font-size:14px;padding:12px 0">${emptyMsg}</div>`;
         }
-      });
-      
-      if (html === '') {
-        html = '<div style="color:var(--r);font-size:14px;padding:12px 0">Error rendering trades. Data might be corrupted.</div>';
-      }
-      
-      el.innerHTML = html;
+
+        let html = '';
+        tradeArray.forEach(t => {
+          try {
+            const ep = parseFloat(t.entry_price) || 0;
+            const sl = parseFloat(t.stop_loss) || 0;
+            const one_r = parseFloat(t.one_r) || (ep - sl) || 1;
+            const be = ep + (2 * one_r);
+            const t3r = ep + (3 * one_r);
+            const pnl = parseFloat(t.realized_pnl) || 0;
+            const pnl_pct = parseFloat(t.pnl_pct) || 0;
+            const sl_pct = parseFloat(t.sl_pct) || 0;
+            
+            const statusBadge = t.status === 'WATCHING' ? 'bm' : t.status === 'ACTIVE' ? 'bb2' : pnl >= 0 ? 'bg2' : 'br2';
+            const stages = [
+              { label: 'Scan', done: true },
+              { label: 'Enter @ Rs' + ep.toFixed(1), done: t.status !== 'WATCHING' },
+              { label: 'BE @ Rs' + be.toFixed(1), done: t.status === 'CLOSED' && t.exit_reason !== 'Stop Loss Hit' },
+              { label: '3R @ Rs' + t3r.toFixed(1), done: false },
+              { label: 'Trail EMA', done: false },
+            ];
+            
+            html += `<div class="ft-trade">
+              <div class="ft-head">
+                <div>
+                  <div class="ft-sym">${t.symbol} <span style="font-size:12.5px;color:var(--muted);font-weight:500;margin-left:8px;font-family:sans-serif">${t.strategy || 'SYS'}</span></div>
+                  <div class="ft-meta">Entry Rs${ep} · SL Rs${sl} (${sl_pct}%) · 1R=Rs${one_r.toFixed(1)}</div>
+                  <div class="ft-meta">${t.notes || ''}</div>
+                </div>
+                <div class="ft-right">
+                  ${t.status === 'CLOSED'
+                    ? `<span class="badge ${statusBadge}">${pnl >= 0 ? '+' : ''}Rs${Math.abs(pnl).toFixed(0)} (${pnl_pct >= 0 ? '+' : ''}${pnl_pct.toFixed(1)}%)</span>
+                       <div style="font-size:12px;color:var(--muted);margin-top:6px">${t.exit_reason || 'Manual'}</div>`
+                    : `<span class="badge ${statusBadge}">${t.status}</span><br>
+                       ${t.status === 'WATCHING'
+                        ? `<button class="btn btn-s" style="margin-top:10px;font-size:12px;padding:6px 12px" onclick="markEntered('${t.id}',${ep})">Mark Entered</button>`
+                        : ''}
+                       <button class="btn btn-s" style="margin-top:10px;font-size:12px;padding:6px 12px;color:var(--r);border-color:rgba(239, 68, 68, 0.3)" onclick="openModal('${t.id}',${ep},${t.shares || 1})">Close Trade</button>`
+                  }
+                </div>
+              </div>
+              <div class="ft-stages">
+                ${stages.map((st, i) => `<span class="fts ${st.done ? 'done' : i === stages.findIndex(x => !x.done) ? 'next' : 'wait'}">${st.label}</span>`).join('')}
+              </div>
+            </div>`;
+          } catch (err) {
+            console.error("Skipping corrupted trade:", t.symbol, err);
+          }
+        });
+        
+        return html || `<div style="color:var(--r);font-size:14px;padding:12px 0">Error rendering trades. Data might be corrupted.</div>`;
+      };
+
+      activeEl.innerHTML = generateHtml(activeTrades, 'No active or watching trades yet. Add from the Scanner page.');
+      closedEl.innerHTML = generateHtml(closedTrades, 'No closed trades yet.');
     }
 
     async function addToFt(signal) {
