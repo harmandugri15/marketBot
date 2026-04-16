@@ -1,9 +1,9 @@
-name: EOD Swing Engine
+name: Hybrid Swing Engine
 
 on:
   schedule:
-    # Runs exactly at 3:15 PM IST (09:45 UTC) every Monday-Friday
-    - cron: '45 9 * * 1-5'
+    # Runs every 10 minutes between 9:15 AM and 3:30 PM IST (03:45 to 10:00 UTC)
+    - cron: '*/10 3-10 * * 1-5'
   workflow_dispatch: 
 
 jobs:
