@@ -2051,7 +2051,7 @@
       "id": "HAVELLS_20260410",
       "symbol": "HAVELLS",
       "strategy": "HARMAN1",
-      "entry_price": 1305.3,
+      "entry_price": 1305.0,
       "stop_loss": 1216.95,
       "sl_pct": 5.0,
       "shares": 3,
