@@ -33,9 +33,12 @@
       "stop_loss": 1239.75,
       "one_r": 65.25,
       "shares": 3,
-      "status": "ACTIVE",
+      "status": "CLOSED",
       "entry_date": "2026-04-15",
-      "realized_pnl": 0
+      "realized_pnl": -399.83759999999984,
+      "exit_price": 1174.2,
+      "exit_date": "2026-04-27 11:23",
+      "exit_reason": "Stop Loss Hit"
     }
   ]
 }
