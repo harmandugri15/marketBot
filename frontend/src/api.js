@@ -27,21 +27,36 @@ async function request(method, path, body = null) {
   const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
 
-  const res = await fetch(`${BASE}${path}`, opts);
+  try {
+    const res = await fetch(`${BASE}${path}`, opts);
 
-  if (res.status === 401) {
-    clearToken();
-    window.dispatchEvent(new Event("auth:expired"));
-    throw new Error("Session expired — please log in again");
+    if (res.status === 401) {
+      clearToken();
+      window.dispatchEvent(new Event("auth:expired"));
+      throw new Error("Session expired — please log in again");
+    }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || "API error");
+    }
+
+    if (res.status === 204) return null;
+    return res.json();
+  } catch (err) {
+    if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      const currentUrl = window.location.href;
+      throw new Error(`Connection to Python backend blocked! 
+        <br><br><b>Diagnostic Info:</b>
+        <br>1. Target Backend URL: <code>${BASE}${path}</code>
+        <br>2. Current Browser URL: <code>${currentUrl}</code>
+        <br><br><b>Likely Causes:</b>
+        <br>- The Python backend is not running.
+        <br>- You opened the HTML file directly instead of using 'npm run dev'.
+        <br>- CORS is blocking it because your browser URL doesn't match the allowed origins.`);
+    }
+    throw err;
   }
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || "API error");
-  }
-
-  if (res.status === 204) return null;
-  return res.json();
 }
 
 const get  = (path)        => request("GET",    path);

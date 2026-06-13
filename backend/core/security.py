@@ -44,14 +44,6 @@ def decode_token(token: str) -> dict:
         )
 
 
-def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
-) -> dict:
-    """FastAPI dependency — validates JWT and returns payload."""
-    if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return decode_token(credentials.credentials)
+def get_current_user() -> dict:
+    """FastAPI dependency — Auth bypassed as requested."""
+    return {"sub": "admin", "role": "admin"}
