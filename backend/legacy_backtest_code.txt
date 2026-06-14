@@ -1,0 +1,207 @@
+--- Line 958 ---
+      <div class="ng">Strategies</div>
+      <div class="nl" onclick="go('scanner')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span> 
+        Scanner
+      </div>
+      <div class="nl" onclick="go('backtest')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></span> 
+        Backtest
+      </div>
+
+      <div class="ng">Learn</div>
+================================================================================
+--- Line 960 ---
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span> 
+        Scanner
+      </div>
+      <div class="nl" onclick="go('backtest')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></span> 
+        Backtest
+      </div>
+
+      <div class="ng">Learn</div>
+      <div class="nl" onclick="go('learn')">
+        <span class="ni"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></span> 
+================================================================================
+--- Line 1270 ---
+          <div id="signals-area">
+            <div style="color:var(--muted);font-size:14px;padding:12px 0">Run the scanner to see today's setups.</div>
+          </div>
+        </div>
+
+        <div class="page" id="page-backtest">
+          <div class="ph">
+            <div class="pt">Backtest</div>
+            <div class="ps">Test both strategies on historical NSE data. No real money needed.</div>
+          </div>
+
+================================================================================
+--- Line 1272 ---
+          </div>
+        </div>
+
+        <div class="page" id="page-backtest">
+          <div class="ph">
+            <div class="pt">Backtest</div>
+            <div class="ps">Test both strategies on historical NSE data. No real money needed.</div>
+          </div>
+
+          <div class="ex">
+            <div class="ext">
+================================================================================
+--- Line 1279 ---
+          </div>
+
+          <div class="ex">
+            <div class="ext">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              What is a backtest?
+            </div>
+            <div class="exb">
+              The bot replays the strategy day-by-day on <strong>real past prices</strong>. It never cheats — on day 50 it only looks at day 1-50 data. Results show Win Rate, Profit Factor, and Max Drawdown.
+            </div>
+          </div>
+================================================================================
+--- Line 1288 ---
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch">
+              <div class="ct">Backtest Settings</div>
+            </div>
+            <div class="fg">
+              <div class="fi"><label>Start Date</label><input type="date" id="bt-start" value="2024-01-01"></div>
+              <div class="fi"><label>End Date</label><input type="date" id="bt-end" value="2024-12-31"></div>
+              <div class="fi"><label>Capital (Rs)</label><input type="number" id="bt-cap" value="100000" step="5000"></div>
+================================================================================
+--- Line 1312 ---
+                  <option value="50">Top 50 stocks (medium)</option>
+                  <option value="20">Top 20 stocks (fastest)</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-g" id="bt-btn" onclick="startBt()" style="margin-top: 8px;">Run Backtest</button>
+          </div>
+
+          <div id="bt-prog" style="display:none" class="card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div class="spin"></div><span style="font-size:14px;font-weight:500">Running backtest — this takes 3-8 minutes...</span>
+================================================================================
+--- Line 1317 ---
+            <button class="btn btn-g" id="bt-btn" onclick="startBt()" style="margin-top: 8px;">Run Backtest</button>
+          </div>
+
+          <div id="bt-prog" style="display:none" class="card">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div class="spin"></div><span style="font-size:14px;font-weight:500">Running backtest — this takes 3-8 minutes...</span>
+            </div>
+            <div class="pt2"><span>Testing: <strong id="bt-sym">—</strong></span><span id="bt-pct">0%</span></div>
+            <div class="pw">
+              <div class="pf" id="bt-bar" style="width:0%"></div>
+            </div>
+================================================================================
+--- Line 1690 ---
+      }
+    }
+
+    const PAGE_NAMES = {
+      home: 'Dashboard', fwd: 'Forward Test', scanner: 'Scanner',
+      backtest: 'Backtest', learn: 'How It Works', glossary: 'Glossary',
+      config: 'Settings', logs: 'Logs'
+    };
+
+    // ════════════════════════════════════════════════════════════════
+    //  NAV
+================================================================================
+--- Line 2110 ---
+          }).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  BACKTEST
+    // ════════════════════════════════════════════════════════════════
+    function startBt() {
+      $('bt-btn').disabled = true;
+      $('bt-prog').style.display = 'block';
+      $('bt-results').style.display = 'none';
+================================================================================
+--- Line 2123 ---
+        start_date: $('bt-start').value, end_date: $('bt-end').value,
+        capital: parseFloat($('bt-cap').value), strategy: $('bt-strat').value
+      };
+      if (count && count !== 'full') payload.symbols_count = parseInt(count);
+
+      fetch('/api/backtest/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(r => r.json()).then(d => {
+          if (d.error) { $('bt-btn').disabled = false; return; }
+          btPoll = setInterval(pollBt, 2000);
+        }).catch(() => { $('bt-btn').disabled = false; });
+    }
+================================================================================
+--- Line 2132 ---
+        }).catch(() => { $('bt-btn').disabled = false; });
+    }
+
+    async function pollBt() {
+      try {
+        const d = await (await fetch('/api/backtest/progress')).json();
+        const pct = d.total > 0 ? Math.round(d.current / d.total * 100) : 0;
+        $('bt-bar').style.width = pct + '%'; $('bt-pct').textContent = pct + '%'; $('bt-sym').textContent = d.symbol || '—';
+        if (d.done) { clearInterval(btPoll); $('bt-btn').disabled = false; $('bt-prog').style.display = 'none'; loadBtResults(); }
+        if (d.error) { clearInterval(btPoll); $('bt-btn').disabled = false; }
+      } catch (e) { }
+================================================================================
+--- Line 2142 ---
+      } catch (e) { }
+    }
+
+    async function loadBtResults() {
+      try {
+        const r = await (await fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results')).json();
+        if (r.error) return;
+        const m = r.metrics;
+        $('bt-results').style.display = 'block';
+        $('bt-tc').textContent = m.total_trades + ' trades';
+
+================================================================================
+--- Line 2162 ---
+        ].map(x => `<div class="stat ${x.c}"><div class="sl">${x.l}</div><div class="sv ${x.c}">${x.v}</div><div class="ss">${x.s}</div></div>`).join('');
+
+        const vb = $('bt-verdict'); vb.style.display = 'flex';
+        let vc = 'ai', vt;
+        if (m.win_rate >= 50 && m.profit_factor >= 1.5 && m.max_drawdown_pct <= 30) {
+          vc = 'ag'; vt = `<strong>Good backtest results.</strong> Win rate ${m.win_rate}%, profit factor ${m.profit_factor}, max drawdown ${m.max_drawdown_pct}%. This looks viable. Now run a 30-day forward test before going live.`;
+        } else if (m.profit_factor >= 1.0) {
+          vc = 'aw'; vt = `<strong>Mixed results.</strong> Win rate ${m.win_rate}%, PF ${m.profit_factor}. The strategy is profitable but borderline. This could be due to market conditions in the selected period.`;
+        } else {
+          vc = 'ar'; vt = `<strong>Poor results on this date range.</strong> Win rate ${m.win_rate}%, PF ${m.profit_factor}. Do NOT go live based on these results alone.`;
+        }
+================================================================================
+--- Line 2270 ---
+      { t: 'Profit Factor', d: 'Total profit from winning trades ÷ total loss from losing trades. PF of 2.0 means you made Rs2 for every Rs1 lost. PF > 1.5 is good. PF < 1.0 means you are losing money overall.' },
+      { t: 'Max Drawdown', d: 'The biggest peak-to-trough decline your account experienced during the test period. If the account went from Rs1,00,000 to Rs75,000 at some point, that\'s a 25% drawdown. Lower is better.' },
+      { t: 'MACD', d: 'Moving Average Convergence Divergence. Shows momentum. When the MACD histogram is rising (green getting taller), buyers have more power than sellers. The VT strategy requires MACD to be rising at entry.' },
+      { t: 'Volume', d: 'How many shares traded that day. High volume = strong participation. During a pullback, volume should decrease (sellers exhausted). On a breakout, volume should increase (buyers entering).' },
+      { t: 'Paper Trading', d: 'Simulating trades without real money. The bot tracks everything as if real — entries, exits, P&L — but no actual orders. Always paper trade first.' },
+      { t: 'Forward Test', d: 'Running the strategy on real upcoming market data starting from today. More realistic than a backtest because the future is truly unknown. 30 days of forward testing is the minimum before considering going live.' },
+      { t: 'Circuit Breaker', d: 'A safety rule: if the account loses 50% of capital, the bot stops all trading. This prevents catastrophic loss due to a broken strategy or extreme market condition.' },
+    ];
+
+    function renderGloss() {
+      $('gloss-list').innerHTML = GLOSSARY.map(g => `
+================================================================================
+--- Line 2329 ---
+    //  INIT
+    // ════════════════════════════════════════════════════════════════
+    refreshHome();
+    renderGloss();
+    loadAndShowSignals(0, 0).catch(() => { });
+    fetch(isGH ? 'data/backtest_results.json' : '/api/backtest/results').then(r => r.json()).then(d => { if (!d.error) { $('bt-results').style.display = 'block'; loadBtResults(); } }).catch(() => { });
+  </script>
+</body>
+
+</html>
+================================================================================

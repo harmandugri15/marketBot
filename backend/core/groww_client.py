@@ -42,6 +42,7 @@ class GrowwClient:
         
         self.client = None
         self.connected = False
+        self.market_data_allowed = True
         
         self.authenticate()
 
@@ -99,7 +100,7 @@ class GrowwClient:
         Falls back to yfinance if Groww API not configured (ideal for dev/paper mode).
         Returns list of {date, open, high, low, close, volume}.
         """
-        if not self.is_configured or not self.client:
+        if not self.is_configured or not self.client or not self.market_data_allowed:
             return self._yfinance_fallback(symbol, from_date, to_date, interval)
 
         # Clean symbol by stripping .NS suffix for Groww API
@@ -123,24 +124,14 @@ class GrowwClient:
             elif interval == "1h":
                 interval_mins = 60
 
-            if hasattr(self.client, "get_historical_candles"):
-                response = self.client.get_historical_candles(
-                    trading_symbol=groww_ticker,
-                    exchange="NSE",
-                    segment="CASH",
-                    start_time=start_str,
-                    end_time=end_str,
-                    interval_in_minutes=interval_mins
-                )
-            else:
-                response = self.client.get_historical_candle_data(
-                    trading_symbol=groww_ticker,
-                    exchange="NSE",
-                    segment="CASH",
-                    start_time=start_str,
-                    end_time=end_str,
-                    interval_in_minutes=interval_mins
-                )
+            response = self.client.get_historical_candle_data(
+                trading_symbol=groww_ticker,
+                exchange="NSE",
+                segment="CASH",
+                start_time=start_str,
+                end_time=end_str,
+                interval_in_minutes=interval_mins
+            )
 
             formatted_data = []
             candle_list = response.get("candles", []) if isinstance(response, dict) else []
@@ -157,7 +148,13 @@ class GrowwClient:
                     })
             return formatted_data
         except Exception as e:
-            logger.warning(f"Groww API failed for {symbol}, falling back to yfinance: {e}")
+            err_msg = str(e)
+            if "forbidden" in err_msg.lower() or "403" in err_msg:
+                self.market_data_allowed = False
+                logger.info("🚫 Groww API returned Access Forbidden for market data (unpaid account). "
+                            "Switching permanently to silent yfinance fallback mode for this session.")
+            else:
+                logger.warning(f"Groww API failed for {symbol}, falling back to yfinance: {e}")
             return self._yfinance_fallback(symbol, from_date, to_date, interval)
 
     def get_historical_intraday_data(
@@ -171,7 +168,7 @@ class GrowwClient:
         Falls back to yfinance if Groww API not configured.
         Returns list of {date, time, open, high, low, close, volume}.
         """
-        if not self.is_configured or not self.client:
+        if not self.is_configured or not self.client or not self.market_data_allowed:
             return self._yfinance_historical_intraday(symbol, from_date, to_date)
 
         clean_symbol = symbol.replace(".NS", "")
@@ -195,16 +192,14 @@ class GrowwClient:
                     end_str = f"{current_start.strftime('%Y-%m-%d')} 15:30:00"
                     
                     try:
-                        if hasattr(self.client, "get_historical_candles"):
-                            response = self.client.get_historical_candles(
-                                trading_symbol=groww_ticker, exchange="NSE", segment="CASH",
-                                start_time=start_str, end_time=end_str, interval_in_minutes=5
-                            )
-                        else:
-                            response = self.client.get_historical_candle_data(
-                                trading_symbol=groww_ticker, exchange="NSE", segment="CASH",
-                                start_time=start_str, end_time=end_str, interval_in_minutes=5
-                            )
+                        response = self.client.get_historical_candle_data(
+                            trading_symbol=groww_ticker,
+                            exchange="NSE",
+                            segment="CASH",
+                            start_time=start_str,
+                            end_time=end_str,
+                            interval_in_minutes=5
+                        )
                         
                         candle_list = response.get("candles", []) if isinstance(response, dict) else []
                         for candle in candle_list:
@@ -219,7 +214,13 @@ class GrowwClient:
                                     "close":  float(candle[4]),
                                     "volume": int(candle[5])
                                 })
-                    except Exception:
+                    except Exception as e:
+                        err_msg = str(e)
+                        if "forbidden" in err_msg.lower() or "403" in err_msg:
+                            self.market_data_allowed = False
+                            logger.info("🚫 Groww API returned Access Forbidden for market data (unpaid account). "
+                                        "Switching permanently to silent yfinance fallback mode for this session.")
+                            return self._yfinance_historical_intraday(symbol, from_date, to_date)
                         pass
                 
                 current_start += timedelta(days=1)
@@ -235,7 +236,7 @@ class GrowwClient:
 
     def get_ltp(self, symbol: str) -> Optional[float]:
         """Last Traded Price for a symbol."""
-        if not self.is_configured or not self.client:
+        if not self.is_configured or not self.client or not self.market_data_allowed:
             return self._yfinance_ltp(symbol)
         clean_symbol = symbol.replace(".NS", "")
         symbol_map = {
@@ -254,12 +255,17 @@ class GrowwClient:
                 if val is not None:
                     return float(val)
             return self._yfinance_ltp(symbol)
-        except Exception:
+        except Exception as e:
+            err_msg = str(e)
+            if "forbidden" in err_msg.lower() or "403" in err_msg:
+                self.market_data_allowed = False
+                logger.info("🚫 Groww API returned Access Forbidden for market data (unpaid account). "
+                            "Switching permanently to silent yfinance fallback mode for this session.")
             return self._yfinance_ltp(symbol)
 
     def get_quote(self, symbol: str) -> dict:
         """Full bid/ask quote."""
-        if not self.is_configured or not self.client:
+        if not self.is_configured or not self.client or not self.market_data_allowed:
             return {}
         clean_symbol = symbol.replace(".NS", "")
         symbol_map = {
@@ -271,7 +277,12 @@ class GrowwClient:
             if hasattr(self.client, "get_quote"):
                 return self.client.get_quote(trading_symbol=groww_ticker, exchange="NSE", segment="CASH")
             return {}
-        except Exception:
+        except Exception as e:
+            err_msg = str(e)
+            if "forbidden" in err_msg.lower() or "403" in err_msg:
+                self.market_data_allowed = False
+                logger.info("🚫 Groww API returned Access Forbidden for market data (unpaid account). "
+                            "Switching permanently to silent yfinance fallback mode for this session.")
             return {}
 
     # ── Order Management ──────────────────────────────────────────────────────

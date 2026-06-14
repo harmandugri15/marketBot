@@ -1,0 +1,5 @@
+GrowwAPI.CANDLE_INTERVAL_DAY = '1day' (type: <class 'str'>)
+GrowwAPI.CANDLE_INTERVAL_HOUR_1 = '1hour' (type: <class 'str'>)
+GrowwAPI.CANDLE_INTERVAL_MIN_1 = '1minute' (type: <class 'str'>)
+GrowwAPI.CANDLE_INTERVAL_MIN_5 = '5minute' (type: <class 'str'>)
+GrowwAPI.CANDLE_INTERVAL_MIN_15 = '15minute' (type: <class 'str'>)

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 IST = pytz.timezone('Asia/Kolkata')
 
 # Highly liquid stocks perfect for VWAP Bounces
-INTRADAY_WATCHLIST = ["RELIANCE", "HDFCBANK", "ICICIBANK", "INFY", "TCS", "TATAMOTORS", "SBIN", "AXISBANK", "M&M", "MARUTI"]
+INTRADAY_WATCHLIST = ["RELIANCE", "HDFCBANK", "ICICIBANK", "INFY", "TCS", "TMCV", "TMPV", "SBIN", "AXISBANK", "M&M", "MARUTI"]
 
 # STUDENT ACCOUNT SETTINGS
 STUDENT_CAPITAL = 4000.0  # Base capital

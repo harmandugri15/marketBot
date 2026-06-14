@@ -77,7 +77,7 @@ export async function renderBacktest(container) {
       }
 
       tbody.innerHTML = data.map(r => `
-        <tr>
+        <tr class="clickable-row" data-id="${r.id}" style="cursor:pointer;">
           <td>${new Date(r.run_date).toLocaleDateString()}</td>
           <td><span class="badge" style="background:var(--border-color); font-size:0.75rem;">${r.strategy}</span></td>
           <td style="font-size:0.875rem">${r.start_date} → ${r.end_date}</td>
@@ -87,10 +87,148 @@ export async function renderBacktest(container) {
           <td class="mono">${r.total_trades}</td>
         </tr>
       `).join('');
+
+      document.querySelectorAll('.clickable-row').forEach(row => {
+        row.addEventListener('click', async () => {
+          const id = row.getAttribute('data-id');
+          await showBacktestDetails(id);
+        });
+      });
     } catch (e) {
       console.error(e);
     }
   };
+
+  async function showBacktestDetails(id) {
+    try {
+      const r = await backtest.detail(id);
+      
+      let modal = document.getElementById('bt-detail-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'bt-detail-modal';
+        document.body.appendChild(modal);
+      }
+      
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100vw';
+      modal.style.height = '100vh';
+      modal.style.background = 'rgba(11, 15, 25, 0.85)';
+      modal.style.backdropFilter = 'blur(8px)';
+      modal.style.zIndex = '1000';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      modal.style.padding = '2rem';
+      
+      const tradesHtml = (r.trade_log || []).map((t, idx) => {
+        const pnl = t.pnl || 0;
+        const pct = t.pnl_pct || 0;
+        const entryPrice = t.entry || t.entry_price || 0;
+        const exitPrice = t.exit || t.exit_price || 0;
+        const qty = t.qty || t.shares || 0;
+        
+        return `
+          <tr>
+            <td style="color:var(--text-muted)">${idx + 1}</td>
+            <td style="font-weight:600;">${t.symbol}</td>
+            <td><span class="badge" style="background:var(--border-color);">${t.strategy || '—'}</span></td>
+            <td>${t.entry_date || '—'}</td>
+            <td>${t.exit_date || '—'}</td>
+            <td class="mono">₹${entryPrice.toLocaleString('en-IN')}</td>
+            <td class="mono">${exitPrice ? `₹${exitPrice.toLocaleString('en-IN')}` : '—'}</td>
+            <td class="mono">${qty}</td>
+            <td class="mono ${pnl >= 0 ? 'positive' : 'negative'}">${pnl >= 0 ? '+' : ''}₹${Math.abs(pnl).toLocaleString('en-IN')}</td>
+            <td class="mono ${pct >= 0 ? 'positive' : 'negative'}">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.05); color:var(--text-muted);">${t.exit_reason || '—'}</span></td>
+          </tr>
+        `;
+      }).join('');
+
+      modal.innerHTML = `
+        <div class="card" style="width: 90%; max-width: 1200px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; position: relative; border: 1px solid var(--border-color); background: var(--bg-color);">
+          <button id="close-modal-btn" style="position: absolute; top: 1.5rem; right: 1.5rem; background: transparent; color: var(--text-muted); font-size: 1.5rem; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-color); cursor: pointer;">
+            &times;
+          </button>
+          
+          <div>
+            <h2>Backtest Details</h2>
+            <p class="text-muted" style="font-size: 0.875rem;">Strategy: <strong>${r.strategy}</strong> | Tested Period: <strong>${r.start_date} → ${r.end_date}</strong></p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02)">
+              <div class="stat-label">Total Return</div>
+              <div class="stat-value ${r.total_return_pct >= 0 ? 'positive' : 'negative'}">${r.total_return_pct >= 0 ? '+' : ''}${r.total_return_pct}%</div>
+            </div>
+            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02)">
+              <div class="stat-label">Win Rate</div>
+              <div class="stat-value">${r.win_rate}%</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${r.winning_trades}W / ${r.losing_trades}L</div>
+            </div>
+            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02)">
+              <div class="stat-label">Profit Factor</div>
+              <div class="stat-value">${r.profit_factor}</div>
+            </div>
+            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02)">
+              <div class="stat-label">Max Drawdown</div>
+              <div class="stat-value negative">-${r.max_drawdown}%</div>
+            </div>
+            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02)">
+              <div class="stat-label">Avg Win / Loss</div>
+              <div style="font-size: 1.1rem; font-weight: 700; margin-top: 0.5rem; font-family: var(--font-mono);">
+                <span class="positive">+${r.avg_gain_pct}%</span> / <span class="negative">-${r.avg_loss_pct}%</span>
+              </div>
+            </div>
+            <div class="card" style="padding: 1rem; text-align: center; background: rgba(255,255,255,0.02)">
+              <div class="stat-label">Ending Capital</div>
+              <div class="stat-value" style="font-size: 1.5rem; margin-top: 0.75rem;">₹${r.final_capital.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="mb-3">Executed Trades (${r.total_trades} total)</h3>
+            <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Symbol</th>
+                    <th>Strategy</th>
+                    <th>Entry Date</th>
+                    <th>Exit Date</th>
+                    <th>Entry Price</th>
+                    <th>Exit Price</th>
+                    <th>Qty</th>
+                    <th>PnL</th>
+                    <th>Gain %</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tradesHtml || '<tr><td colspan="11" style="text-align:center;">No trades were executed.</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('close-modal-btn').onclick = () => {
+        modal.remove();
+      };
+      
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      };
+    } catch (err) {
+      alert('Failed to load backtest details: ' + err.message);
+    }
+  }
 
   await loadResults();
 

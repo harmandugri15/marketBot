@@ -1,0 +1,6 @@
+get_historical_candles signature:
+(self, exchange: str, segment: str, groww_symbol: str, start_time: str, end_time: str, candle_interval: str, timeout: Optional[int] = None) -> dict
+
+get_historical_candle_data signature:
+(self, trading_symbol: str, exchange: str, segment: str, start_time: str, end_time: str, interval_in_minutes: Optional[int] = None, timeout: Optional[int] = None) -> dict
+
