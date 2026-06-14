@@ -63,8 +63,38 @@ async def lifespan(app: FastAPI):
             db = SessionLocal()
             try:
                 from services.scanner_service import run_scan
+                from services.forward_test_service import log_daily_signals
+                from models.user import User
+                from models.signal import Signal
+
+                # 1. Run global scan using default client
                 client = GrowwClient()
-                run_scan(db, client)
+                signals = []
+                try:
+                    signals.extend(run_scan(db, client, strategy="VCP"))
+                except Exception as ex:
+                    logger.error(f"[Scheduler] VCP scan failed: {ex}")
+                try:
+                    signals.extend(run_scan(db, client, strategy="HARMAN1_PULLBACK"))
+                except Exception as ex:
+                    logger.error(f"[Scheduler] HARMAN1_PULLBACK scan failed: {ex}")
+
+                latest = db.query(Signal).order_by(Signal.scan_date.desc()).first()
+                regime = latest.market_regime if latest else "CASH"
+                nifty_close = latest.close if latest and latest.symbol == "^NSEI" else None
+
+                # 2. Process daily signals for every active user
+                users = db.query(User).filter(User.is_active == True).all()
+                for user in users:
+                    try:
+                        user_client = GrowwClient(
+                            api_key=user.groww_api_key,
+                            secret_key=user.groww_secret_key,
+                            client_id=user.groww_client_id
+                        )
+                        log_daily_signals(db, user, user_client, signals, regime, nifty_close)
+                    except Exception as ue:
+                        logger.error(f"[Scheduler] Failed to process signals for user {user.username}: {ue}")
             finally:
                 db.close()
 
@@ -72,8 +102,19 @@ async def lifespan(app: FastAPI):
             db = SessionLocal()
             try:
                 from services.forward_test_service import update_open_forward_trades
-                client = GrowwClient()
-                update_open_forward_trades(db, client)
+                from models.user import User
+
+                users = db.query(User).filter(User.is_active == True).all()
+                for user in users:
+                    try:
+                        user_client = GrowwClient(
+                            api_key=user.groww_api_key,
+                            secret_key=user.groww_secret_key,
+                            client_id=user.groww_client_id
+                        )
+                        update_open_forward_trades(db, user, user_client)
+                    except Exception as ue:
+                        logger.error(f"[Scheduler] Failed to update forward trades for user {user.username}: {ue}")
             finally:
                 db.close()
 

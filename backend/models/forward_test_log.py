@@ -7,7 +7,8 @@ This is the bridge between paper trading and going live —
 you analyze this log to gain confidence before switching modes.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Date, JSON, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, Date, JSON, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 
@@ -16,6 +17,7 @@ class ForwardTestLog(Base):
     __tablename__ = "forward_test_log"
 
     id           = Column(Integer, primary_key=True, index=True)
+    user_id      = Column(Integer, ForeignKey("users.id"), nullable=False)
     log_date     = Column(Date, nullable=False, index=True)
     strategy     = Column(String(20), default="VCP")
 
@@ -41,5 +43,7 @@ class ForwardTestLog(Base):
     notes           = Column(Text, nullable=True)
     created_at      = Column(DateTime(timezone=True), server_default=func.now())
 
+    user = relationship("User", back_populates="forward_logs")
+
     def __repr__(self):
-        return f"<ForwardTestLog {self.log_date} signals={self.signals_count} pnl={self.daily_pnl}>"
+        return f"<ForwardTestLog {self.log_date} signals={self.signals_count} pnl={self.daily_pnl} user_id={self.user_id}>"

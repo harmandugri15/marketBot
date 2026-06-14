@@ -10,8 +10,10 @@ export async function renderBacktest(container) {
         <form id="bt-form">
           <div class="form-group">
             <label class="form-label">Strategy</label>
-            <select class="form-control" disabled>
-              <option>VCP (Volatility Contraction)</option>
+            <select id="bt-strat" class="form-control">
+              <option value="VCP">VCP (Volatility Contraction)</option>
+              <option value="HARMAN1_PULLBACK">Swing Pullback (HARMAN1_PULLBACK)</option>
+              <option value="VWAP_RUNNER">Intraday VWAP Bounce (VWAP_RUNNER)</option>
             </select>
           </div>
           <div class="form-group">
@@ -48,6 +50,7 @@ export async function renderBacktest(container) {
             <thead>
               <tr>
                 <th>Run Date</th>
+                <th>Strategy</th>
                 <th>Period</th>
                 <th>Return</th>
                 <th>Win Rate</th>
@@ -56,7 +59,7 @@ export async function renderBacktest(container) {
               </tr>
             </thead>
             <tbody id="bt-results">
-              <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+              <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -69,13 +72,14 @@ export async function renderBacktest(container) {
       const data = await backtest.results();
       const tbody = document.getElementById('bt-results');
       if (!data.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No backtests run yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No backtests run yet.</td></tr>';
         return;
       }
 
       tbody.innerHTML = data.map(r => `
         <tr>
           <td>${new Date(r.run_date).toLocaleDateString()}</td>
+          <td><span class="badge" style="background:var(--border-color); font-size:0.75rem;">${r.strategy}</span></td>
           <td style="font-size:0.875rem">${r.start_date} → ${r.end_date}</td>
           <td class="mono ${r.total_return_pct >= 0 ? 'positive' : 'negative'}">${r.total_return_pct}%</td>
           <td class="mono">${r.win_rate}%</td>
@@ -97,6 +101,7 @@ export async function renderBacktest(container) {
     
     try {
       await backtest.run({
+        strategy: document.getElementById('bt-strat').value,
         start_date: document.getElementById('bt-start').value,
         end_date: document.getElementById('bt-end').value,
         capital: parseFloat(document.getElementById('bt-cap').value)

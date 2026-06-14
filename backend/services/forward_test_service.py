@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from config import get_settings
 from core.groww_client import GrowwClient
 from core.indicators import calculate_position_size
+from models.user import User
 from models.forward_test_log import ForwardTestLog
 from models.trade import Trade, TradeMode, TradeStatus
 
@@ -32,6 +33,7 @@ settings = get_settings()
 
 def log_daily_signals(
     db: Session,
+    user: User,
     client: GrowwClient,
     signals: list[dict],
     regime: str,
@@ -43,12 +45,17 @@ def log_daily_signals(
     """
     today = date.today()
 
-    # Get or create today's log
-    existing = db.query(ForwardTestLog).filter(ForwardTestLog.log_date == today).first()
+    # Get or create today's log for this user
+    existing = db.query(ForwardTestLog).filter(
+        ForwardTestLog.log_date == today,
+        ForwardTestLog.user_id == user.id
+    ).first()
+
     if existing:
         log = existing
     else:
         log = ForwardTestLog(
+            user_id      = user.id,
             log_date     = today,
             strategy     = "VCP",
             market_regime = regime,
@@ -63,8 +70,8 @@ def log_daily_signals(
     trades_entered = 0
     for sig in signals[:settings.max_trades_per_day]:   # cap per day
         pos = calculate_position_size(
-            capital   = settings.capital,
-            risk_pct  = settings.risk_pct,
+            capital   = user.capital,
+            risk_pct  = user.risk_pct,
             entry     = sig["entry"],
             stop_loss = sig["stop_loss"],
         )
@@ -72,6 +79,7 @@ def log_daily_signals(
             continue
 
         trade = Trade(
+            user_id          = user.id,
             symbol           = sig["symbol"],
             strategy         = sig.get("strategy", "VCP"),
             mode             = TradeMode.forward,
@@ -88,11 +96,11 @@ def log_daily_signals(
     log.trades_entered = trades_entered
     db.commit()
     db.refresh(log)
-    logger.info(f"Forward test log for {today}: {len(signals)} signals, {trades_entered} trades entered")
+    logger.info(f"Forward test log for {today} (User {user.username}): {len(signals)} signals, {trades_entered} trades entered")
     return log
 
 
-def update_open_forward_trades(db: Session, client: GrowwClient) -> dict:
+def update_open_forward_trades(db: Session, user: User, client: GrowwClient) -> dict:
     """
     For each open forward-test trade, check if today's price
     hit the stop-loss or target, and close accordingly.
@@ -100,7 +108,11 @@ def update_open_forward_trades(db: Session, client: GrowwClient) -> dict:
     """
     open_trades = (
         db.query(Trade)
-        .filter(Trade.mode == TradeMode.forward, Trade.status == TradeStatus.open)
+        .filter(
+            Trade.user_id == user.id,
+            Trade.mode == TradeMode.forward,
+            Trade.status == TradeStatus.open
+        )
         .all()
     )
 
@@ -137,14 +149,21 @@ def update_open_forward_trades(db: Session, client: GrowwClient) -> dict:
 
     # Update today's forward test log
     today = date.today()
-    log   = db.query(ForwardTestLog).filter(ForwardTestLog.log_date == today).first()
+    log   = db.query(ForwardTestLog).filter(
+        ForwardTestLog.log_date == today,
+        ForwardTestLog.user_id == user.id
+    ).first()
+
     if log:
         log.trades_closed = closed_today
         log.daily_pnl     = round(pnl_today, 2)
         # Cumulative P&L
         prev_logs = (
             db.query(ForwardTestLog)
-            .filter(ForwardTestLog.log_date < today)
+            .filter(
+                ForwardTestLog.user_id == user.id,
+                ForwardTestLog.log_date < today
+            )
             .order_by(ForwardTestLog.log_date.desc())
             .first()
         )
@@ -155,16 +174,20 @@ def update_open_forward_trades(db: Session, client: GrowwClient) -> dict:
     return {"closed": closed_today, "pnl_today": round(pnl_today, 2)}
 
 
-def get_forward_test_summary(db: Session) -> dict:
+def get_forward_test_summary(db: Session, user: User) -> dict:
     """Get overall forward test performance summary."""
-    logs = db.query(ForwardTestLog).order_by(ForwardTestLog.log_date).all()
+    logs = db.query(ForwardTestLog).filter(ForwardTestLog.user_id == user.id).order_by(ForwardTestLog.log_date).all()
 
     if not logs:
         return {"days_logged": 0, "total_signals": 0, "cumulative_pnl": 0}
 
     all_trades = (
         db.query(Trade)
-        .filter(Trade.mode == TradeMode.forward, Trade.status == TradeStatus.closed)
+        .filter(
+            Trade.user_id == user.id,
+            Trade.mode == TradeMode.forward,
+            Trade.status == TradeStatus.closed
+        )
         .all()
     )
 

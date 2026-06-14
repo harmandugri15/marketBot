@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from config import get_settings
 from core.groww_client import GrowwClient
 from core.indicators import calculate_position_size
+from models.user import User
 from models.trade import Trade, TradeMode, TradeStatus
 from schemas.trade import TradeCreate, TradeClose, PortfolioSummary
 
@@ -29,24 +30,20 @@ class TradingModeError(Exception):
     pass
 
 
-def _resolve_mode() -> TradeMode:
-    return TradeMode(settings.trading_mode)
-
-
 def open_trade(
     db: Session,
-    client: GrowwClient,
+    user: User,
     trade_in: TradeCreate,
     override_mode: Optional[str] = None,
 ) -> Trade:
     """
     Open a new trade. Routes to paper/forward/live based on current mode.
     """
-    mode = TradeMode(override_mode) if override_mode else _resolve_mode()
+    mode = TradeMode(override_mode) if override_mode else TradeMode(user.trading_mode)
 
     pos = calculate_position_size(
-        capital=settings.capital,
-        risk_pct=settings.risk_pct,
+        capital=user.capital,
+        risk_pct=user.risk_pct,
         entry=trade_in.entry_price,
         stop_loss=trade_in.stop_loss,
     )
@@ -57,6 +54,12 @@ def open_trade(
 
     groww_order_id = None
     groww_status   = None
+
+    client = GrowwClient(
+        api_key=user.groww_api_key,
+        secret_key=user.groww_secret_key,
+        client_id=user.groww_client_id
+    )
 
     if mode == TradeMode.live:
         # ── LIVE: place real order ────────────────────────────────────────────
@@ -69,14 +72,18 @@ def open_trade(
             quantity   = quantity,
             order_type = "LIMIT",
             price      = trade_in.entry_price,
-            product    = "CNC",
+            product    = "MIS" if trade_in.strategy in ["VWAP_RUNNER", "INTRADAY"] else "CNC",
         )
         groww_order_id = order.get("order_id")
         groww_status   = order.get("status", "PENDING")
+        if groww_status in ["REJECTED", "FAILED"]:
+            reason = order.get("reject_reason", order.get("message", "Unknown broker error"))
+            raise TradingModeError(f"Live order execution failed: {reason}")
     else:
         logger.info(f"{mode.upper()} TRADE: {trade_in.symbol} @ {trade_in.entry_price}")
 
     trade = Trade(
+        user_id          = user.id,
         symbol           = trade_in.symbol,
         strategy         = trade_in.strategy,
         mode             = mode,
@@ -98,29 +105,39 @@ def open_trade(
 
 def close_trade(
     db: Session,
-    client: GrowwClient,
+    user: User,
     trade_id: int,
     close_data: TradeClose,
 ) -> Trade:
     """
     Close an open trade, calculate P&L, optionally place exit order.
     """
-    trade = db.query(Trade).filter(Trade.id == trade_id).first()
+    trade = db.query(Trade).filter(Trade.id == trade_id, Trade.user_id == user.id).first()
     if not trade:
         raise ValueError(f"Trade {trade_id} not found")
     if trade.status != TradeStatus.open:
         raise ValueError(f"Trade {trade_id} is already {trade.status}")
 
+    client = GrowwClient(
+        api_key=user.groww_api_key,
+        secret_key=user.groww_secret_key,
+        client_id=user.groww_client_id
+    )
+
     if trade.mode == TradeMode.live and client.is_configured:
         logger.info(f"LIVE EXIT: SELL {trade.quantity}x {trade.symbol} @ {close_data.exit_price}")
-        client.place_order(
+        order = client.place_order(
             symbol     = trade.symbol,
             side       = "SELL",
             quantity   = trade.quantity,
             order_type = "LIMIT",
             price      = close_data.exit_price,
-            product    = "CNC",
+            product    = "MIS" if trade.strategy in ["VWAP_RUNNER", "INTRADAY"] else "CNC",
         )
+        close_status = order.get("status", "PENDING")
+        if close_status in ["REJECTED", "FAILED"]:
+            reason = order.get("reject_reason", order.get("message", "Unknown broker error"))
+            raise TradingModeError(f"Live exit order failed: {reason}")
 
     pnl     = (close_data.exit_price - trade.entry_price) * trade.quantity
     pnl_pct = ((close_data.exit_price - trade.entry_price) / trade.entry_price) * 100
@@ -138,9 +155,9 @@ def close_trade(
     return trade
 
 
-def get_portfolio_summary(db: Session) -> PortfolioSummary:
+def get_portfolio_summary(db: Session, user: User) -> PortfolioSummary:
     """Aggregate portfolio metrics across all trades."""
-    all_trades    = db.query(Trade).all()
+    all_trades    = db.query(Trade).filter(Trade.user_id == user.id).all()
     open_trades   = [t for t in all_trades if t.status == TradeStatus.open]
     closed_trades = [t for t in all_trades if t.status == TradeStatus.closed]
 
@@ -158,5 +175,5 @@ def get_portfolio_summary(db: Session) -> PortfolioSummary:
         open_pnl      = round(open_pnl, 2),
         realized_pnl  = round(realized_pnl, 2),
         win_rate       = round(win_rate, 1),
-        trading_mode  = settings.trading_mode,
+        trading_mode  = user.trading_mode,
     )

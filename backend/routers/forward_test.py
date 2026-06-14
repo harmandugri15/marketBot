@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from database import get_db
+from models.user import User
 from core.groww_client import GrowwClient
 from core.security import get_current_user
 from models.forward_test_log import ForwardTestLog
@@ -19,19 +20,24 @@ router = APIRouter(prefix="/api/v1/forward-test", tags=["Forward Test"])
 
 
 @router.get("/summary")
-def forward_test_summary(db: Session = Depends(get_db)):
+def forward_test_summary(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     """Aggregate stats across all forward test days."""
-    return get_forward_test_summary(db)
+    return get_forward_test_summary(db, current_user)
 
 
 @router.get("/logs")
 def forward_test_logs(
     limit: int = Query(default=30, le=365),
+    current_user: User = Depends(get_current_user),
     db:    Session = Depends(get_db),
 ):
-    """Most recent N days of forward test logs."""
+    """Most recent N days of forward test logs for this user."""
     logs = (
         db.query(ForwardTestLog)
+        .filter(ForwardTestLog.user_id == current_user.id)
         .order_by(ForwardTestLog.log_date.desc())
         .limit(limit)
         .all()
@@ -56,10 +62,14 @@ def forward_test_logs(
 
 @router.post("/update")
 def trigger_update(
-    user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db:   Session = Depends(get_db),
 ):
     """Manually check open forward-test trades against current prices."""
-    client = GrowwClient()
-    result = update_open_forward_trades(db, client)
+    client = GrowwClient(
+        api_key=current_user.groww_api_key,
+        secret_key=current_user.groww_secret_key,
+        client_id=current_user.groww_client_id
+    )
+    result = update_open_forward_trades(db, current_user, client)
     return {"message": "Update complete", **result}

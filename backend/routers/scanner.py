@@ -17,6 +17,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from database import get_db
+from models.user import User
 from core.groww_client import GrowwClient
 from core.security import get_current_user
 from services.scanner_service import run_scan, get_latest_signals
@@ -24,7 +25,7 @@ from schemas.signal import SignalListResponse, SignalRead
 
 router = APIRouter(prefix="/api/v1/scanner", tags=["Scanner"])
 
-# Shared progress state (simple; would use Redis for multi-instance deploy)
+# Global scan progress state
 _scan_state = {
     "running": False,
     "current": 0,
@@ -39,12 +40,11 @@ _scan_state = {
 def get_signals(
     limit:    int = Query(default=50, le=200),
     strategy: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
     db:       Session = Depends(get_db),
 ):
     """Return the latest active signals from the database."""
-    signals = get_latest_signals(db, limit=limit)
-    if strategy:
-        signals = [s for s in signals if s.strategy == strategy]
+    signals = get_latest_signals(db, limit=limit, strategy=strategy)
     regime = signals[0].market_regime if signals else None
     return SignalListResponse(
         count=len(signals),
@@ -56,7 +56,7 @@ def get_signals(
 @router.post("/run", status_code=202)
 def trigger_scan(
     strategy: str = "AUTO",
-    user:     dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db:       Session = Depends(get_db),
 ):
     """Start a scan in a background thread."""
@@ -65,30 +65,40 @@ def trigger_scan(
         raise HTTPException(status_code=409, detail="A scan is already running")
 
     _scan_state = {"running": True, "current": 0, "total": 0, "symbol": "", "done": False, "error": None}
+    user_id = current_user.id
 
     def _run():
         global _scan_state
+        from database import SessionLocal
+        thread_db = SessionLocal()
         try:
-            client = GrowwClient()
+            user = thread_db.query(User).filter(User.id == user_id).first()
+            client = GrowwClient(
+                api_key=user.groww_api_key if user else None,
+                secret_key=user.groww_secret_key if user else None,
+                client_id=user.groww_client_id if user else None
+            )
 
             def progress(current, total, symbol):
                 _scan_state["current"] = current
                 _scan_state["total"]   = total
                 _scan_state["symbol"]  = symbol
 
-            run_scan(db, client, strategy=strategy, progress_callback=progress)
+            run_scan(thread_db, client, strategy=strategy, progress_callback=progress)
             _scan_state["done"]    = True
             _scan_state["running"] = False
         except Exception as e:
             _scan_state["error"]   = str(e)
             _scan_state["running"] = False
+        finally:
+            thread_db.close()
 
     threading.Thread(target=_run, daemon=True).start()
     return {"message": "Scan started", "status": "running"}
 
 
 @router.get("/progress")
-def scan_progress():
+def scan_progress(current_user: User = Depends(get_current_user)):
     """Server-Sent Events stream for real-time scan progress."""
     def _event_stream():
         import time
@@ -104,7 +114,7 @@ def scan_progress():
 
 
 @router.get("/regime")
-def get_regime(db: Session = Depends(get_db)):
+def get_regime(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Return the most recent market regime from signal records."""
     from models.signal import Signal
     latest = db.query(Signal).order_by(Signal.scan_date.desc()).first()

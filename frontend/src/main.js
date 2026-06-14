@@ -22,45 +22,92 @@ const routes = {
 };
 
 async function initApp() {
-  // Bypass auth as requested
-  const user = { app: "MarketBot", trading_mode: "paper" };
-  renderLayout(user);
-  navigate(window.location.pathname);
+  try {
+    const user = await auth.me();
+    renderLayout(user);
+    navigate(window.location.pathname);
+  } catch (err) {
+    renderLogin();
+  }
 }
 
 function renderLogin() {
   app.innerHTML = `
     <div style="display:flex; height:100vh; align-items:center; justify-content:center; background:var(--bg-color);">
-      <div class="card" style="width: 400px;">
-        <h2 style="text-align:center; margin-bottom: 1.5rem;" class="text-gradient">MarketBot Login</h2>
-        <form id="login-form">
+      <div class="card" style="width: 420px; padding: 2.5rem;">
+        <h2 style="text-align:center; margin-bottom: 2rem;" class="text-gradient">MarketBot</h2>
+        
+        <div style="display:flex; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+          <button id="tab-login" style="flex:1; padding:0.75rem; background:none; border:none; color:var(--text-color); font-weight:600; cursor:pointer; border-bottom:2px solid var(--primary-color);">Login</button>
+          <button id="tab-register" style="flex:1; padding:0.75rem; background:none; border:none; color:var(--text-muted); font-weight:600; cursor:pointer; border-bottom:2px solid transparent;">Register</button>
+        </div>
+
+        <form id="auth-form">
           <div class="form-group">
             <label class="form-label">Username</label>
-            <input type="text" id="username" class="form-control" required value="admin" />
+            <input type="text" id="username" class="form-control" required minlength="3" placeholder="Enter username" />
           </div>
           <div class="form-group">
             <label class="form-label">Password</label>
-            <input type="password" id="password" class="form-control" required />
+            <input type="password" id="password" class="form-control" required minlength="6" placeholder="Enter password" />
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;">Login</button>
-          <div id="login-error" class="negative mt-4" style="text-align:center; font-size:0.875rem;"></div>
+          <button type="submit" id="submit-btn" class="btn btn-primary" style="width:100%; margin-top: 1rem;">Login</button>
+          <div id="auth-error" class="negative mt-4" style="text-align:center; font-size:0.875rem;"></div>
         </form>
       </div>
     </div>
   `;
 
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
+  let mode = 'login';
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const submitBtn = document.getElementById('submit-btn');
+  const errDiv = document.getElementById('auth-error');
+
+  tabLogin.addEventListener('click', () => {
+    mode = 'login';
+    tabLogin.style.borderBottomColor = 'var(--primary-color)';
+    tabLogin.style.color = 'var(--text-color)';
+    tabRegister.style.borderBottomColor = 'transparent';
+    tabRegister.style.color = 'var(--text-muted)';
+    submitBtn.textContent = 'Login';
+    errDiv.textContent = '';
+  });
+
+  tabRegister.addEventListener('click', () => {
+    mode = 'register';
+    tabRegister.style.borderBottomColor = 'var(--primary-color)';
+    tabRegister.style.color = 'var(--text-color)';
+    tabLogin.style.borderBottomColor = 'transparent';
+    tabLogin.style.color = 'var(--text-muted)';
+    submitBtn.textContent = 'Register';
+    errDiv.textContent = '';
+  });
+
+  document.getElementById('auth-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const u = document.getElementById('username').value;
     const p = document.getElementById('password').value;
-    const errDiv = document.getElementById('login-error');
     
     try {
-      errDiv.textContent = 'Authenticating...';
-      const res = await auth.login(u, p);
-      localStorage.setItem('mb_token', res.access_token);
-      window.location.reload();
+      if (mode === 'login') {
+        errDiv.textContent = 'Authenticating...';
+        const res = await auth.login(u, p);
+        localStorage.setItem('mb_token', res.access_token);
+        window.location.reload();
+      } else {
+        errDiv.textContent = 'Creating account...';
+        await auth.register(u, p);
+        errDiv.className = 'positive mt-4';
+        errDiv.style.textAlign = 'center';
+        errDiv.textContent = 'Account created successfully! Switching to Login...';
+        setTimeout(() => {
+          tabLogin.click();
+        }, 1500);
+      }
     } catch (err) {
+      errDiv.className = 'negative mt-4';
+      errDiv.style.textAlign = 'center';
       errDiv.textContent = err.message;
     }
   });

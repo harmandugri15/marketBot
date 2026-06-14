@@ -48,43 +48,117 @@ def _fetch_and_analyse(
     strategy: str = "AUTO",
 ) -> dict | None:
     """
-    Fetch OHLCV data for one symbol, run VCP detection.
+    Fetch OHLCV data for one symbol, run chosen strategy detection.
     Returns a signal dict or None if no setup found.
     """
     time.sleep(random.uniform(0.3, 0.8))   # jitter to avoid burst calls
 
-    from_date = (datetime.now() - timedelta(days=260)).strftime("%Y-%m-%d")
-    to_date   = datetime.now().strftime("%Y-%m-%d")
+    active_strategy = strategy
+    if active_strategy == "AUTO":
+        active_strategy = "VCP"
 
     try:
-        raw = client.get_historical_data(symbol, from_date, to_date)
-        if not raw or len(raw) < 100:
-            return None
+        if active_strategy in ["VWAP_RUNNER", "INTRADAY"]:
+            # Fetch last 3 days of 5m candles to ensure we have today's candles safely
+            from_date = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
+            to_date   = datetime.now().strftime("%Y-%m-%d")
+            raw = client.get_historical_intraday_data(symbol, from_date, to_date)
+            if not raw or len(raw) < 5:
+                return None
 
-        df = pd.DataFrame(raw)
-        df["close"]  = pd.to_numeric(df["close"], errors="coerce")
-        df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
-        df = df.dropna(subset=["close", "volume"])
+            df = pd.DataFrame(raw)
+            df["close"]  = pd.to_numeric(df["close"], errors="coerce")
+            df["volume"] = pd.to_numeric(df.get("volume", 0), errors="coerce").fillna(0)
+            df["high"]   = pd.to_numeric(df["high"], errors="coerce")
+            df["low"]    = pd.to_numeric(df["low"], errors="coerce")
+            df["open"]   = pd.to_numeric(df["open"], errors="coerce")
+            df = df.dropna(subset=["close"])
 
-        result = detect_vcp(df, settings.vol_mult, settings.expansion_pct)
+            from core.indicators import detect_vwap_bounce
+            result = detect_vwap_bounce(df)
+            if not result["passed"]:
+                return None
 
-        if not result["passed"] or result["score"] < settings.min_quality:
-            return None
+            last = df.iloc[-1]
+            return {
+                "symbol":       symbol,
+                "strategy":     "VWAP_RUNNER",
+                "close":        float(last["close"]),
+                "entry":        result["entry"],
+                "stop_loss":    result["stop_loss"],
+                "target":       result["target"],
+                "quality":      result["score"],
+                "rsi":          None,
+                "vol_ratio":    None,
+                "pullback_pct": None,
+                "market_regime": regime,
+            }
 
-        last = df.iloc[-1]
-        return {
-            "symbol":       symbol,
-            "strategy":     strategy if strategy != "AUTO" else "VCP",
-            "close":        float(last["close"]),
-            "entry":        result["entry"],
-            "stop_loss":    result["stop_loss"],
-            "target":       result["target"],
-            "quality":      result["score"],
-            "rsi":          float(df.iloc[-1].get("rsi", 0)) if "rsi" in df.columns else None,
-            "vol_ratio":    result["pullback"].get("vol_ratio"),
-            "pullback_pct": result["pullback"].get("pullback_pct"),
-            "market_regime": regime,
-        }
+        elif active_strategy in ["HARMAN1_PULLBACK", "SWING"]:
+            from_date = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
+            to_date   = datetime.now().strftime("%Y-%m-%d")
+            raw = client.get_historical_data(symbol, from_date, to_date)
+            if not raw or len(raw) < 20:
+                return None
+
+            df = pd.DataFrame(raw)
+            df["close"]  = pd.to_numeric(df["close"], errors="coerce")
+            df["volume"] = pd.to_numeric(df.get("volume", 0), errors="coerce").fillna(0)
+            df["high"]   = pd.to_numeric(df["high"], errors="coerce")
+            df["low"]    = pd.to_numeric(df["low"], errors="coerce")
+            df = df.dropna(subset=["close"])
+
+            from core.indicators import detect_swing_pullback
+            result = detect_swing_pullback(df)
+            if not result["passed"]:
+                return None
+
+            last = df.iloc[-1]
+            return {
+                "symbol":       symbol,
+                "strategy":     "HARMAN1_PULLBACK",
+                "close":        float(last["close"]),
+                "entry":        result["entry"],
+                "stop_loss":    result["stop_loss"],
+                "target":       result["target"],
+                "quality":      result["score"],
+                "rsi":          result["rsi"],
+                "vol_ratio":    None,
+                "pullback_pct": result["dist"] * 100 if result["dist"] is not None else None,
+                "market_regime": regime,
+            }
+
+        else: # Default: VCP
+            from_date = (datetime.now() - timedelta(days=260)).strftime("%Y-%m-%d")
+            to_date   = datetime.now().strftime("%Y-%m-%d")
+            raw = client.get_historical_data(symbol, from_date, to_date)
+            if not raw or len(raw) < 100:
+                return None
+
+            df = pd.DataFrame(raw)
+            df["close"]  = pd.to_numeric(df["close"], errors="coerce")
+            df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
+            df = df.dropna(subset=["close", "volume"])
+
+            result = detect_vcp(df, settings.vol_mult, settings.expansion_pct)
+
+            if not result["passed"] or result["score"] < settings.min_quality:
+                return None
+
+            last = df.iloc[-1]
+            return {
+                "symbol":       symbol,
+                "strategy":     "VCP",
+                "close":        float(last["close"]),
+                "entry":        result["entry"],
+                "stop_loss":    result["stop_loss"],
+                "target":       result["target"],
+                "quality":      result["score"],
+                "rsi":          float(df.iloc[-1].get("rsi", 0)) if "rsi" in df.columns else None,
+                "vol_ratio":    result["pullback"].get("vol_ratio"),
+                "pullback_pct": result["pullback"].get("pullback_pct"),
+                "market_regime": regime,
+            }
     except Exception as e:
         logger.warning(f"Error scanning {symbol}: {e}")
         return None
@@ -113,9 +187,13 @@ def run_scan(
     signals = []
     total   = len(symbols)
 
-    # Deactivate old signals from today
+    # Deactivate old signals of this strategy from today
     today_start = datetime.combine(date.today(), datetime.min.time())
-    db.query(Signal).filter(Signal.scan_date >= today_start).update({"is_active": False})
+    active_strat = strategy if strategy != "AUTO" else "VCP"
+    db.query(Signal).filter(
+        Signal.scan_date >= today_start,
+        Signal.strategy == active_strat
+    ).update({"is_active": False})
     db.commit()
 
     def _worker(args):
@@ -139,12 +217,13 @@ def run_scan(
     return signals
 
 
-def get_latest_signals(db: Session, limit: int = 50) -> list[Signal]:
+def get_latest_signals(db: Session, limit: int = 50, strategy: str = None) -> list[Signal]:
     """Return most recent active signals."""
+    q = db.query(Signal).filter(Signal.is_active == True)
+    if strategy:
+        q = q.filter(Signal.strategy == strategy)
     return (
-        db.query(Signal)
-        .filter(Signal.is_active == True)
-        .order_by(Signal.quality.desc(), Signal.scan_date.desc())
+        q.order_by(Signal.quality.desc(), Signal.scan_date.desc())
         .limit(limit)
         .all()
     )

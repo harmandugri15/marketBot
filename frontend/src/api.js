@@ -66,13 +66,14 @@ const del  = (path)        => request("DELETE", path);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const auth = {
-  login: (username, password) => post("/auth/login", { username, password }),
-  me:    ()                   => get("/auth/me"),
+  login:    (username, password) => post("/auth/login", { username, password }),
+  register: (username, password) => post("/auth/register", { username, password }),
+  me:       ()                   => get("/auth/me"),
 };
 
 // ── Scanner ───────────────────────────────────────────────────────────────────
 export const scanner = {
-  signals:  (limit = 50) => get(`/scanner/signals?limit=${limit}`),
+  signals:  (limit = 50, strategy = "") => get(`/scanner/signals?limit=${limit}${strategy ? `&strategy=${strategy}` : ""}`),
   run:      (strategy = "AUTO") => post(`/scanner/run?strategy=${strategy}`),
   regime:   ()           => get("/scanner/regime"),
 };

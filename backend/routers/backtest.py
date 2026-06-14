@@ -16,6 +16,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from database import get_db
+from models.user import User
 from core.groww_client import GrowwClient
 from core.security import get_current_user
 from models.backtest_result import BacktestResult
@@ -24,49 +25,63 @@ from schemas.backtest import BacktestRequest, BacktestSummary, BacktestDetail, B
 
 router = APIRouter(prefix="/api/v1/backtest", tags=["Backtest"])
 
-_bt_state = {
-    "running": False,
-    "current": 0,
-    "total":   0,
-    "symbol":  "",
-    "done":    False,
-    "error":   None,
-    "result_id": None,
-}
+# Map user_id -> backtest state dict
+_bt_states = {}
+
+
+def get_user_bt_state(user_id: int) -> dict:
+    if user_id not in _bt_states:
+        _bt_states[user_id] = {
+            "running": False,
+            "current": 0,
+            "total":   0,
+            "symbol":  "",
+            "done":    False,
+            "error":   None,
+            "result_id": None,
+        }
+    return _bt_states[user_id]
 
 
 @router.post("/run", status_code=202)
 def start_backtest(
     req:  BacktestRequest,
-    user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db:   Session = Depends(get_db),
 ):
-    global _bt_state
-    if _bt_state["running"]:
+    user_id = current_user.id
+    state = get_user_bt_state(user_id)
+    if state["running"]:
         raise HTTPException(status_code=409, detail="A backtest is already running")
 
-    _bt_state = {"running": True, "current": 0, "total": 0, "symbol": "", "done": False, "error": None, "result_id": None}
+    state.update({"running": True, "current": 0, "total": 0, "symbol": "", "done": False, "error": None, "result_id": None})
 
     def _run():
-        global _bt_state
         # Create a new DB session for the thread
         from database import SessionLocal
         thread_db = SessionLocal()
         try:
-            client = GrowwClient()
+            user = thread_db.query(User).filter(User.id == user_id).first()
+            if not user:
+                raise Exception("User not found")
+            client = GrowwClient(
+                api_key=user.groww_api_key,
+                secret_key=user.groww_secret_key,
+                client_id=user.groww_client_id
+            )
 
             def progress(current, total, symbol):
-                _bt_state["current"] = current
-                _bt_state["total"]   = total
-                _bt_state["symbol"]  = symbol
+                state["current"] = current
+                state["total"]   = total
+                state["symbol"]  = symbol
 
-            result = run_backtest(thread_db, client, req, progress_callback=progress)
-            _bt_state["done"]      = True
-            _bt_state["running"]   = False
-            _bt_state["result_id"] = result.id
+            result = run_backtest(thread_db, user, client, req, progress_callback=progress)
+            state["done"]      = True
+            state["running"]   = False
+            state["result_id"] = result.id
         except Exception as e:
-            _bt_state["error"]   = str(e)
-            _bt_state["running"] = False
+            state["error"]   = str(e)
+            state["running"] = False
         finally:
             thread_db.close()
 
@@ -75,20 +90,23 @@ def start_backtest(
 
 
 @router.get("/progress", response_model=BacktestProgress)
-def backtest_progress():
-    return BacktestProgress(**_bt_state)
+def backtest_progress(current_user: User = Depends(get_current_user)):
+    return BacktestProgress(**get_user_bt_state(current_user.id))
 
 
 @router.get("/progress/stream")
-def backtest_progress_stream():
+def backtest_progress_stream(current_user: User = Depends(get_current_user)):
     """SSE stream for frontend progress bar."""
+    user_id = current_user.id
+    state = get_user_bt_state(user_id)
+
     def _gen():
         import time
-        while _bt_state["running"] or not _bt_state["done"]:
-            yield f"data: {json.dumps(_bt_state)}\n\n"
+        while state["running"] or not state["done"]:
+            yield f"data: {json.dumps(state)}\n\n"
             time.sleep(0.8)
-            if _bt_state["done"] or _bt_state["error"]:
-                yield f"data: {json.dumps(_bt_state)}\n\n"
+            if state["done"] or state["error"]:
+                yield f"data: {json.dumps(state)}\n\n"
                 break
 
     return StreamingResponse(_gen(), media_type="text/event-stream")
@@ -98,9 +116,10 @@ def backtest_progress_stream():
 def list_results(
     limit:    int = Query(default=20, le=100),
     strategy: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
     db:       Session = Depends(get_db),
 ):
-    q = db.query(BacktestResult)
+    q = db.query(BacktestResult).filter(BacktestResult.user_id == current_user.id)
     if strategy:
         q = q.filter(BacktestResult.strategy == strategy)
     results = q.order_by(BacktestResult.run_date.desc()).limit(limit).all()
@@ -108,8 +127,15 @@ def list_results(
 
 
 @router.get("/{result_id}", response_model=BacktestDetail)
-def get_result(result_id: int, db: Session = Depends(get_db)):
-    result = db.query(BacktestResult).filter(BacktestResult.id == result_id).first()
+def get_result(
+    result_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    result = db.query(BacktestResult).filter(
+        BacktestResult.id == result_id,
+        BacktestResult.user_id == current_user.id
+    ).first()
     if not result:
         raise HTTPException(status_code=404, detail="Backtest result not found")
     return BacktestDetail.model_validate(result)

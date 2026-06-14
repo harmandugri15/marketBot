@@ -47,5 +47,5 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db():
     """Create all tables on startup (no-op if they already exist)."""
-    from models import signal, trade, backtest_result, forward_test_log  # noqa: F401
+    from models import user, signal, trade, backtest_result, forward_test_log  # noqa: F401
     Base.metadata.create_all(bind=engine)

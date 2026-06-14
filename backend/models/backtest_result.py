@@ -4,7 +4,8 @@ models/backtest_result.py
 Stores each complete backtest run with aggregated stats and trade log.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, JSON
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, JSON, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 
@@ -13,6 +14,7 @@ class BacktestResult(Base):
     __tablename__ = "backtest_results"
 
     id           = Column(Integer, primary_key=True, index=True)
+    user_id      = Column(Integer, ForeignKey("users.id"), nullable=False)
     run_date     = Column(DateTime(timezone=True), server_default=func.now())
     strategy     = Column(String(20), default="VCP")
 
@@ -42,5 +44,7 @@ class BacktestResult(Base):
 
     notes        = Column(Text, nullable=True)
 
+    user = relationship("User", back_populates="backtest_results")
+
     def __repr__(self):
-        return f"<Backtest {self.strategy} {self.start_date}→{self.end_date} wr={self.win_rate}%>"
+        return f"<Backtest {self.strategy} {self.start_date}→{self.end_date} wr={self.win_rate}% user_id={self.user_id}>"

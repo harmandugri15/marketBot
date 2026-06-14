@@ -6,7 +6,8 @@ The `mode` column is the key safety guard: live trades only flow
 through when mode == 'live' and Groww credentials are verified.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Enum
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Enum, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 import enum
@@ -28,6 +29,7 @@ class Trade(Base):
     __tablename__ = "trades"
 
     id          = Column(Integer, primary_key=True, index=True)
+    user_id     = Column(Integer, ForeignKey("users.id"), nullable=False)
     symbol      = Column(String(20), nullable=False, index=True)
     strategy    = Column(String(20), default="VCP")
     mode        = Column(Enum(TradeMode), nullable=False, default=TradeMode.paper)
@@ -55,5 +57,7 @@ class Trade(Base):
 
     capital_deployed = Column(Float, nullable=True)
 
+    user = relationship("User", back_populates="trades")
+
     def __repr__(self):
-        return f"<Trade {self.symbol} {self.mode} {self.status} pnl={self.pnl}>"
+        return f"<Trade {self.symbol} {self.mode} {self.status} pnl={self.pnl} user_id={self.user_id}>"

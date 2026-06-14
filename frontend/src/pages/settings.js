@@ -24,11 +24,19 @@ export async function renderSettings(container) {
               <label class="form-label">Min Setup Quality (0-100)</label>
               <input type="number" id="min_quality" class="form-control" required />
             </div>
+            <div class="form-group">
+              <label class="form-label">Trading Mode</label>
+              <select id="trading_mode" class="form-control" required>
+                <option value="paper">Paper Trading (Simulated Fills)</option>
+                <option value="forward">Forward Testing (Logs only, no real money)</option>
+                <option value="live" id="opt-live" disabled>Live Trading (Active)</option>
+              </select>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary mt-4">Save Parameters</button>
         </form>
       </div>
-
+ 
       <!-- Live Mode Guard -->
       <div class="card" style="border-color: var(--danger-color);">
         <h3 class="mb-4" style="color: var(--danger-color)">LIVE Execution</h3>
@@ -62,7 +70,7 @@ export async function renderSettings(container) {
       </div>
     </div>
   `;
-
+ 
   // Load current settings
   try {
     const data = await settings.get();
@@ -71,27 +79,32 @@ export async function renderSettings(container) {
     document.getElementById('max_sl_pct').value = data.max_sl_pct;
     document.getElementById('min_quality').value = data.min_quality;
     
+    const optLive = document.getElementById('opt-live');
     if (data.trading_mode === 'live') {
+      optLive.disabled = false;
       const btn = document.getElementById('btn-live');
       btn.textContent = 'LIVE MODE ACTIVE';
       btn.disabled = true;
       btn.style.opacity = '0.5';
     }
+    document.getElementById('trading_mode').value = data.trading_mode;
   } catch (err) {
     console.error("Failed to load settings:", err);
   }
-
+ 
   // Handle standard settings save
   document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
       await settings.update({
+        trading_mode: document.getElementById('trading_mode').value,
         capital: parseFloat(document.getElementById('capital').value),
         risk_pct: parseFloat(document.getElementById('risk_pct').value),
         max_sl_pct: parseFloat(document.getElementById('max_sl_pct').value),
         min_quality: parseInt(document.getElementById('min_quality').value, 10),
       });
-      alert('Parameters saved successfully!');
+      alert('Parameters saved successfully! Reloading...');
+      window.location.reload();
     } catch (err) {
       alert('Error saving parameters: ' + err.message);
     }

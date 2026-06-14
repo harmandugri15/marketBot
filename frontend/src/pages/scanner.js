@@ -4,14 +4,23 @@ let sse = null;
 
 export async function renderScanner(container) {
   container.innerHTML = `
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center mb-4" style="gap: 1rem; flex-wrap: wrap;">
       <div>
-        <h3 style="margin:0;">VCP Screener</h3>
+        <h3 style="margin:0;">Screener</h3>
         <span id="regime-badge" class="badge">Checking Regime...</span>
       </div>
 
+      <div class="flex gap-2 items-center">
+        <label class="form-label" style="margin:0; white-space:nowrap;">Strategy:</label>
+        <select id="scan-strat" class="form-control" style="width: auto; margin: 0; padding: 0.375rem 1.75rem 0.375rem 0.75rem;">
+          <option value="VCP">VCP (Volatility Contraction)</option>
+          <option value="HARMAN1_PULLBACK">Swing Pullback (HARMAN1_PULLBACK)</option>
+          <option value="VWAP_RUNNER">Intraday VWAP Bounce (VWAP_RUNNER)</option>
+        </select>
+      </div>
+
       <button id="btn-run-scan" class="btn btn-primary">
-        Run Daily Scan Now
+        Run Strategy Scan Now
       </button>
     </div>
 
@@ -81,6 +90,7 @@ export async function renderScanner(container) {
   const btnRun = document.getElementById("btn-run-scan");
   const tbody = document.getElementById("signals-body");
   const regimeBadge = document.getElementById("regime-badge");
+  const stratSelect = document.getElementById("scan-strat");
 
   const progressContainer = document.getElementById(
     "scan-progress-container"
@@ -91,7 +101,8 @@ export async function renderScanner(container) {
 
   async function loadSignals() {
     try {
-      const data = await scanner.signals();
+      const selectedStrat = stratSelect.value;
+      const data = await scanner.signals(50, selectedStrat);
 
       updateRegimeBadge(data.market_regime);
 
@@ -99,7 +110,7 @@ export async function renderScanner(container) {
         tbody.innerHTML = `
           <tr>
             <td colspan="7" style="text-align:center;padding:2rem;">
-              No active signals today.
+              No active signals today for this strategy.
             </td>
           </tr>
         `;
@@ -160,9 +171,13 @@ export async function renderScanner(container) {
                   color:var(--text-muted);
                 "
               >
-                PB: ${Number(signal.pullback_pct || 0).toFixed(1)}%
-                <br>
-                VR: ${Number(signal.vol_ratio || 0).toFixed(1)}x
+                ${
+                  signal.strategy === 'VWAP_RUNNER'
+                    ? `Intraday VWAP Bounce<br>No daily indicators`
+                    : signal.strategy === 'HARMAN1_PULLBACK'
+                    ? `RSI: ${signal.rsi ? Number(signal.rsi).toFixed(1) : 'N/A'}<br>Pullback: ${signal.pullback_pct ? Number(signal.pullback_pct).toFixed(1) : '0.0'}%`
+                    : `PB: ${Number(signal.pullback_pct || 0).toFixed(1)}%<br>VR: ${Number(signal.vol_ratio || 0).toFixed(1)}x`
+                }
               </td>
 
               <td>
@@ -220,6 +235,7 @@ export async function renderScanner(container) {
         const entry = Number(btn.dataset.entry);
         const stopLoss = Number(btn.dataset.stop);
         const target = Number(btn.dataset.target);
+        const selectedStrat = stratSelect.value;
 
         try {
           const ok = confirm(
@@ -230,7 +246,7 @@ export async function renderScanner(container) {
 
           await trades.create({
             symbol,
-            strategy: "VCP",
+            strategy: selectedStrat,
             entry_price: entry,
             stop_loss: stopLoss,
             target,
@@ -287,7 +303,8 @@ export async function renderScanner(container) {
 
   btnRun.addEventListener("click", async () => {
     try {
-      await scanner.run();
+      const selectedStrat = stratSelect.value;
+      await scanner.run(selectedStrat);
       connectSSE();
     } catch (error) {
       if (
@@ -300,6 +317,8 @@ export async function renderScanner(container) {
       }
     }
   });
+
+  stratSelect.addEventListener("change", loadSignals);
 
   await loadSignals();
 }

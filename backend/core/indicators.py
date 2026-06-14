@@ -270,3 +270,106 @@ def calculate_position_size(
         "risk_amount":      round(risk_amount, 2),
         "risk_per_share":   round(risk_per_share, 2),
     }
+
+
+# ── Swing Pullback (HARMAN1_PULLBACK) ─────────────────────────────────────────
+
+def detect_swing_pullback(df: pd.DataFrame) -> dict:
+    """
+    HARMAN1_PULLBACK Swing Strategy:
+    1. Distance to EMA20 is 0-4% (0 < (close - ema20)/ema20 < 0.04)
+    2. RSI(14) is 40-65
+    3. Stop loss is max(min(low * 0.99, entry * 0.95), entry * 0.92)
+    4. Target is 3R
+    """
+    res = {
+        "passed": False,
+        "score": 0,
+        "entry": None,
+        "stop_loss": None,
+        "target": None,
+        "rsi": None,
+        "dist": None,
+    }
+    if len(df) < 20:
+        return res
+
+    df = df.copy()
+    if "ema20" not in df.columns:
+        df["ema20"] = ema(df["close"], 20)
+    if "rsi" not in df.columns:
+        df["rsi"] = rsi(df["close"], 14)
+
+    today = df.iloc[-1]
+    dist = (today["close"] - today["ema20"]) / today["ema20"]
+
+    res["rsi"] = float(today["rsi"])
+    res["dist"] = float(dist)
+
+    if 0 < dist < 0.04 and 40 < today["rsi"] < 65:
+        entry = float(today["close"])
+        sl = float(max(min(today["low"] * 0.99, entry * 0.95), entry * 0.92))
+        one_r = entry - sl
+        if one_r > 0:
+            res["passed"] = True
+            res["score"] = 90  # default high score for meeting criteria
+            res["entry"] = round(entry, 2)
+            res["stop_loss"] = round(sl, 2)
+            res["target"] = round(entry + (3 * one_r), 2)
+
+    return res
+
+
+# ── Intraday VWAP Bounce (VWAP_RUNNER) ────────────────────────────────────────
+
+def detect_vwap_bounce(df: pd.DataFrame) -> dict:
+    """
+    VWAP_RUNNER Intraday Strategy:
+    1. Timeframe: 5-minute candles
+    2. Price is above today's open (close > day_open)
+    3. Previous low is very close to VWAP (abs(prev_low - prev_vwap)/prev_vwap < 0.002)
+    4. Current candle is green (close > open)
+    5. Stop loss is current_vwap * 0.998
+    6. Max SL width is 1.5% (one_r / entry < 0.015)
+    """
+    res = {
+        "passed": False,
+        "score": 0,
+        "entry": None,
+        "stop_loss": None,
+        "target": None,
+        "distance_to_vwap": None,
+    }
+    if len(df) < 5:
+        return res
+
+    df = df.copy()
+    if "vwap" not in df.columns:
+        typical_price = (df["high"] + df["low"] + df["close"]) / 3
+        # Volume-Weighted Average Price
+        # Cumulative typical price * volume divided by cumulative volume
+        df["vwap"] = (typical_price * df["volume"]).cumsum() / df["volume"].cumsum()
+
+    day_open = df.iloc[0]["open"]
+    curr_candle = df.iloc[-1]
+    prev_candle = df.iloc[-2]
+
+    curr_vwap = curr_candle["vwap"]
+    prev_vwap = prev_candle["vwap"]
+
+    distance_to_vwap = abs(prev_candle["low"] - prev_vwap) / prev_vwap
+    res["distance_to_vwap"] = float(distance_to_vwap)
+
+    if curr_candle["close"] > day_open and distance_to_vwap < 0.002:
+        if curr_candle["close"] > curr_candle["open"]:
+            entry = float(curr_candle["close"])
+            sl = float(curr_vwap * 0.998)
+            one_r = entry - sl
+            if one_r > 0 and (one_r / entry * 100) < 1.5:
+                res["passed"] = True
+                res["score"] = 90
+                res["entry"] = round(entry, 2)
+                res["stop_loss"] = round(sl, 2)
+                res["target"] = round(entry + (3 * one_r), 2)  # default target
+
+    return res

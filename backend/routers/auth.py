@@ -1,22 +1,23 @@
 """
 routers/auth.py
 ---------------
-POST /api/v1/auth/login  — returns JWT token
-GET  /api/v1/auth/me     — returns current user info
+POST /api/v1/auth/register — register a new user
+POST /api/v1/auth/login    — returns JWT token
+GET  /api/v1/auth/me       — returns current user info
 """
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from core.security import create_access_token
+
+from database import get_db
+from models.user import User
+from schemas.user import UserCreate, UserRead
+from core.security import create_access_token, verify_password, get_password_hash, get_current_user
 from config import get_settings
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 settings = get_settings()
-
-# Simple single-user auth.
-# In production, replace with a proper user table and hashed passwords.
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "marketbot2025"   # Override via env var in production
 
 
 class LoginRequest(BaseModel):
@@ -28,32 +29,53 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     trading_mode: str
+    username: str
+
+
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def register(body: UserCreate, db: Session = Depends(get_db)):
+    """Register a new user in the platform."""
+    existing = db.query(User).filter(User.username == body.username).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
+    
+    new_user = User(
+        username=body.username,
+        password_hash=get_password_hash(body.password)
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest):
-    """Authenticate and return a JWT."""
-    import os
-    expected_pass = os.getenv("ADMIN_PASSWORD", ADMIN_PASSWORD)
-    
-    # Print for debugging
-    print(f"[AUTH DEBUG] Received: '{body.username}' / '{body.password}'. Expected: '{expected_pass}'")
-
-    # Temporarily accept any password while we debug why it wasn't working
-    if body.username != ADMIN_USERNAME:
+def login(body: LoginRequest, db: Session = Depends(get_db)):
+    """Authenticate a user and return a JWT access token."""
+    user = db.query(User).filter(User.username == body.username).first()
+    if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username",
+            detail="Incorrect username or password"
         )
-    token = create_access_token({"sub": body.username, "role": "admin"})
-    return TokenResponse(access_token=token, trading_mode=settings.trading_mode)
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account is deactivated"
+        )
+
+    token = create_access_token({"sub": str(user.id)})
+    return TokenResponse(
+        access_token=token,
+        trading_mode=user.trading_mode,
+        username=user.username
+    )
 
 
-@router.get("/me")
-def get_me():
-    """Public endpoint — just returns app info (useful for health check)."""
-    return {
-        "app":          settings.app_name,
-        "trading_mode": settings.trading_mode,
-        "status":       "ok",
-    }
+@router.get("/me", response_model=UserRead)
+def get_me(current_user: User = Depends(get_current_user)):
+    """Get profile of current logged in user."""
+    return current_user
