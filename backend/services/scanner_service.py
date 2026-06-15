@@ -58,7 +58,7 @@ def _fetch_and_analyse(
         active_strategy = "VCP"
 
     try:
-
+        if active_strategy in ["HARMAN1_PULLBACK", "SWING"]:
             from_date = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
             to_date   = datetime.now().strftime("%Y-%m-%d")
             raw = client.get_historical_data(symbol, from_date, to_date)
