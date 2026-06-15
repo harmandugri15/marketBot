@@ -18,7 +18,7 @@ from fastapi.responses import FileResponse
 from config import get_settings
 from database import init_db
 from routers import auth, scanner, trades, backtest, forward_test, settings as settings_router
-from routers import sandbox, data_log
+from routers import sandbox, data_log, rebalance
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 import os
@@ -184,6 +184,7 @@ app.include_router(forward_test.router)
 app.include_router(settings_router.router)
 app.include_router(sandbox.router)
 app.include_router(data_log.router)
+app.include_router(rebalance.router)
 
 
 # ── Health Check ──────────────────────────────────────────────────────────────
