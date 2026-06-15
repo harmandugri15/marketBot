@@ -1,24 +1,2 @@
 === Groww API Multi-Endpoint Test ===
-Authentication successful!
-
-1. Profile Success: {
-  "vendor_user_id": "c396f842-29d8-4393-96ed-2c7995f9241e",
-  "ucc": "5019409880",
-  "nse_enabled": true,
-  "bse_enabled": true,
-  "ddpi_enabled": false,
-  "active_segments": [
-    "CASH"
-  ]
-}
-
-2. Holdings Success: {
-  "holdings": []
-}
-
-3. Positions Success: {
-  "positions": []
-}
-
-4. LTP Failed: Access forbidden for this request.
-
+General Auth Error: Authorisation failed. Your API token does not have the required permissions.

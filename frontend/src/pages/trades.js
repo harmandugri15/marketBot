@@ -74,7 +74,7 @@ export async function renderTrades(container) {
             </td>
             <td>${pnlStr}</td>
             <td>
-              ${!isClosed ? `<button class="btn btn-outline" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="window.closeTrade(${t.id}, ${t.target || t.entry_price * 1.1})">Close</button>` : ''}
+              ${!isClosed ? `<button class="btn btn-outline" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="window.closeTrade(${t.id}, this)">Close</button>` : ''}
             </td>
           </tr>
         `;
@@ -89,17 +89,20 @@ export async function renderTrades(container) {
   document.getElementById('filter-mode').addEventListener('change', loadData);
   document.getElementById('filter-status').addEventListener('change', loadData);
 
-  window.closeTrade = async (id, fallbackPrice) => {
-    const priceStr = prompt("Enter exit price:", fallbackPrice.toFixed(2));
-    if (!priceStr) return;
-    const exitPrice = parseFloat(priceStr);
-    if (isNaN(exitPrice)) return alert("Invalid price");
-
+  window.closeTrade = async (id, btnElement) => {
+    if (btnElement) {
+      btnElement.disabled = true;
+      btnElement.textContent = "Closing...";
+    }
     try {
-      await trades.close(id, { exit_price: exitPrice, exit_reason: "MANUAL" });
+      await trades.close(id, { exit_reason: "MANUAL" });
       loadData();
     } catch (e) {
       alert("Failed to close trade: " + e.message);
+      if (btnElement) {
+        btnElement.disabled = false;
+        btnElement.textContent = "Close";
+      }
     }
   };
 }

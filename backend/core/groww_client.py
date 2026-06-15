@@ -35,6 +35,8 @@ class GrowwClient:
             data = client.get_historical_data("RELIANCE.NS", "2024-01-01", "2024-12-31")
     """
 
+    _global_auth_failed = False
+
     def __init__(self, api_key: str = None, secret_key: str = None, client_id: str = None):
         self.api_key    = api_key or settings.groww_api_key
         self.secret_key = secret_key or settings.groww_secret_key
@@ -50,6 +52,10 @@ class GrowwClient:
         """Authenticates using the official Groww API Key and Secret flow."""
         if not self.api_key or not self.secret_key:
             logger.info("Groww API credentials not set. Running in yfinance fallback mode.")
+            return
+            
+        if GrowwClient._global_auth_failed:
+            self.connected = False
             return
 
         try:
@@ -70,12 +76,14 @@ class GrowwClient:
             else:
                 logger.error("❌ Groww API get_access_token returned empty token.")
                 self.connected = False
+                GrowwClient._global_auth_failed = True
         except ImportError:
             logger.error("❌ growwapi package not installed. Run 'pip install growwapi'")
             self.connected = False
         except Exception as e:
             logger.error(f"❌ Failed to authenticate with Groww API SDK: {e}")
             self.connected = False
+            GrowwClient._global_auth_failed = True
 
     @property
     def is_configured(self) -> bool:
@@ -378,13 +386,34 @@ class GrowwClient:
     ) -> list[dict]:
         """Use yfinance when Groww API is not configured."""
         try:
+            from datetime import datetime, timedelta
             import yfinance as yf
             yf_symbol = symbol
             if not yf_symbol.endswith(".NS") and not yf_symbol.startswith("^"):
                 yf_symbol = f"{yf_symbol}.NS"
+                
+            # yfinance limits
+            start_dt = datetime.strptime(from_date, "%Y-%m-%d")
+            today_dt = datetime.now()
+            if interval in ["5m", "15m"]:
+                max_start = today_dt - timedelta(days=59)
+                if start_dt < max_start:
+                    logger.warning(f"[yfinance] Interval {interval} restricted to last 60 days. Adjusting from_date.")
+                    start_dt = max_start
+                    from_date = start_dt.strftime("%Y-%m-%d")
+            elif interval in ["1h"]:
+                max_start = today_dt - timedelta(days=729)
+                if start_dt < max_start:
+                    logger.warning(f"[yfinance] Interval {interval} restricted to last 730 days. Adjusting from_date.")
+                    start_dt = max_start
+                    from_date = start_dt.strftime("%Y-%m-%d")
+                    
+            logger.info(f"[yfinance] Fetching {symbol} {interval} {from_date}\u2192{to_date}")
+            t0 = time.time()
             ticker = yf.Ticker(yf_symbol)
             df = ticker.history(start=from_date, end=to_date, interval=interval)
             if df.empty:
+                logger.warning(f"[yfinance] {symbol}: 0 candles returned (possibly delisted or no data)")
                 return []
             df.index = df.index.tz_localize(None) if df.index.tz else df.index
             records = []
@@ -397,6 +426,8 @@ class GrowwClient:
                     "close":  round(float(row["Close"]), 2),
                     "volume": int(row["Volume"]),
                 })
+            elapsed = time.time() - t0
+            logger.info(f"[yfinance] {symbol}: {len(records)} candles fetched in {elapsed:.2f}s")
             return records
         except Exception as e:
             logger.error(f"yfinance fallback failed for {symbol}: {e}")
@@ -414,9 +445,12 @@ class GrowwClient:
             yf_symbol = symbol
             if not yf_symbol.endswith(".NS") and not yf_symbol.startswith("^"):
                 yf_symbol = f"{yf_symbol}.NS"
+            logger.info(f"[yfinance] Fetching {symbol} 5m intraday {from_date}\u2192{to_date}")
+            t0 = time.time()
             ticker = yf.Ticker(yf_symbol)
             df = ticker.history(start=from_date, end=to_date, interval="5m")
             if df.empty:
+                logger.warning(f"[yfinance] {symbol}: 0 candles returned (possibly delisted or no data)")
                 return []
             
             df.index = df.index.tz_convert("Asia/Kolkata") if df.index.tz else df.index.tz_localize("Asia/Kolkata")
@@ -432,6 +466,8 @@ class GrowwClient:
                     "close":  round(float(row["Close"]), 2),
                     "volume": int(row["Volume"]),
                 })
+            elapsed = time.time() - t0
+            logger.info(f"[yfinance] {symbol}: {len(records)} candles fetched in {elapsed:.2f}s")
             return records
         except Exception as e:
             logger.error(f"yfinance 5m fallback failed for {symbol}: {e}")
@@ -446,6 +482,9 @@ class GrowwClient:
             if not yf_symbol.endswith(".NS") and not yf_symbol.startswith("^"):
                 yf_symbol = f"{yf_symbol}.NS"
             data = yf.Ticker(yf_symbol).fast_info
-            return float(data.last_price) if data.last_price else None
+            price = float(data.last_price) if data.last_price else None
+            if price is not None:
+                logger.info(f"[yfinance] LTP {symbol}: {price}")
+            return price
         except Exception:
             return None

@@ -4,9 +4,10 @@ routers/auth.py
 POST /api/v1/auth/register — register a new user
 POST /api/v1/auth/login    — returns JWT token
 GET  /api/v1/auth/me       — returns current user info
+GET  /api/v1/auth/check-username — check username availability
 """
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -32,7 +33,7 @@ class TokenResponse(BaseModel):
     username: str
 
 
-@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(body: UserCreate, db: Session = Depends(get_db)):
     """Register a new user in the platform."""
     existing = db.query(User).filter(User.username == body.username).first()
@@ -49,7 +50,13 @@ def register(body: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
+
+    token = create_access_token({"sub": str(new_user.id)})
+    return TokenResponse(
+        access_token=token,
+        trading_mode=new_user.trading_mode,
+        username=new_user.username
+    )
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -79,3 +86,11 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 def get_me(current_user: User = Depends(get_current_user)):
     """Get profile of current logged in user."""
     return current_user
+
+
+@router.get("/check-username")
+def check_username(username: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+    """Check if a username is available for registration."""
+    existing = db.query(User).filter(User.username == username).first()
+    return {"available": existing is None}
+

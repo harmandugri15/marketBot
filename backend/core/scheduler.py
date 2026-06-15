@@ -17,7 +17,7 @@ IST = pytz.timezone("Asia/Kolkata")
 scheduler = BackgroundScheduler(timezone=IST)
 
 
-def register_jobs(run_daily_scan_fn, update_forward_trades_fn):
+def register_jobs(run_daily_scan_fn, update_forward_trades_fn, auto_trade_monitor_fn):
     """
     Register all scheduled jobs.
     Called from main.py lifespan context.
@@ -49,6 +49,19 @@ def register_jobs(run_daily_scan_fn, update_forward_trades_fn):
         except Exception as e:
             logger.error(f"[Scheduler] Forward trade update failed: {e}")
 
+    # Auto Trade Monitor - check SL/target every 5 minutes
+    @scheduler.scheduled_job(
+        CronTrigger(minute="*/5", timezone=IST),
+        id="auto_trade_monitor",
+        max_instances=1,
+    )
+    def _auto_trade_monitor():
+        logger.info(f"[Scheduler] Running Auto-Trade monitor at {datetime.now(IST)}")
+        try:
+            auto_trade_monitor_fn()
+        except Exception as e:
+            logger.error(f"[Scheduler] Auto-Trade monitor failed: {e}")
+
     if not scheduler.running:
         scheduler.start()
-        logger.info("[Scheduler] Started with jobs: daily_vcp_scan, update_forward_trades")
+        logger.info("[Scheduler] Started with jobs: daily_vcp_scan, update_forward_trades, auto_trade_monitor")

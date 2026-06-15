@@ -18,6 +18,10 @@ class SettingsRead(BaseModel):
     min_quality: int
     groww_api_configured: bool
     telegram_configured: bool
+    
+    # Auto Trading Bot
+    auto_trading_enabled: bool
+    auto_trading_strategy: str
 
 
 class SettingsUpdate(BaseModel):
@@ -35,6 +39,8 @@ class SettingsUpdate(BaseModel):
     groww_client_id: Optional[str] = None
     telegram_bot_token: Optional[str] = None
     telegram_chat_id: Optional[str] = None
+    auto_trading_enabled: Optional[bool] = None
+    auto_trading_strategy: Optional[str] = None
 
 
 class LiveModeRequest(BaseModel):

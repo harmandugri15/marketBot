@@ -1,6 +1,13 @@
 import { settings } from '../api.js';
 
 export async function renderSettings(container) {
+  let data = {};
+  try {
+    data = await settings.get();
+  } catch (e) {
+    console.error("Failed to load settings:", e);
+  }
+
   container.innerHTML = `
     <div class="grid-3">
       <!-- Strategy Settings -->
@@ -37,8 +44,32 @@ export async function renderSettings(container) {
         </form>
       </div>
  
+      <!-- Auto Trading Bot -->
+      <div class="card" style="grid-column: span 3;">
+        <h2 class="card-title">Automated Trading Bot</h2>
+        <p class="text-muted" style="margin-bottom:1rem;">Allow MarketBot to autonomously scan the market, calculate position sizing, and execute trades according to your preferred strategy. The bot will automatically exit positions when targets or stop-losses are hit.</p>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Enable Auto-Trading</label>
+            <select id="auto-enabled" class="form-control">
+              <option value="false" ${!data.auto_trading_enabled ? 'selected' : ''}>Disabled</option>
+              <option value="true" ${data.auto_trading_enabled ? 'selected' : ''}>Enabled (Active)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bot Strategy</label>
+            <select id="auto-strategy" class="form-control">
+              <option value="VCP" ${data.auto_trading_strategy === 'VCP' ? 'selected' : ''}>Volatility Contraction (VCP)</option>
+              <option value="HARMAN1_PULLBACK" ${data.auto_trading_strategy === 'HARMAN1_PULLBACK' ? 'selected' : ''}>Harman Pullback</option>
+              <option value="VWAP_RUNNER" ${data.auto_trading_strategy === 'VWAP_RUNNER' ? 'selected' : ''}>VWAP Intraday Runner</option>
+            </select>
+          </div>
+        </div>
+        <button id="save-auto-btn" class="btn btn-primary" style="margin-top: 1rem;">Save Bot Settings</button>
+      </div>
+
       <!-- Live Mode Guard -->
-      <div class="card" style="border-color: var(--danger-color);">
+      <div class="card" style="grid-column: span 3; border-color: var(--danger-color);">
         <h3 class="mb-4" style="color: var(--danger-color)">LIVE Execution</h3>
         <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
           To switch from paper/forward testing to real money execution, you must provide valid Groww API credentials. 
@@ -73,11 +104,10 @@ export async function renderSettings(container) {
  
   // Load current settings
   try {
-    const data = await settings.get();
-    document.getElementById('capital').value = data.capital;
-    document.getElementById('risk_pct').value = data.risk_pct;
-    document.getElementById('max_sl_pct').value = data.max_sl_pct;
-    document.getElementById('min_quality').value = data.min_quality;
+    document.getElementById('capital').value = data.capital || 200000;
+    document.getElementById('risk_pct').value = data.risk_pct || 1.0;
+    document.getElementById('max_sl_pct').value = data.max_sl_pct || 12.0;
+    document.getElementById('min_quality').value = data.min_quality || 85;
     
     const optLive = document.getElementById('opt-live');
     if (data.trading_mode === 'live') {
@@ -107,6 +137,21 @@ export async function renderSettings(container) {
       window.location.reload();
     } catch (err) {
       alert('Error saving parameters: ' + err.message);
+    }
+  });
+
+  document.getElementById('save-auto-btn').addEventListener('click', async () => {
+    const isEnabled = document.getElementById('auto-enabled').value === 'true';
+    const strat = document.getElementById('auto-strategy').value;
+
+    try {
+      await settings.update({
+        auto_trading_enabled: isEnabled,
+        auto_trading_strategy: strat
+      });
+      alert('Auto-Trading Bot settings updated!');
+    } catch (e) {
+      alert('Error updating bot settings: ' + e.message);
     }
   });
 

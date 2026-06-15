@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse
 from config import get_settings
 from database import init_db
 from routers import auth, scanner, trades, backtest, forward_test, settings as settings_router
+from routers import sandbox, data_log
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 import os
@@ -64,6 +65,7 @@ async def lifespan(app: FastAPI):
             try:
                 from services.scanner_service import run_scan
                 from services.forward_test_service import log_daily_signals
+                from services.auto_trade_service import process_auto_trading_signals
                 from models.user import User
                 from models.signal import Signal
 
@@ -95,6 +97,13 @@ async def lifespan(app: FastAPI):
                         log_daily_signals(db, user, user_client, signals, regime, nifty_close)
                     except Exception as ue:
                         logger.error(f"[Scheduler] Failed to process signals for user {user.username}: {ue}")
+                        
+                # 3. Process automated trades
+                try:
+                    process_auto_trading_signals(db, signals, regime)
+                except Exception as ex:
+                    logger.error(f"[Scheduler] Failed to process auto trading: {ex}")
+                    
             finally:
                 db.close()
 
@@ -118,7 +127,17 @@ async def lifespan(app: FastAPI):
             finally:
                 db.close()
 
-        register_jobs(_daily_scan_job, _forward_update_job)
+        def _auto_trade_monitor_job():
+            db = SessionLocal()
+            try:
+                from services.auto_trade_service import monitor_auto_trades
+                monitor_auto_trades(db)
+            except Exception as e:
+                logger.error(f"[Scheduler] Auto trade monitor job failed: {e}")
+            finally:
+                db.close()
+
+        register_jobs(_daily_scan_job, _forward_update_job, _auto_trade_monitor_job)
         logger.info("Scheduler started")
     except Exception as e:
         logger.warning(f"Scheduler failed to start: {e}")
@@ -163,6 +182,8 @@ app.include_router(trades.router)
 app.include_router(backtest.router)
 app.include_router(forward_test.router)
 app.include_router(settings_router.router)
+app.include_router(sandbox.router)
+app.include_router(data_log.router)
 
 
 # ── Health Check ──────────────────────────────────────────────────────────────

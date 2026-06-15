@@ -31,6 +31,7 @@ def test_auth_and_user_isolation():
     assert res1.status_code == 201
     user1_data = res1.json()
     assert user1_data["username"] == "userone"
+    assert "access_token" in user1_data
 
     # 2. Register User 2
     res2 = client.post("/api/v1/auth/register", json={

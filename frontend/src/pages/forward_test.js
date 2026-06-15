@@ -1,4 +1,4 @@
-import { forwardTest } from '../api.js';
+import { forwardTest, trades } from '../api.js';
 
 export async function renderForwardTest(container) {
   container.innerHTML = `
@@ -33,6 +33,32 @@ export async function renderForwardTest(container) {
         </tbody>
       </table>
     </div>
+
+    <div class="mt-8 mb-4">
+      <h3>Bot Executions (Auto-Trades)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        These are the trades autonomously executed and managed by the Auto-Trading Bot based on your settings.
+      </p>
+    </div>
+    
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Strategy</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Entry</th>
+            <th>Current / Exit</th>
+            <th>P&L</th>
+          </tr>
+        </thead>
+        <tbody id="bot-trades-body">
+          <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
   `;
 
   const loadData = async () => {
@@ -58,6 +84,40 @@ export async function renderForwardTest(container) {
       `).join('');
     } catch (err) {
       document.getElementById('fwd-body').innerHTML = `<tr><td colspan="7" class="negative">Error: ${err.message}</td></tr>`;
+    }
+
+    try {
+      // Fetch all trades, filter out SANDBOX trades
+      const allTrades = await trades.list();
+      const botTrades = allTrades.filter(t => t.strategy !== 'SANDBOX');
+      const tbody = document.getElementById('bot-trades-body');
+
+      if (!botTrades.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No automated trades executed yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = botTrades.map(t => {
+        const pnlStr = t.pnl !== null 
+          ? `<span class="${t.pnl >= 0 ? 'positive' : 'negative'}">₹${t.pnl} (${t.pnl_pct}%)</span>` 
+          : `<span class="text-muted">Open</span>`;
+        
+        return `
+          <tr>
+            <td><strong>${t.symbol}</strong></td>
+            <td><span class="badge" style="background:#e0e7ff; color:#4361ee;">${t.strategy}</span></td>
+            <td><span class="badge ${t.mode === 'live' ? 'badge-danger' : 'badge-warning'}">${t.mode.toUpperCase()}</span></td>
+            <td>
+              <span class="badge ${t.status === 'open' ? 'badge-success' : 'badge-neutral'}">${t.status}</span>
+            </td>
+            <td class="mono">₹${t.entry_price}</td>
+            <td class="mono">${t.exit_price ? '₹'+t.exit_price : '—'}</td>
+            <td>${pnlStr}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      document.getElementById('bot-trades-body').innerHTML = `<tr><td colspan="7" class="negative">Error loading trades: ${err.message}</td></tr>`;
     }
   };
 

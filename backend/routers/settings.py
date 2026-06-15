@@ -34,6 +34,8 @@ def read_settings(current_user: User = Depends(get_current_user)):
         min_quality         = current_user.min_quality,
         groww_api_configured = bool(current_user.groww_api_key),
         telegram_configured  = bool(s.telegram_bot_token),
+        auto_trading_enabled = current_user.auto_trading_enabled,
+        auto_trading_strategy = current_user.auto_trading_strategy,
     )
 
 
@@ -69,6 +71,10 @@ def update_settings(
         current_user.groww_secret_key = body.groww_secret_key
     if body.groww_client_id is not None:
         current_user.groww_client_id = body.groww_client_id
+    if body.auto_trading_enabled is not None:
+        current_user.auto_trading_enabled = body.auto_trading_enabled
+    if body.auto_trading_strategy is not None:
+        current_user.auto_trading_strategy = body.auto_trading_strategy
 
     db.commit()
     return {"message": "Settings updated"}

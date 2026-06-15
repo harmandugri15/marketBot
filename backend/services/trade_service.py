@@ -124,6 +124,14 @@ def close_trade(
         client_id=user.groww_client_id
     )
 
+    # Enforce real-time price fetching for MANUAL closes or if exit_price is missing
+    if not close_data.exit_price or close_data.exit_reason == "MANUAL":
+        ltp = client.get_ltp(trade.symbol)
+        if not ltp:
+            raise ValueError(f"Could not fetch current live price for {trade.symbol}. Cannot close trade.")
+        close_data.exit_price = ltp
+        logger.info(f"Manual close requested. Fetched real-time LTP for {trade.symbol}: {ltp}")
+
     if trade.mode == TradeMode.live and client.is_configured:
         logger.info(f"LIVE EXIT: SELL {trade.quantity}x {trade.symbol} @ {close_data.exit_price}")
         order = client.place_order(

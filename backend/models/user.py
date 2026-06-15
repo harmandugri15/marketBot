@@ -23,6 +23,10 @@ class User(Base):
     groww_secret_key = Column(String(255), nullable=True)
     groww_client_id = Column(String(255), nullable=True)
 
+    # Auto Trading Bot settings
+    auto_trading_enabled = Column(Boolean, default=False, nullable=False)
+    auto_trading_strategy = Column(String(50), default="VCP", nullable=False)
+
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)

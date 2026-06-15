@@ -21,7 +21,6 @@ def _make_engine():
         return create_engine(
             url,
             connect_args={"check_same_thread": False},
-            poolclass=StaticPool,
         )
     else:
         return create_engine(url, pool_pre_ping=True)

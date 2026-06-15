@@ -18,7 +18,7 @@ class TradeCreate(BaseModel):
 
 
 class TradeClose(BaseModel):
-    exit_price: float
+    exit_price: Optional[float] = None
     exit_reason: Literal["SL_HIT", "TARGET_HIT", "MANUAL", "TRAILING"] = "MANUAL"
 
 

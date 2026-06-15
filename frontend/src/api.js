@@ -66,9 +66,10 @@ const del  = (path)        => request("DELETE", path);
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const auth = {
-  login:    (username, password) => post("/auth/login", { username, password }),
-  register: (username, password) => post("/auth/register", { username, password }),
-  me:       ()                   => get("/auth/me"),
+  login:         (username, password) => post("/auth/login", { username, password }),
+  register:      (username, password) => post("/auth/register", { username, password }),
+  me:            ()                   => get("/auth/me"),
+  checkUsername: (username)           => get(`/auth/check-username?username=${username}`),
 };
 
 // ── Scanner ───────────────────────────────────────────────────────────────────
@@ -112,6 +113,19 @@ export const settings = {
   get:        ()     => get("/settings"),
   update:     (data) => put("/settings", data),
   enableLive: (data) => post("/settings/live", data),
+};
+
+// ── Sandbox ───────────────────────────────────────────────────────────────────
+export const sandbox = {
+  chart:     (symbol, period = '6mo', interval = '1d') => get(`/sandbox/chart?symbol=${symbol}&period=${period}&interval=${interval}`),
+  trade:     (data)   => post('/sandbox/trade', data),
+  positions: ()       => get('/sandbox/positions'),
+  ltp:       (symbol) => get(`/sandbox/ltp?symbol=${symbol}`),
+};
+
+// ── Data Logs ─────────────────────────────────────────────────────────────────
+export const dataLogs = {
+  recent: (limit = 50) => get(`/logs/data?limit=${limit}`),
 };
 
 // ── SSE helpers ───────────────────────────────────────────────────────────────

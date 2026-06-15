@@ -1,3 +1,2 @@
 Keys loaded: API_KEY=eyJraWQiOiJaTUt... | SECRET_KEY=_7Co(...
-Authentication successful!
-Error: Access forbidden for this request.
+Error: Authorisation failed. Your API token does not have the required permissions.
