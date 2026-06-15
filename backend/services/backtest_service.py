@@ -113,6 +113,7 @@ def _simulate_swing_trades(
     end_date: date,
     capital: float,
     risk_pct: float,
+    strategy: str = "HARMAN1_PULLBACK",
 ) -> list[dict]:
     """
     Portfolio-level backtest for Swing Pullback (HARMAN1_PULLBACK) strategy
@@ -188,7 +189,13 @@ def _simulate_swing_trades(
                     continue
 
                 window = df.iloc[:loc+1]
-                result = detect_swing_pullback(window)
+                
+                if strategy == "GOOGLE_SWING":
+                    from core.indicators import detect_google_swing
+                    result = detect_google_swing(window)
+                else:
+                    result = detect_swing_pullback(window)
+                    
                 if result["passed"]:
                     entry = result["entry"]
                     sl = result["stop_loss"]
@@ -204,7 +211,7 @@ def _simulate_swing_trades(
                     if shares > 0:
                         active_trades.append({
                             "symbol":      symbol,
-                            "strategy":    "HARMAN1_PULLBACK",
+                            "strategy":    strategy,
                             "entry_date":  str(current_date),
                             "entry_price": round(entry, 2),
                             "entry":       round(entry, 2),
@@ -466,7 +473,7 @@ def run_backtest(
     logger.info(f"Backtest starting: {request.strategy} {request.start_date}→{request.end_date} cap={capital} (User {user.username})")
 
     # Strategy Selector Routing
-    if request.strategy in ["HARMAN1_PULLBACK", "SWING"]:
+    if request.strategy in ["HARMAN1_PULLBACK", "SWING", "GOOGLE_SWING"]:
         start_dt = datetime.strptime(request.start_date, "%Y-%m-%d")
         lookback_start = (start_dt - timedelta(days=200)).strftime("%Y-%m-%d")
 
@@ -498,7 +505,8 @@ def run_backtest(
             start_dt.date(),
             datetime.strptime(request.end_date, "%Y-%m-%d").date(),
             capital,
-            user.risk_pct
+            user.risk_pct,
+            request.strategy
         )
 
     elif request.strategy in ["VWAP_RUNNER", "INTRADAY"]:

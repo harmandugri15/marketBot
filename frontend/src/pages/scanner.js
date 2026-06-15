@@ -15,6 +15,7 @@ export async function renderScanner(container) {
         <select id="scan-strat" class="form-control" style="width: auto; margin: 0; padding: 0.375rem 1.75rem 0.375rem 0.75rem;">
           <option value="VCP">VCP (Volatility Contraction)</option>
           <option value="HARMAN1_PULLBACK">Swing Pullback (HARMAN1_PULLBACK)</option>
+          <option value="GOOGLE_SWING">Google Swing (EMA/RSI/ATR)</option>
           <option value="VWAP_RUNNER">Intraday VWAP Bounce (VWAP_RUNNER)</option>
         </select>
       </div>

@@ -128,6 +128,41 @@ def _fetch_and_analyse(
                 "market_regime": regime,
             }
 
+        elif active_strategy == "GOOGLE_SWING":
+            from_date = (datetime.now() - timedelta(days=100)).strftime("%Y-%m-%d")
+            to_date   = datetime.now().strftime("%Y-%m-%d")
+            raw = client.get_historical_data(symbol, from_date, to_date)
+            if not raw or len(raw) < 55:
+                return None
+
+            df = pd.DataFrame(raw)
+            df["close"]  = pd.to_numeric(df["close"], errors="coerce")
+            df["volume"] = pd.to_numeric(df.get("volume", 0), errors="coerce").fillna(0)
+            df["high"]   = pd.to_numeric(df["high"], errors="coerce")
+            df["low"]    = pd.to_numeric(df["low"], errors="coerce")
+            df["open"]   = pd.to_numeric(df["open"], errors="coerce")
+            df = df.dropna(subset=["close"])
+
+            from core.indicators import detect_google_swing
+            result = detect_google_swing(df)
+            if not result["passed"]:
+                return None
+
+            last = df.iloc[-1]
+            return {
+                "symbol":       symbol,
+                "strategy":     "GOOGLE_SWING",
+                "close":        float(last["close"]),
+                "entry":        result["entry"],
+                "stop_loss":    result["stop_loss"],
+                "target":       result["target"],
+                "quality":      result["score"],
+                "rsi":          result["rsi"],
+                "vol_ratio":    None,
+                "pullback_pct": result["dist"] * 100 if result["dist"] is not None else None,
+                "market_regime": regime,
+            }
+
         else: # Default: VCP
             from_date = (datetime.now() - timedelta(days=260)).strftime("%Y-%m-%d")
             to_date   = datetime.now().strftime("%Y-%m-%d")

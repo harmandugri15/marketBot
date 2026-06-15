@@ -13,6 +13,7 @@ export async function renderBacktest(container) {
             <select id="bt-strat" class="form-control">
               <option value="VCP">VCP (Volatility Contraction)</option>
               <option value="HARMAN1_PULLBACK">Swing Pullback (HARMAN1_PULLBACK)</option>
+              <option value="GOOGLE_SWING">Google Swing (EMA/RSI/ATR)</option>
               <option value="VWAP_RUNNER">Intraday VWAP Bounce (VWAP_RUNNER)</option>
             </select>
           </div>

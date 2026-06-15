@@ -373,3 +373,65 @@ def detect_vwap_bounce(df: pd.DataFrame) -> dict:
                 res["target"] = round(entry + (3 * one_r), 2)  # default target
 
     return res
+
+# -- Google Swing Pullback Strategy -------------------------------------------
+
+def detect_google_swing(df: pd.DataFrame) -> dict:
+    """
+    Google Swing Pullback Strategy
+    1. Trend Filter: Close > 50 EMA
+    2. Trend Strength: 20 EMA > 50 EMA
+    3. Momentum: RSI 14 > 50
+    4. Pullback: Low <= 20 EMA
+    5. Bullish Reversal: Close > Open OR Close > Prev Close
+    """
+    res = {
+        "passed": False,
+        "score": 0,
+        "entry": None,
+        "stop_loss": None,
+        "target": None,
+        "rsi": None,
+        "dist": None
+    }
+    if len(df) < 55:
+        return res
+
+    df = df.copy()
+    df = add_emas(df)
+    if "rsi" not in df.columns:
+        df["rsi"] = rsi(df["close"], 14)
+    if "atr14" not in df.columns:
+        df["atr14"] = atr(df, 14)
+
+    curr = df.iloc[-1]
+    prev = df.iloc[-2]
+
+    trend_filter = curr["close"] > curr["ema50"]
+    trend_strength = curr["ema20"] > curr["ema50"]
+    momentum = curr["rsi"] > 50
+    pullback = curr["low"] <= curr["ema20"]
+    bullish_reversal = (curr["close"] > curr["open"]) or (curr["close"] > prev["close"])
+
+    res["rsi"] = float(curr["rsi"])
+    if curr["ema20"] > 0:
+        res["dist"] = float((curr["close"] - curr["ema20"]) / curr["ema20"])
+
+    if trend_filter and trend_strength and momentum and pullback and bullish_reversal:
+        entry = float(curr["close"])
+        # Stop-Loss: Placed at exactly Swing Low of the last 3 days, OR Entry Price - (1.5 * ATR), whichever is further from entry (i.e. minimum of both values).
+        recent_swing_low = float(df.iloc[-3:]["low"].min())
+        atr_sl = entry - (1.5 * curr["atr14"])
+        sl = float(min(recent_swing_low, atr_sl))
+        
+        one_r = entry - sl
+        if one_r > 0:
+            target = entry + (2.5 * one_r)
+            res["passed"] = True
+            res["score"] = 90
+            res["entry"] = round(entry, 2)
+            res["stop_loss"] = round(sl, 2)
+            res["target"] = round(target, 2)
+
+    return res
+
