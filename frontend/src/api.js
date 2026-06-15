@@ -5,7 +5,8 @@
  * Handles auth token injection, error normalisation, and base URL.
  */
 
-const BASE = "/api/v1";
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const BASE = `${API_URL}/api/v1`;
 
 function getToken() {
   return localStorage.getItem("mb_token");
