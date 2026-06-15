@@ -56,6 +56,7 @@ def get_signals(
 @router.post("/run", status_code=202)
 def trigger_scan(
     strategy: str = "AUTO",
+    universe: str = "ALL",
     current_user: User = Depends(get_current_user),
     db:       Session = Depends(get_db),
 ):
@@ -84,7 +85,7 @@ def trigger_scan(
                 _scan_state["total"]   = total
                 _scan_state["symbol"]  = symbol
 
-            run_scan(thread_db, client, strategy=strategy, progress_callback=progress)
+            run_scan(thread_db, client, strategy=strategy, universe=universe, progress_callback=progress)
             _scan_state["done"]    = True
             _scan_state["running"] = False
         except Exception as e:

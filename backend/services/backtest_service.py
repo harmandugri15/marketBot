@@ -466,7 +466,8 @@ def run_backtest(
     Run full backtest and save results to DB.
     Returns a BacktestResult ORM object.
     """
-    symbols = request.symbols or STOCK_UNIVERSE
+    from config import resolve_universe
+    symbols = request.symbols or resolve_universe(getattr(request, "universe", "ALL"))
     capital = request.capital
     all_trades = []
 
@@ -509,34 +510,7 @@ def run_backtest(
             request.strategy
         )
 
-    elif request.strategy in ["VWAP_RUNNER", "INTRADAY"]:
-        market_data = {}
-        for idx, symbol in enumerate(symbols, 1):
-            if progress_callback:
-                progress_callback(idx, len(symbols), symbol)
-            try:
-                # Intraday 5m data
-                raw = client.get_historical_intraday_data(symbol, request.start_date, request.end_date)
-                if not raw or len(raw) < 5:
-                    continue
-                df = pd.DataFrame(raw)
-                df["close"]  = pd.to_numeric(df["close"],  errors="coerce")
-                df["volume"] = pd.to_numeric(df.get("volume", 0), errors="coerce").fillna(0)
-                df["high"]   = pd.to_numeric(df["high"],   errors="coerce")
-                df["low"]    = pd.to_numeric(df["low"],    errors="coerce")
-                df["open"]   = pd.to_numeric(df["open"],   errors="coerce")
-                df           = df.dropna(subset=["close"])
-                market_data[symbol] = df
-            except Exception as e:
-                logger.warning(f"Backtest 5m data fetch error for {symbol}: {e}")
 
-        all_trades = _simulate_intraday_trades(
-            market_data,
-            capital,
-            user.risk_pct
-        )
-
-    else:
         # Default VCP walk-forward simulation (Symbol by Symbol)
         for idx, symbol in enumerate(symbols, 1):
             if progress_callback:

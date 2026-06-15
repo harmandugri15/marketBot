@@ -61,7 +61,7 @@ export async function renderSettings(container) {
             <select id="auto-strategy" class="form-control">
               <option value="VCP" ${data.auto_trading_strategy === 'VCP' ? 'selected' : ''}>Volatility Contraction (VCP)</option>
               <option value="HARMAN1_PULLBACK" ${data.auto_trading_strategy === 'HARMAN1_PULLBACK' ? 'selected' : ''}>Harman Pullback</option>
-              <option value="VWAP_RUNNER" ${data.auto_trading_strategy === 'VWAP_RUNNER' ? 'selected' : ''}>VWAP Intraday Runner</option>
+              <option value="GOOGLE_SWING" ${data.auto_trading_strategy === 'GOOGLE_SWING' ? 'selected' : ''}>Google Swing (EMA/RSI/ATR)</option>
             </select>
           </div>
         </div>

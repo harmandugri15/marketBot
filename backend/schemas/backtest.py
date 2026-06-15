@@ -12,7 +12,8 @@ class BacktestRequest(BaseModel):
     start_date: str = "2024-01-01"
     end_date: str = "2024-12-31"
     capital: float = Field(default=200000.0, ge=10000)
-    symbols: Optional[list[str]] = None   # None = use default STOCK_UNIVERSE
+    universe: str = "ALL"
+    symbols: Optional[list[str]] = None   # None = use resolved universe
 
 
 class BacktestSummary(BaseModel):

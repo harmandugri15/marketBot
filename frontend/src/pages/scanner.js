@@ -16,7 +16,18 @@ export async function renderScanner(container) {
           <option value="VCP">VCP (Volatility Contraction)</option>
           <option value="HARMAN1_PULLBACK">Swing Pullback (HARMAN1_PULLBACK)</option>
           <option value="GOOGLE_SWING">Google Swing (EMA/RSI/ATR)</option>
-          <option value="VWAP_RUNNER">Intraday VWAP Bounce (VWAP_RUNNER)</option>
+        </select>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <label class="form-label" style="margin:0; white-space:nowrap;">Universe:</label>
+        <select id="scan-universe" class="form-control" style="width: auto; margin: 0; padding: 0.375rem 1.75rem 0.375rem 0.75rem;">
+          <option value="ALL">All (Nifty 500)</option>
+          <option value="NIFTY_50">Nifty 50</option>
+          <option value="NIFTY_NEXT_50">Nifty Next 50</option>
+          <option value="NIFTY_MIDCAP_100">Nifty Midcap 100</option>
+          <option value="NIFTY_BANK">Nifty Bank</option>
+          <option value="NIFTY_IT">Nifty IT</option>
         </select>
       </div>
 
@@ -92,6 +103,7 @@ export async function renderScanner(container) {
   const tbody = document.getElementById("signals-body");
   const regimeBadge = document.getElementById("regime-badge");
   const stratSelect = document.getElementById("scan-strat");
+  const uniSelect = document.getElementById("scan-universe");
 
   const progressContainer = document.getElementById(
     "scan-progress-container"
@@ -305,7 +317,8 @@ export async function renderScanner(container) {
   btnRun.addEventListener("click", async () => {
     try {
       const selectedStrat = stratSelect.value;
-      await scanner.run(selectedStrat);
+      const selectedUni = uniSelect.value;
+      await scanner.run(selectedStrat, selectedUni);
       connectSSE();
     } catch (error) {
       if (

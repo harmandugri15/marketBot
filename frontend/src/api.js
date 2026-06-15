@@ -76,7 +76,7 @@ export const auth = {
 // ── Scanner ───────────────────────────────────────────────────────────────────
 export const scanner = {
   signals:  (limit = 50, strategy = "") => get(`/scanner/signals?limit=${limit}${strategy ? `&strategy=${strategy}` : ""}`),
-  run:      (strategy = "AUTO") => post(`/scanner/run?strategy=${strategy}`),
+  run:      (strategy = "AUTO", universe = "ALL") => post(`/scanner/run?strategy=${strategy}&universe=${universe}`),
   regime:   ()           => get("/scanner/regime"),
 };
 

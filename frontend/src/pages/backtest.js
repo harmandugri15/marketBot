@@ -14,7 +14,17 @@ export async function renderBacktest(container) {
               <option value="VCP">VCP (Volatility Contraction)</option>
               <option value="HARMAN1_PULLBACK">Swing Pullback (HARMAN1_PULLBACK)</option>
               <option value="GOOGLE_SWING">Google Swing (EMA/RSI/ATR)</option>
-              <option value="VWAP_RUNNER">Intraday VWAP Bounce (VWAP_RUNNER)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Universe</label>
+            <select id="bt-universe" class="form-control">
+              <option value="ALL">All (Nifty 500)</option>
+              <option value="NIFTY_50">Nifty 50</option>
+              <option value="NIFTY_NEXT_50">Nifty Next 50</option>
+              <option value="NIFTY_MIDCAP_100">Nifty Midcap 100</option>
+              <option value="NIFTY_BANK">Nifty Bank</option>
+              <option value="NIFTY_IT">Nifty IT</option>
             </select>
           </div>
           <div class="form-group">
@@ -241,6 +251,7 @@ export async function renderBacktest(container) {
     try {
       await backtest.run({
         strategy: document.getElementById('bt-strat').value,
+        universe: document.getElementById('bt-universe').value,
         start_date: document.getElementById('bt-start').value,
         end_date: document.getElementById('bt-end').value,
         capital: parseFloat(document.getElementById('bt-cap').value)

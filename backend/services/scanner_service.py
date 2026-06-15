@@ -58,43 +58,7 @@ def _fetch_and_analyse(
         active_strategy = "VCP"
 
     try:
-        if active_strategy in ["VWAP_RUNNER", "INTRADAY"]:
-            # Fetch last 3 days of 5m candles to ensure we have today's candles safely
-            from_date = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
-            to_date   = datetime.now().strftime("%Y-%m-%d")
-            raw = client.get_historical_intraday_data(symbol, from_date, to_date)
-            if not raw or len(raw) < 5:
-                return None
 
-            df = pd.DataFrame(raw)
-            df["close"]  = pd.to_numeric(df["close"], errors="coerce")
-            df["volume"] = pd.to_numeric(df.get("volume", 0), errors="coerce").fillna(0)
-            df["high"]   = pd.to_numeric(df["high"], errors="coerce")
-            df["low"]    = pd.to_numeric(df["low"], errors="coerce")
-            df["open"]   = pd.to_numeric(df["open"], errors="coerce")
-            df = df.dropna(subset=["close"])
-
-            from core.indicators import detect_vwap_bounce
-            result = detect_vwap_bounce(df)
-            if not result["passed"]:
-                return None
-
-            last = df.iloc[-1]
-            return {
-                "symbol":       symbol,
-                "strategy":     "VWAP_RUNNER",
-                "close":        float(last["close"]),
-                "entry":        result["entry"],
-                "stop_loss":    result["stop_loss"],
-                "target":       result["target"],
-                "quality":      result["score"],
-                "rsi":          None,
-                "vol_ratio":    None,
-                "pullback_pct": None,
-                "market_regime": regime,
-            }
-
-        elif active_strategy in ["HARMAN1_PULLBACK", "SWING"]:
             from_date = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
             to_date   = datetime.now().strftime("%Y-%m-%d")
             raw = client.get_historical_data(symbol, from_date, to_date)
@@ -203,6 +167,7 @@ def run_scan(
     db: Session,
     client: GrowwClient,
     strategy: str = "AUTO",
+    universe: str = "ALL",
     progress_callback=None,
     symbols: list[str] | None = None,
 ) -> list[dict]:
@@ -210,7 +175,8 @@ def run_scan(
     Main scan function — scans all symbols, saves signals to DB.
     Returns list of signal dicts.
     """
-    symbols = symbols or STOCK_UNIVERSE
+    from config import resolve_universe
+    symbols = symbols or resolve_universe(universe)
     regime  = _get_nifty_regime(client)
 
     logger.info(f"Starting scan | regime={regime} | symbols={len(symbols)} | strategy={strategy}")
