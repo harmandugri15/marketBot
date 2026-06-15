@@ -529,8 +529,16 @@ export async function renderSandbox(container) {
     const token = localStorage.getItem('mb_token');
     if (!token) return;
 
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/api/v1/sandbox/ws/live?token=${token}`;
+    let wsUrl;
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl) {
+      const wsProtocol = apiUrl.startsWith('https') ? 'wss:' : 'ws:';
+      const host = apiUrl.replace(/^https?:\/\//, '');
+      wsUrl = `${wsProtocol}//${host}/api/v1/sandbox/ws/live?token=${token}`;
+    } else {
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${wsProtocol}//${window.location.host}/api/v1/sandbox/ws/live?token=${token}`;
+    }
     
     ws = new WebSocket(wsUrl);
 
