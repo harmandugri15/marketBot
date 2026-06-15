@@ -190,9 +190,9 @@ def detect_vcp(df: pd.DataFrame, vol_mult: float = 1.5, expansion_pct: float = 4
     last = df.iloc[-1]
     prev = df.iloc[-2]
 
-    vol_contraction = bool(last["vol_ratio"] < 0.5)
+    vol_contraction = bool(prev["vol_ratio"] < 0.8)
     vol_expansion   = bool(last["vol_ratio"] > vol_mult)
-    price_expansion = bool(last["close"] > prev["high"] * (1 + expansion_pct / 100))
+    price_expansion = bool(last["close"] > prev["close"] * (1 + (expansion_pct / 2) / 100))
 
     result["vol_contraction"] = vol_contraction
     result["vol_expansion"]   = vol_expansion
